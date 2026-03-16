@@ -19,7 +19,8 @@
       "import": "./dist/navigator.js"
     },
     "./navigator.css": "./dist/navigator.css",
-    "./dist/navigator.css": "./dist/navigator.css"
+    "./dist/navigator.css": "./dist/navigator.css",
+    "./static/*": "./dist/static/*"
   },
   "files": [
     "dist"
