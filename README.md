@@ -14,6 +14,23 @@ Thanks Open Source!
 
 **Data** [OpenStreetMap contributors](https://www.openstreetmap.org/copyright)
 
+## Usage
+
+```javascript
+import Navigator from "@ogis/navigator";
+import "@ogis/navigator/navigator.css";
+
+// Initialize the navigator
+const navApp = Navigator.init({
+  el: "#app", // Target element selector
+  debug: false, // Optional: Enable debug mode
+  mapOptions: {
+    // Optional: Pass options to map
+    style: "https://demotiles.maplibre.org/style.json",
+  },
+});
+```
+
 ## Development
 
 ### Install

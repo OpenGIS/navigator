@@ -19,7 +19,7 @@ const Navigator = {
 	 *
 	 * @example
 	 * import Navigator from '@ogis/navigator'
-	 * import '@ogis/navigator/style.css'
+	 * import '@ogis/navigator/navigator.css'
 	 *
 	 * Navigator.init({ el: '#my-map' })
 	 */
