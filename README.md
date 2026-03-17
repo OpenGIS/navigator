@@ -4,6 +4,8 @@ Use your device location and compass to see where you are, anywhere in the world
 
 ![App Preview](assets/screenshots/locate-panel.png)
 
+**[&laquo;&laquo; View the Demo &raquo;&raquo;](https://opengis.github.io/Navigator/)**
+
 ## Thanks Open Source!
 
 | Component        | Source                                                                                                            |
