@@ -23,9 +23,13 @@ export default defineConfig({
       output: {
         globals: {
           vue: "Vue",
-          "@ogis/waymark-js": "WaymarkJs",
+          "@ogis/waymark-js": "WaymarkJS",
         },
       },
     },
+  },
+
+  server: {
+    open: "/dev.html",
   },
 });
