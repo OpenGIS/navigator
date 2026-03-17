@@ -4,15 +4,14 @@ Use your device location and compass to see where you are, anywhere in the world
 
 ![App Preview](assets/screenshots/locate-panel.png)
 
-Thanks Open Source!
+## Thanks Open Source!
 
-**Rendering** [MapLibre GL JS](https://maplibre.org/) / [Waymark JS](https://github.com/OpenGIS/Waymark-JS)
-
-**Vector Tiles** [OpenFreeMap](https://openfreemap.org)
-
-**Tile Schema** [OpenMapTiles](https://www.openmaptiles.org/)
-
-**Data** [OpenStreetMap contributors](https://www.openstreetmap.org/copyright)
+| Component        | Source                                                                                                            |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------- |
+| **Vector Tiles** | [OpenFreeMap](https://openfreemap.org)                                                                            |
+| **Rendering**    | [MapLibre GL JS](https://maplibre.org/) / [Waymark JS](https://github.com/OpenGIS/Waymark-JS/tree/3.0-alpha)      |
+| **Tile Schema**  | [OpenMapTiles](https://www.openmaptiles.org/) / [OSM Bright](https://github.com/openmaptiles/osm-bright-gl-style) |
+| **Data**         | [OpenStreetMap contributors](https://www.openstreetmap.org/copyright)                                             |
 
 ## Usage
 
@@ -24,10 +23,7 @@ import "@ogis/navigator/navigator.css";
 const navApp = Navigator.init({
   el: "#app", // Target element selector
   debug: false, // Optional: Enable debug mode
-  mapOptions: {
-    // Optional: Pass options to map
-    style: "https://demotiles.maplibre.org/style.json",
-  },
+  mapOptions: {}, // Optional: Pass options to map
 });
 ```
 
