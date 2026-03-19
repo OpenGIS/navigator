@@ -46,7 +46,6 @@ test("take homepage screenshot", async ({ context, page }) => {
   await expect(page.locator("#waymark canvas")).toBeVisible();
 
   const locateBtn = page.locator("#locate-button");
-  const panelToggleBtn = page.locator(".navbar-toggler");
   const panel = page.locator("#side-panel");
 
   // show mode
@@ -96,8 +95,8 @@ test("take homepage screenshot", async ({ context, page }) => {
     expect(href).toMatch(/position-heading/);
   }).toPass({ timeout: 15000, interval: 1000 });
 
-  await panelToggleBtn.click();
-  await expect(panel).toBeVisible();
+  // Panel is open by default on desktop — wait for the slide-in transition
+  await expect(panel).toBeVisible({ timeout: 5000 });
   await expect(panel).toHaveClass(/show/);
   await expect(panel).toHaveCSS("transform", "none");
   await expect(page.getByText("Current Location")).toBeVisible();

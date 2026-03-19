@@ -16,6 +16,7 @@ import SidePanel from "@/components/ui/side/panel.vue";
 
 import { useWaymark } from "@/core/useWaymark";
 import { useUI } from "@/core/useUI";
+import LocatePanel from "@/features/locate/panel.vue";
 
 // Map Store
 const { setInstance } = useWaymark();
@@ -23,6 +24,7 @@ const { setInstance } = useWaymark();
 // UI Store
 const {
 	closeNav,
+	openPanel,
 	togglePanelExpanded,
 	isNavVisible,
 	isPanelVisible,
@@ -46,6 +48,11 @@ const handleMapClick = () => {
 const instanceReady = ref(false);
 
 onMounted(() => {
+	// Open the locate panel by default on desktop
+	if (isDesktop.value) {
+		openPanel("locate", LocatePanel);
+	}
+
 	// Create & set the main Waymark Instance
 	createInstance({
 		debug: props.debug,
