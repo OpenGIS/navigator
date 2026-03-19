@@ -82,7 +82,11 @@ onMounted(() => {
 	</div>
 
 	<!-- Map -->
-	<div id="waymark" @click="handleMapClick" />
+	<div
+		id="waymark"
+		:class="{ 'panel-open': isPanelVisible && isDesktop }"
+		@click="handleMapClick"
+	/>
 </template>
 
 <style>
@@ -97,6 +101,12 @@ body {
 	left: 0;
 	width: 100%;
 	height: 100%;
+	transition: left 0.3s ease, width 0.3s ease;
+}
+
+#waymark.panel-open {
+	left: var(--bs-offcanvas-width, 400px);
+	width: calc(100% - var(--bs-offcanvas-width, 400px));
 }
 
 #top {

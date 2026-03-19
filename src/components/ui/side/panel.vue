@@ -50,15 +50,8 @@ const panelRef = ref(null);
 <style scoped>
 /* Ensure the panel sits below navbar if needed */
 .offcanvas {
-  /* Adjust top and height if navbar is fixed-top. Assuming ~56px navbar */
-  /* If navbar is not fixed, top: 0 is fine. But usually "sidebars" sit below. */
-  /* Looking at App.vue, #top is position: absolute; top: 0; z-index: 2. */
-  /* So panel needs high z-index. Bootstrap offcanvas is 1045. */
   z-index: 1045;
   top: 73px !important;
+  height: calc(100% - 73px) !important;
 }
-
-/* On desktop, we might want to push content or sit over it. 
-   Offcanvas sits over content by default.
-*/
 </style>
