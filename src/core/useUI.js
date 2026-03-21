@@ -5,6 +5,9 @@ import { ref, computed, markRaw } from "vue";
 // Device / Screen Size
 const width = ref(window.innerWidth);
 
+// First Load — true when navigator_waymark has never been persisted
+const isFirstLoad = ref(!localStorage.getItem("navigator_waymark"));
+
 // Nav (Left Sidebar)
 const isNavVisible = ref(width.value >= 992); // Toggles entire sidebar visibility
 const isNavExpanded = ref(false); // Toggles expanded/collapsed mode (desktop hover or mobile open)
@@ -132,6 +135,10 @@ export const useUI = () => {
         isPanelExpanded.value = value;
     };
 
+    const setFirstLoadComplete = () => {
+        isFirstLoad.value = false;
+    };
+
     return {
         // State
         width,
@@ -141,6 +148,7 @@ export const useUI = () => {
         isPanelExpanded,
         activePanelId,
         activePanelComponent,
+        isFirstLoad,
 
         // Computed
         isDesktop,
@@ -156,5 +164,6 @@ export const useUI = () => {
         closePanel,
         togglePanelExpanded,
         setPanelExpanded,
+        setFirstLoadComplete,
     };
 };

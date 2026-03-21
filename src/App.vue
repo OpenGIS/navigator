@@ -31,6 +31,7 @@ const {
 	isPanelExpanded,
 	isDesktop,
 	isMobile,
+	isFirstLoad,
 } = useUI();
 
 const handleMapClick = () => {
@@ -75,7 +76,7 @@ onMounted(() => {
 		<Top />
 	</div>
 
-	<div id="content" class="page-content">
+	<div id="content" class="page-content" :class="{ 'first-load': isFirstLoad }">
 		<!-- <Nav id="side-nav" /> -->
 
 		<SidePanel />
