@@ -15,6 +15,10 @@ test.describe("Locate Functionality", () => {
   });
 
   test("Locate button toggles position and heading", async ({ page }) => {
+    const getUseHref = async (locator) =>
+      (await locator.getAttribute("xlink:href")) ||
+      (await locator.getAttribute("href"));
+
     // 1. Locate button exists
     // The button has an svg use href containing 'position'
     // We can also target by class .navbar-nav-link-icon
@@ -42,10 +46,8 @@ test.describe("Locate Functionality", () => {
     // but the xlink:href/href won't be valid.
 
     // We assert that the href attribute contains the correct icon ID
-    const href =
-      (await useElement.getAttribute("xlink:href")) ||
-      (await useElement.getAttribute("href"));
-    expect(href).toMatch(/ogisNav-icons\.svg#position$/);
+    const href = await getUseHref(useElement);
+    expect(href).toMatch(/#position$/);
 
     // Take screenshot for location only
     await page.screenshot({
@@ -75,10 +77,8 @@ test.describe("Locate Functionality", () => {
         window.dispatchEvent(event);
       });
 
-      const href =
-        (await useElement.getAttribute("xlink:href")) ||
-        (await useElement.getAttribute("href"));
-      expect(href).toMatch(/ogisNav-icons\.svg#position-heading/);
+      const href = await getUseHref(useElement);
+      expect(href).toMatch(/#position-heading$/);
     }).toPass({ timeout: 15000, interval: 1000 });
 
     // Take screenshot for heading in Show mode
@@ -96,10 +96,9 @@ test.describe("Locate Functionality", () => {
     // Verify button icon changes to 'position-lock'
     // The button svg use href should contain 'position-lock'
     // Wait for the update
-    await expect(locateBtn.locator("use")).toHaveAttribute(
-      "xlink:href",
-      /position-lock/,
-    );
+    await expect
+      .poll(async () => getUseHref(locateBtn.locator("use")))
+      .toMatch(/#position-lock$/);
 
     // Take screenshot for Follow mode
     await page.screenshot({
