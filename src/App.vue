@@ -45,7 +45,7 @@ const handleMapClick = () => {
 	}
 };
 
-const instanceReady = ref(false);
+const waymarkReady = ref(false);
 
 onMounted(() => {
 	// Open the locate panel by default on desktop
@@ -63,7 +63,7 @@ onMounted(() => {
 		},
 		onLoad: (WaymarkInstance) => {
 			setInstance(WaymarkInstance);
-			instanceReady.value = true;
+			waymarkReady.value = true;
 		},
 	});
 });
@@ -71,7 +71,7 @@ onMounted(() => {
 
 <template>
 	<div style="display: none" v-html="iconSprite"></div>
-	<div id="top" v-if="instanceReady">
+	<div id="top" v-if="waymarkReady">
 		<Top />
 	</div>
 
