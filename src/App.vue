@@ -58,7 +58,7 @@ onMounted(() => {
 		debug: props.debug,
 		id: "waymark",
 		mapOptions: {
-			attributionControl: false,
+			attributionControl: true,
 			...props.mapOptions,
 		},
 		onLoad: (WaymarkInstance) => {
