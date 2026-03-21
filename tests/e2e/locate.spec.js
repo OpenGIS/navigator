@@ -113,4 +113,41 @@ test.describe("Locate Functionality", () => {
     // The marker element should be detached or hidden
     await expect(marker).toBeHidden();
   });
+
+  test("Heading updates marker immediately without waiting for a position poll", async ({
+    page,
+  }) => {
+    const locateBtn = page.locator("#locate-button");
+    const marker = page.locator(".maplibregl-marker .oi");
+    const useEl = marker.locator("use");
+
+    const getUseHref = async () =>
+      (await useEl.getAttribute("xlink:href")) ||
+      (await useEl.getAttribute("href"));
+
+    // Activate positioning and wait for the initial marker
+    await locateBtn.click();
+    await expect(marker).toBeVisible({ timeout: 10000 });
+
+    // Dispatch a single compass event — no retry loop
+    await page.evaluate(() => {
+      const eventType =
+        "ondeviceorientationabsolute" in window
+          ? "deviceorientationabsolute"
+          : "deviceorientation";
+
+      const event = new Event(eventType, { bubbles: true });
+      // alpha: 180 → heading = 360 - 180 = 180° (South)
+      Object.defineProperty(event, "alpha", { value: 180 });
+      Object.defineProperty(event, "absolute", { value: true });
+
+      window.dispatchEvent(event);
+    });
+
+    // Marker icon must update well within the old 5-second polling interval,
+    // demonstrating that heading changes are reflected immediately.
+    await expect.poll(getUseHref, { timeout: 3000 }).toMatch(
+      /#position-heading$/,
+    );
+  });
 });
