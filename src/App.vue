@@ -1,7 +1,5 @@
 <script setup>
-import { onMounted } from "vue";
-import { createInstance } from "@ogis/waymark-js";
-import "@ogis/waymark-js/dist/waymark-js.css";
+import { computed, ref } from "vue";
 import iconSprite from "@/assets/icons/ogisNav-icons.svg?raw";
 
 const props = defineProps({
@@ -14,12 +12,14 @@ import Top from "@/components/ui/top.vue";
 // import Nav from "@/components/ui/side/nav.vue";
 import SidePanel from "@/components/ui/side/panel.vue";
 
-import { useWaymark } from "@/core/useWaymark";
+import { useMap } from "@/core/useMap";
 import { useUI } from "@/core/useUI";
+import { usePosition } from "@/features/locate/usePosition";
 import LocatePanel from "@/features/locate/panel.vue";
 
-// Map Store
-const { setInstance } = useWaymark();
+// Map — template ref passed so useMap manages the full lifecycle
+const mapContainer = ref(null);
+useMap(mapContainer, props.mapOptions);
 
 // UI Store
 const {
@@ -33,6 +33,15 @@ const {
 	isMobile,
 } = useUI();
 
+// Position — data attributes on #waymark enable test observability
+const { positionMode, currentPosition } = usePosition();
+const positionHasHeading = computed(
+	() =>
+		currentPosition.value !== null &&
+		currentPosition.value?.properties?.heading !== null &&
+		currentPosition.value?.properties?.heading !== undefined,
+);
+
 const handleMapClick = () => {
 	if (isNavVisible.value && !isDesktop.value) {
 		closeNav();
@@ -44,24 +53,9 @@ const handleMapClick = () => {
 	}
 };
 
-onMounted(() => {
-	if (isDesktop.value) {
-		openPanel("locate", LocatePanel);
-	}
-
-	// Create & set the main Waymark Instance
-	createInstance({
-		debug: props.debug,
-		id: "waymark",
-		mapOptions: {
-			attributionControl: true,
-			...props.mapOptions,
-		},
-		onLoad: (WaymarkInstance) => {
-			setInstance(WaymarkInstance);
-		},
-	});
-});
+if (isDesktop.value) {
+	openPanel("locate", LocatePanel);
+}
 </script>
 
 <template>
@@ -78,7 +72,10 @@ onMounted(() => {
 
 	<!-- Map -->
 	<div
+		ref="mapContainer"
 		id="waymark"
+		:data-position-mode="positionMode || ''"
+		:data-position-heading="positionHasHeading ? 'true' : 'false'"
 		:class="{ 'panel-open': isPanelVisible && isDesktop }"
 		@click="handleMapClick"
 	/>

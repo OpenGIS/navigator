@@ -7,8 +7,12 @@ import {
     requestCompassPermission,
 } from "@/helpers/Compass";
 import Position from "@/classes/Position";
+import { addPositionIcons } from "@/helpers/mapIcons";
 
-import { useWaymark } from "@/core/useWaymark";
+import { useMap } from "@/core/useMap";
+
+const SOURCE_ID = "navigator-position";
+const LAYER_ID = "navigator-position-layer";
 
 // Singleton State
 const state = useStorage("position", {
@@ -27,26 +31,68 @@ export const usePosition = () => {
         lastHeading = heading;
     };
 
-    const updateMap = () => {
+    const positionToFeature = (pos) => ({
+        type: "Feature",
+        id: pos.id,
+        geometry: pos.geometry,
+        properties: pos.properties,
+    });
+
+    const updateMap = async () => {
         if (!state.currentPosition) return;
 
-        const { waymarkInstance } = useWaymark();
+        const { map } = useMap();
+        if (!map) return;
 
-        if (!waymarkInstance) return;
+        await addPositionIcons(map);
 
-        // Add or update position on map
-        if (waymarkInstance.geoJSONStore.hasItem(state.currentPosition.id)) {
-            waymarkInstance.geoJSONStore.updateItem(state.currentPosition);
+        const feature = positionToFeature(state.currentPosition);
+        const featureCollection = {
+            type: "FeatureCollection",
+            features: [feature],
+        };
+
+        if (map.getSource(SOURCE_ID)) {
+            map.getSource(SOURCE_ID).setData(featureCollection);
         } else {
-            waymarkInstance.geoJSONStore.addItem(state.currentPosition);
+            map.addSource(SOURCE_ID, {
+                type: "geojson",
+                data: featureCollection,
+            });
+            map.addLayer({
+                id: LAYER_ID,
+                type: "symbol",
+                source: SOURCE_ID,
+                layout: {
+                    // Switch between icons based on whether heading is available
+                    "icon-image": [
+                        "case",
+                        ["!=", ["get", "heading"], null],
+                        "position-heading",
+                        "position",
+                    ],
+                    // Rotate the icon to match the heading (0 when none)
+                    "icon-rotate": ["coalesce", ["get", "heading"], 0],
+                    "icon-rotation-alignment": "map",
+                    "icon-allow-overlap": true,
+                    "icon-size": 1,
+                },
+            });
         }
 
         // Follow logic
         if (state.positionMode === "follow") {
-            waymarkInstance.mapLibreMap.jumpTo({
+            map.jumpTo({
                 center: state.currentPosition.geometry.coordinates.slice(0, 2),
             });
         }
+    };
+
+    const removeFromMap = () => {
+        const { map } = useMap();
+        if (!map) return;
+        if (map.getLayer(LAYER_ID)) map.removeLayer(LAYER_ID);
+        if (map.getSource(SOURCE_ID)) map.removeSource(SOURCE_ID);
     };
 
     const updatePosition = async () => {
@@ -96,6 +142,7 @@ export const usePosition = () => {
         // Watch Compass
         compassHandler = watchCompass((heading) => {
             updateHeading(heading);
+            updateMap();
         });
     };
 
@@ -119,8 +166,8 @@ export const usePosition = () => {
             state.positionMode = "show";
             await startPositioning();
 
-            const { waymarkInstance } = useWaymark();
-            if (state.currentPosition) {
+            const { map } = useMap();
+            if (state.currentPosition && map) {
                 const jumpOptions = {
                     center: state.currentPosition.geometry.coordinates.slice(
                         0,
@@ -132,7 +179,7 @@ export const usePosition = () => {
                     jumpOptions.zoom = 14;
                 }
 
-                waymarkInstance.mapLibreMap.jumpTo(jumpOptions);
+                map.jumpTo(jumpOptions);
             }
         } else if (state.positionMode === "show") {
             state.positionMode = "follow";
@@ -140,12 +187,7 @@ export const usePosition = () => {
         } else {
             state.positionMode = null;
             stopPositioning();
-
-            // Remove position from map
-            const { waymarkInstance } = useWaymark();
-            if (state.currentPosition) {
-                waymarkInstance.geoJSONStore.removeItem(state.currentPosition);
-            }
+            removeFromMap();
         }
     };
 
@@ -163,3 +205,4 @@ export const usePosition = () => {
         stopPositioning,
     };
 };
+

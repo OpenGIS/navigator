@@ -19,11 +19,11 @@ export default defineConfig({
       // fileName: "navigator",
     },
     rollupOptions: {
-      external: ["vue", "@ogis/waymark-js"],
+      external: ["vue", "maplibre-gl"],
       output: {
         globals: {
           vue: "Vue",
-          "@ogis/waymark-js": "WaymarkJS",
+          "maplibre-gl": "maplibregl",
         },
       },
     },

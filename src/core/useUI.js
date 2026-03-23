@@ -5,8 +5,8 @@ import { ref, computed, markRaw } from "vue";
 // Device / Screen Size
 const width = ref(window.innerWidth);
 
-// First Load — true when navigator_waymark has never been persisted
-const isFirstLoad = ref(!localStorage.getItem("navigator_waymark"));
+// First Load — true when navigator_view has never been persisted
+const isFirstLoad = ref(!localStorage.getItem("navigator_view"));
 
 // Nav (Left Sidebar)
 const isNavVisible = ref(width.value >= 992); // Toggles entire sidebar visibility

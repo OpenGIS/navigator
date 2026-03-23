@@ -15,39 +15,21 @@ test.describe("Locate Functionality", () => {
   });
 
   test("Locate button toggles position and heading", async ({ page }) => {
-    const getUseHref = async (locator) =>
-      (await locator.getAttribute("xlink:href")) ||
-      (await locator.getAttribute("href"));
-
     // 1. Locate button exists
-    // The button has an svg use href containing 'position'
-    // We can also target by class .navbar-nav-link-icon
     const locateBtn = page.locator("#locate-button");
     await expect(locateBtn).toBeVisible();
 
     // 2. Click to "Show" mode
     await locateBtn.click();
 
-    // 3. Verify marker appears on map
-    // The marker is added to the map. It usually has class 'maplibregl-marker' or similar from Waymark/MapLibre.
-    // The icon HTML inside has class 'oi'.
-    // We wait for the marker to be present in the DOM
-    const marker = page.locator(".maplibregl-marker .oi");
-    await expect(marker).toBeVisible({ timeout: 10000 });
+    // 3. Verify position appears — the #waymark container reflects mode via data attribute
+    const waymarkEl = page.locator("#waymark");
+    await expect(waymarkEl).toHaveAttribute("data-position-mode", "show", {
+      timeout: 10000,
+    });
 
-    // 4. Verify the icon is the standard position icon (no heading)
-    // This part reproduces the bug: checks for valid href/xlink:href
-    // If the bug exists (using :xlink:href), this locator might fail or the attribute check will fail
-    const useElement = marker.locator("use");
-
-    // Check if use element has valid href
-    // We check specifically that it does NOT use the buggy :xlink:href syntax in the DOM
-    // In a real browser, :xlink:href attribute might be present if the HTML parser didn't strip it,
-    // but the xlink:href/href won't be valid.
-
-    // We assert that the href attribute contains the correct icon ID
-    const href = await getUseHref(useElement);
-    expect(href).toMatch(/#position$/);
+    // 4. Verify no heading yet (plain position icon)
+    await expect(waymarkEl).toHaveAttribute("data-position-heading", "false");
 
     // Take screenshot for location only
     await page.screenshot({
@@ -77,8 +59,7 @@ test.describe("Locate Functionality", () => {
         window.dispatchEvent(event);
       });
 
-      const href = await getUseHref(useElement);
-      expect(href).toMatch(/#position-heading$/);
+      await expect(waymarkEl).toHaveAttribute("data-position-heading", "true");
     }).toPass({ timeout: 15000, interval: 1000 });
 
     // Take screenshot for heading in Show mode
@@ -94,10 +75,14 @@ test.describe("Locate Functionality", () => {
     await locateBtn.click();
 
     // Verify button icon changes to 'position-lock'
-    // The button svg use href should contain 'position-lock'
-    // Wait for the update
     await expect
-      .poll(async () => getUseHref(locateBtn.locator("use")))
+      .poll(async () => {
+        const use = locateBtn.locator("use");
+        return (
+          (await use.getAttribute("xlink:href")) ||
+          (await use.getAttribute("href"))
+        );
+      })
       .toMatch(/#position-lock$/);
 
     // Take screenshot for Follow mode
@@ -109,8 +94,7 @@ test.describe("Locate Functionality", () => {
     // 7. Switch off
     await locateBtn.click();
 
-    // Verify marker is removed from map
-    // The marker element should be detached or hidden
-    await expect(marker).toBeHidden();
+    // Verify position is removed — data-position-mode clears
+    await expect(waymarkEl).toHaveAttribute("data-position-mode", "");
   });
 });

@@ -6,8 +6,8 @@ import "bootstrap";
 /**
  * @typedef {Object} NavigatorConfig
  * @property {string|HTMLElement} [el='#app'] - Target element or CSS selector to mount Navigator into
- * @property {boolean} [debug=false] - Enable Waymark debug mode
- * @property {Object} [mapOptions={}] - Options passed directly to the Waymark map instance
+ * @property {boolean} [debug=false] - Enable debug mode
+ * @property {Object} [mapOptions={}] - Options passed directly to the MapLibre Map constructor
  */
 
 const Navigator = {

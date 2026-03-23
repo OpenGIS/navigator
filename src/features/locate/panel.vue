@@ -187,14 +187,6 @@ const formatHeading = (val) =>
           >Rendering</span
         >
         <a
-          href="https://github.com/OpenGIS/Waymark-JS"
-          target="_blank"
-          class="text-body small ms-auto text-decoration-underline"
-        >
-          Waymark JS
-        </a>
-        &nbsp;/&nbsp;
-        <a
           href="https://maplibre.org/"
           target="_blank"
           class="text-body small ms-auto text-decoration-underline"

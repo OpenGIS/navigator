@@ -11,7 +11,7 @@ Use your device location and compass to see where you are, anywhere in the world
 | Component        | Source                                                                                                            |
 | ---------------- | ----------------------------------------------------------------------------------------------------------------- |
 | **Vector Tiles** | [OpenFreeMap](https://openfreemap.org)                                                                            |
-| **Rendering**    | [MapLibre GL JS](https://maplibre.org/) / [Waymark JS](https://github.com/OpenGIS/Waymark-JS/tree/3.0-alpha)      |
+| **Rendering**    | [MapLibre GL JS](https://maplibre.org/)                                                                           |
 | **Tile Schema**  | [OpenMapTiles](https://www.openmaptiles.org/) / [OSM Bright](https://github.com/openmaptiles/osm-bright-gl-style) |
 | **Data**         | [OpenStreetMap contributors](https://www.openstreetmap.org/copyright)                                             |
 

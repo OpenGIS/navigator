@@ -3,16 +3,16 @@ import { test, expect } from "@playwright/test";
 const TRANSITION_TIMEOUT = 1000;
 
 /**
- * Helpers to control navigator_waymark localStorage state before page load.
+ * Helpers to control navigator_view localStorage state before page load.
  * addInitScript runs before any page scripts, so it reliably seeds / clears storage.
  */
 const withNoWaymarkStorage = (page) =>
-  page.addInitScript(() => localStorage.removeItem("navigator_waymark"));
+  page.addInitScript(() => localStorage.removeItem("navigator_view"));
 
 const withWaymarkStorage = (page) =>
   page.addInitScript(() =>
     localStorage.setItem(
-      "navigator_waymark",
+      "navigator_view",
       JSON.stringify({ mapView: { center: { lat: 51.5, lng: -0.1 }, zoom: 10 } }),
     ),
   );
@@ -35,7 +35,7 @@ test.describe("First Load Alert", () => {
     await expect(page.locator("#first-load-alert")).toHaveCount(0);
   });
 
-  test("alert is absent on reload once navigator_waymark is persisted", async ({
+  test("alert is absent on reload once navigator_view is persisted", async ({
     page,
   }) => {
     // Fresh browser context already has empty localStorage — no init script needed.
@@ -44,10 +44,10 @@ test.describe("First Load Alert", () => {
 
     await expect(page.locator("#first-load-alert")).toBeVisible();
 
-    // Simulate navigator_waymark being written (as useWaymark does on moveend)
+    // Simulate navigator_view being written (as useMap does on moveend)
     await page.evaluate(() => {
       localStorage.setItem(
-        "navigator_waymark",
+        "navigator_view",
         JSON.stringify({ mapView: { center: { lat: 51.5, lng: -0.1 }, zoom: 10 } }),
       );
     });

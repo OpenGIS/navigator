@@ -1,32 +1,23 @@
-import { WaymarkMarker } from "@ogis/waymark-js";
-import { getColour } from "@/helpers/Identity";
-
-export default class Position extends WaymarkMarker {
-    // https://developer.mozilla.org/en-US/docs/Web/API/GeolocationCoordinates
-    constructor(geoLocation = {}, heading = null, feature = {}) {
-        // Generate properties first so they are available for the super constructor
-        const initialProperties = Position.generateProperties(
-            geoLocation,
-            heading,
-        );
-        const initialGeometry = Position.generateGeometry(geoLocation);
-
-        // Merge generated properties into the feature object
-        feature.properties = {
-            ...feature.properties,
-            ...initialProperties,
-        };
-        feature.geometry = initialGeometry;
-
-        super(feature);
+// https://developer.mozilla.org/en-US/docs/Web/API/GeolocationCoordinates
+export default class Position {
+    constructor(geoLocation = {}, heading = null, options = {}) {
+        this.id = options.id || "position";
+        this.geometry = Position.generateGeometry(geoLocation);
+        this.properties = Position.generateProperties(geoLocation, heading);
     }
 
     update(geoLocation = {}, heading = null) {
-        const properties = Position.generateProperties(geoLocation, heading);
-        const geometry = Position.generateGeometry(geoLocation);
+        this.geometry = Position.generateGeometry(geoLocation);
+        this.properties = Position.generateProperties(geoLocation, heading);
+    }
 
-        this.properties = { ...this.properties, ...properties };
-        this.geometry = geometry;
+    toFeature() {
+        return {
+            type: "Feature",
+            id: this.id,
+            geometry: this.geometry,
+            properties: this.properties,
+        };
     }
 
     static generateGeometry(geoLocation) {
@@ -35,67 +26,45 @@ export default class Position extends WaymarkMarker {
             typeof geoLocation.coords.longitude !== "number" ||
             typeof geoLocation.coords.latitude !== "number"
         ) {
-            // Return null or handle error appropriate for your app flow
-            // Returning empty coordinates to avoid crash, or could throw error
-            return {
-                type: "Point",
-                coordinates: [0, 0, 0],
-            };
+            return { type: "Point", coordinates: [0, 0] };
         }
 
-        const coords = geoLocation.coords;
+        const { coords } = geoLocation;
         const altitude =
             typeof coords.altitude === "number" ? coords.altitude : null;
 
         return {
             type: "Point",
-            coordinates: [coords.longitude, coords.latitude, altitude],
+            coordinates:
+                altitude !== null
+                    ? [coords.longitude, coords.latitude, altitude]
+                    : [coords.longitude, coords.latitude],
         };
     }
 
     static generateProperties(geoLocation, heading) {
-        if (!geoLocation.coords) return {};
+        if (!geoLocation.coords) return { heading: null };
 
-        const coords = geoLocation.coords;
+        const { coords } = geoLocation;
         const altitude =
             typeof coords.altitude === "number" ? coords.altitude : null;
 
-        const ogisNav = {
-            heading: heading,
-            speed: coords.speed,
-            altitude: altitude,
-            accuracy: coords.accuracy,
-            altitudeAccuracy: coords.altitudeAccuracy,
-            timestamp: geoLocation.timestamp,
-        };
-
-        // Icon logic
-        const rotation =
+        const effectiveHeading =
             typeof heading === "number" && !isNaN(heading) ? heading : null;
 
-        const iconHTML = rotation
-            ? `<svg class="oi" width="40" height="40" fill="${getColour(
-                  "primary",
-              )}" style="display: inline-block; transform: rotate(${rotation}deg);"><use xlink:href="#position-heading" /></svg>`
-            : `<svg class="oi" width="40" height="40" fill="${getColour(
-                  "primary",
-              )}" style="display: inline-block;"><use xlink:href="#position" /></svg>`;
-
+        // heading is also exposed top-level so MapLibre expressions
+        // (icon-image, icon-rotate) can reference it via ['get', 'heading']
         return {
-            ogisNav: ogisNav,
-            waymark: {
-                icon: {
-                    html: iconHTML,
-                    width: 48,
-                    height: 48,
-                },
-                paint: {
-                    "circle-radius": 0,
-                    "circle-color": "transparent",
-                    "circle-stroke-color": "transparent",
-                    "circle-stroke-width": 0,
-                },
+            heading: effectiveHeading,
+            ogisNav: {
+                heading: effectiveHeading,
+                speed: coords.speed,
+                altitude,
+                accuracy: coords.accuracy,
+                altitudeAccuracy: coords.altitudeAccuracy,
+                timestamp: geoLocation.timestamp,
             },
         };
     }
 }
+

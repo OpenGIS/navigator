@@ -17,7 +17,7 @@ test("take homepage screenshot", async ({ context, page }) => {
       localStorage.clear();
 
       localStorage.setItem(
-        "navigator_waymark",
+        "navigator_view",
         JSON.stringify({
           mapView: {
             center: [longitude, latitude],
@@ -50,9 +50,11 @@ test("take homepage screenshot", async ({ context, page }) => {
 
   // show mode
   await locateBtn.click();
-  await expect(page.locator(".maplibregl-marker .oi")).toBeVisible({
-    timeout: 10000,
-  });
+  await expect(page.locator("#waymark")).toHaveAttribute(
+    "data-position-mode",
+    "show",
+    { timeout: 10000 },
+  );
 
   // follow mode
   await locateBtn.click();
@@ -65,7 +67,7 @@ test("take homepage screenshot", async ({ context, page }) => {
 
   await expect.poll(async () => {
     return page.evaluate(() => {
-      const saved = localStorage.getItem("navigator_waymark");
+      const saved = localStorage.getItem("navigator_view");
       if (!saved) return null;
       const mapView = JSON.parse(saved).mapView;
       return typeof mapView?.zoom === "number" ? mapView.zoom : null;
@@ -87,12 +89,10 @@ test("take homepage screenshot", async ({ context, page }) => {
       window.dispatchEvent(event);
     });
 
-    const markerUse = page.locator(".maplibregl-marker .oi use").first();
-    const href =
-      (await markerUse.getAttribute("xlink:href")) ||
-      (await markerUse.getAttribute("href"));
-
-    expect(href).toMatch(/position-heading/);
+    await expect(page.locator("#waymark")).toHaveAttribute(
+      "data-position-heading",
+      "true",
+    );
   }).toPass({ timeout: 15000, interval: 1000 });
 
   // Panel is open by default on desktop — wait for the slide-in transition
