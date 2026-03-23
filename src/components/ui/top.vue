@@ -1,10 +1,8 @@
 <script setup>
-import Position from "@/components/ui/top/position.vue";
 import Alerts from "@/components/ui/top/alerts.vue";
-import LocatePanel from "@/features/locate/panel.vue";
+import MenuPanel from "@/components/ui/side/menu.vue";
 import { useUI } from "@/core/useUI";
 import Icon from "@/components/ui/icon.vue";
-// import { usePosition } from "@/features/locate/usePosition";
 
 const { togglePanel } = useUI();
 </script>
@@ -18,7 +16,7 @@ const { togglePanel } = useUI();
         <button
           type="button"
           class="navbar-toggler border-0"
-          @click="togglePanel('locate', LocatePanel)"
+          @click="togglePanel('menu', MenuPanel)"
         >
           <Icon width="48" height="48" fill="currentColor" name="sidebar-info" />
         </button>
@@ -32,11 +30,7 @@ const { togglePanel } = useUI();
       <!-- END Middle -->
 
       <!-- START End -->
-      <ul class="end nav">
-        <li class="nav-item mx-1">
-          <Position />
-        </li>
-      </ul>
+      <ul class="end nav"></ul>
       <!-- END End -->
     </div>
   </nav>

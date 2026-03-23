@@ -8,8 +8,8 @@ const { isFirstLoad, setFirstLoadComplete } = useUI();
   <div v-if="isFirstLoad" id="first-load-alert">
     <div class="alert alert-info alert-dismissible mb-0 rounded-0 d-flex align-items-center gap-2">
       <span>
-        Tap the <strong>location button</strong> to see your position on the map — you'll be
-        prompted to allow location access.
+        Welcome to Navigator! Use the <strong>menu</strong> to explore the app
+        and navigate the map.
       </span>
       <button
         type="button"

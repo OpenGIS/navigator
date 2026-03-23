@@ -18,10 +18,9 @@ const panelRef = ref(null);
   <!-- Using .offcanvas-end for right-side panel -->
   <!-- Using :class="{ show: isPanelVisible }" to toggle visibility via Vue state -->
   <div
-    class="offcanvas offcanvas-start"
+    class="offcanvas offcanvas-start navigator-panel"
     :class="{ show: isPanelVisible }"
     tabindex="-1"
-    id="side-panel"
     ref="panelRef"
     aria-labelledby="offcanvasLabel"
     data-bs-scroll="true"

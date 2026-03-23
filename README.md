@@ -1,35 +1,89 @@
 # Navigator
 
-Use your device location and compass to see where you are, anywhere in the world.
+A free, Open-Source navigation app for the real world.
 
-![App Preview](assets/screenshots/app-preview.png)
+[Use Navigator](https://www.ogis.org/navigator/)
 
-**[&laquo;&laquo; View the Demo &raquo;&raquo;](https://www.ogis.org/navigator/)**
+[![App Preview](assets/screenshots/app-preview.png)](https://www.ogis.org/navigator/)
 
 ## Thanks Open Source!
 
-| Component        | Source                                                                                                            |
-| ---------------- | ----------------------------------------------------------------------------------------------------------------- |
-| **Vector Tiles** | [OpenFreeMap](https://openfreemap.org)                                                                            |
-| **Rendering**    | [MapLibre GL JS](https://maplibre.org/)                                                                           |
-| **Tile Schema**  | [OpenMapTiles](https://www.openmaptiles.org/) / [OSM Bright](https://github.com/openmaptiles/osm-bright-gl-style) |
-| **Data**         | [OpenStreetMap contributors](https://www.openstreetmap.org/copyright)                                             |
+| Component          | Source                                                                                                            |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| **Map Data**       | &copy;[OpenStreetMap contributors](https://www.openstreetmap.org/copyright)                                       |
+| **Tile Hosting**   | [OpenFreeMap](https://openfreemap.org)                                                                            |
+| **Rendering**      | [MapLibre GL JS](https://maplibre.org/)                                                                           |
+| **Tile Schema**    | [OpenMapTiles](https://www.openmaptiles.org/) / [OSM Bright](https://github.com/openmaptiles/osm-bright-gl-style) |
+| **User Interface** | [Vue JS](https://vuejs.org/)                                                                                      |
+
+## Install
+
+Navigator is [available on npm](https://www.npmjs.com/package/@ogis/navigator) as `@ogis/navigator`. It can be installed with:
+
+```bash
+npm install @ogis/navigator
+```
 
 ## Usage
 
-```javascript
+```js
 import Navigator from "@ogis/navigator";
 import "@ogis/navigator/navigator.css";
 
-// Initialize the navigator
-const navApp = Navigator.init({
-  el: "#app", // Target element selector
-  debug: false, // Optional: Enable debug mode
-  mapOptions: {}, // Optional: Pass options to map
+Navigator.init({ id: "my-map" });
+```
+
+`Navigator.init()` looks for a `<div id="my-map">` in the DOM. If one does not exist it is created and appended to `<body>`.
+
+### Options
+
+```js
+Navigator.init({
+  id: "my-map", // DOM element id to mount into (created if absent); defaults to 'navigator'
+  mapOptions: {
+    // passed directly to the MapLibre Map constructor
+    center: [-0.12, 51.5],
+    zoom: 12,
+  },
 });
 ```
 
+### Multiple instances
+
+Each call to `Navigator.init()` creates a fully isolated instance with its own map, UI state, and localStorage namespace.
+
+```js
+Navigator.init({
+  id: "map-a",
+  mapOptions: { center: [-0.12, 51.5], zoom: 10 },
+});
+Navigator.init({
+  id: "map-b",
+  mapOptions: { center: [2.35, 48.85], zoom: 10 },
+});
+```
+
+See [`docs/1.instances.md`](docs/1.instances.md) for full details.
+
 ## Development
+
+### Document First
+
+Navigator follows a **Document First** development process. Before writing any code, write the documentation for what you're building. Tests and implementation follow from that.
+
+```
+Document → Test → Implement → Screenshot
+```
+
+**1. Write the documentation** — Start by writing (or updating) the relevant `docs/` file. Describe what the feature does, how to use it, and what developers can expect. If you can't explain it, it probably isn't ready to build.
+
+**2. Write the tests** — Translate each doc heading into a `test.describe` block in the corresponding spec file. If you can't write a test for something, the docs description is too vague — sharpen it first.
+
+**3. Implement until the tests pass** — The docs and tests define the target; the implementation just needs to reach it. Run `npm test` to track progress.
+
+**4. Add screenshots to the docs** — For sections where a picture helps, add a screenshot spec in `tests/e2e/screenshots/` and embed the output in the docs. Not every section needs one.
+
+See [TESTING.md](TESTING.md) for the full testing and screenshot strategy.
 
 ### Install
 
@@ -48,6 +102,8 @@ npm run dev
 ```bash
 npm test
 ```
+
+See [TESTING.md](TESTING.md) for the testing strategy and how to add tests.
 
 ### Build
 

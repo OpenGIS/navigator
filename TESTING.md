@@ -1,21 +1,70 @@
 # Testing Strategy
 
-This project uses [Playwright](https://playwright.dev/) for End-to-End (E2E) testing.
+The **Document First** development process is described in the [README](../README.md#document-first). In short: document the behaviour, write tests against the docs, implement until tests pass, then add screenshots where they help.
+
+
+## Structure
+
+E2E tests mirror the documentation. Each doc file has a corresponding spec file, and each heading in the doc maps to a `test.describe` block in the spec.
+
+| Doc | Spec | Coverage |
+|-----|------|----------|
+| `docs/1.instances.md` | `tests/e2e/1.instances.spec.js` | Instance creation, `id`, `mapOptions`, multiple instances, storage convention |
+| `docs/2.core.md` | `tests/e2e/2.core.spec.js` | `useMap` lifecycle, view persistence, URL hash, `useUI` panel, breakpoints, first load |
+
+When a new doc file is added (e.g. `docs/4.myfeature.md`), a corresponding `tests/e2e/4.myfeature.spec.js` should be created with a `test.describe` block for each heading.
+
+## Screenshots
+
+Screenshots are captured by Playwright and embedded in documentation for illustration. They live in `tests/e2e/screenshots/` and follow the same numbering as the docs.
+
+| Screenshot spec | Output | Used in |
+|-----------------|--------|---------|
+| `tests/e2e/screenshots/readme.spec.js` | `assets/screenshots/app-preview.png` | `README.md` |
+| `tests/e2e/screenshots/2.core.spec.js` | `assets/screenshots/docs/2.core/` | `docs/2.core.md` |
+
+### Conventions
+
+- One screenshot spec per doc file, numbered to match (e.g. `screenshots/3.features.spec.js` for `docs/3.features.md`).
+- Screenshots capture the full viewport at **1280×720** (desktop) unless a specific breakpoint is being illustrated.
+- Test names describe the UI state being captured (e.g. `"useUI / First load — desktop initial load"`).
+- Not every section needs a screenshot — add one when the visual output meaningfully illustrates the behaviour being documented.
+
+### Running screenshot tests
+
+To regenerate all screenshots:
+
+```bash
+npx playwright test tests/e2e/screenshots/
+```
+
+To regenerate a single file:
+
+```bash
+npx playwright test tests/e2e/screenshots/2.core.spec.js
+```
+
+Screenshots are committed to the repository so that docs render correctly in GitHub and npm.
+
+## Initial test view
+
+The standard initial test view used across E2E tests and screenshots is:
+
+```
+#map=18/50.653900/-128.009400
+```
+
+This is Port Hardy, BC — a recognisable coastal location used in test fixtures, screenshot specs, and the README preview image.
 
 ## Running Tests
-
-To run the tests, use the following command:
 
 ```bash
 npm test
 ```
 
-This will:
-1.  Start the Vite development server (if not already running).
-2.  Launch the Playwright test runner.
-3.  Execute tests in `tests/e2e/`.
+This starts the Vite dev server and runs all specs via Playwright (including screenshots).
 
-To run tests in UI mode (interactive):
+For interactive / UI mode:
 
 ```bash
 npx playwright test --ui
@@ -23,19 +72,42 @@ npx playwright test --ui
 
 ## Writing Tests
 
--   Create new test files in `tests/e2e/` with the `.spec.js` extension.
--   Use `test` and `expect` from `@playwright/test`.
--   Example:
-    ```javascript
-    const { test, expect } = require('@playwright/test');
+- Create spec files in `tests/e2e/` with the `.spec.js` extension, numbered to match the corresponding doc.
+- Name `test.describe` blocks after doc headings (e.g. `"useMap / View persistence"`).
+- Use `page.addInitScript` to seed or clear `localStorage` before navigation — this is the reliable way to control app state in tests.
+- Storage keys follow the pattern `navigator_{namespace}_{instanceId}`. The demo uses `id: "app"`, so the view key is `navigator_view_app`.
+- Poll for async side-effects (e.g. throttled localStorage writes) with `expect.poll()` rather than `waitForTimeout`.
 
-    test('My Feature works', async ({ page }) => {
-      await page.goto('/');
-      await expect(page.locator('#my-element')).toBeVisible();
-    });
-    ```
+```javascript
+import { test, expect } from "@playwright/test";
+
+test.describe("My feature / My heading", () => {
+  test("does the thing", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator(".my-element")).toBeVisible();
+  });
+});
+```
 
 ## Directory Structure
 
--   `tests/e2e/`: Contains all E2E test files.
--   `playwright.config.js`: Configuration for Playwright.
+```
+tests/
+  e2e/
+    1.instances.spec.js        ← docs/1.instances.md
+    2.core.spec.js             ← docs/2.core.md
+    screenshots/
+      readme.spec.js           ← assets/screenshots/app-preview.png
+      2.core.spec.js           ← assets/screenshots/docs/2.core/
+assets/
+  screenshots/
+    app-preview.png            ← README.md hero image
+    docs/
+      2.core/
+        first-load.png
+        panel.png
+        mobile.png
+playwright.config.js
+```
+
+

@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from "vue";
+import { ref, inject } from "vue";
 import iconSprite from "@/assets/icons/ogisNav-icons.svg?raw";
 
 const props = defineProps({
@@ -9,13 +9,13 @@ const props = defineProps({
 
 // UI
 import Top from "@/components/ui/top.vue";
-// import Nav from "@/components/ui/side/nav.vue";
 import SidePanel from "@/components/ui/side/panel.vue";
+import MenuPanel from "@/components/ui/side/menu.vue";
 
 import { useMap } from "@/core/useMap";
 import { useUI } from "@/core/useUI";
-import { usePosition } from "@/features/locate/usePosition";
-import LocatePanel from "@/features/locate/panel.vue";
+
+const instanceId = inject("navigatorId", "navigator");
 
 // Map — template ref passed so useMap manages the full lifecycle
 const mapContainer = ref(null);
@@ -33,15 +33,6 @@ const {
 	isMobile,
 } = useUI();
 
-// Position — data attributes on #waymark enable test observability
-const { positionMode, currentPosition } = usePosition();
-const positionHasHeading = computed(
-	() =>
-		currentPosition.value !== null &&
-		currentPosition.value?.properties?.heading !== null &&
-		currentPosition.value?.properties?.heading !== undefined,
-);
-
 const handleMapClick = () => {
 	if (isNavVisible.value && !isDesktop.value) {
 		closeNav();
@@ -54,39 +45,32 @@ const handleMapClick = () => {
 };
 
 if (isDesktop.value) {
-	openPanel("locate", LocatePanel);
+	openPanel("menu", MenuPanel);
 }
 </script>
 
 <template>
 	<div style="display: none" v-html="iconSprite"></div>
-	<div id="top">
+	<div class="navigator-top">
 		<Top />
 	</div>
 
-	<div id="content" class="page-content">
-		<!-- <Nav id="side-nav" /> -->
-
+	<div class="navigator-content">
 		<SidePanel />
 	</div>
 
 	<!-- Map -->
 	<div
 		ref="mapContainer"
-		id="waymark"
-		:data-position-mode="positionMode || ''"
-		:data-position-heading="positionHasHeading ? 'true' : 'false'"
+		class="navigator-map"
+		:data-navigator-id="instanceId"
 		:class="{ 'panel-open': isPanelVisible && isDesktop }"
 		@click="handleMapClick"
 	/>
 </template>
 
-<style>
-body {
-	z-index: 0;
-}
-
-#waymark {
+<style scoped>
+.navigator-map {
 	z-index: 1;
 	position: absolute;
 	top: 0;
@@ -96,12 +80,12 @@ body {
 	transition: left 0.3s ease, width 0.3s ease;
 }
 
-#waymark.panel-open {
+.navigator-map.panel-open {
 	left: var(--bs-offcanvas-width, 400px);
 	width: calc(100% - var(--bs-offcanvas-width, 400px));
 }
 
-#top {
+.navigator-top {
 	z-index: 1060;
 	position: absolute;
 	top: 0;

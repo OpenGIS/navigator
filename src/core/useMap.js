@@ -1,16 +1,11 @@
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { onMounted, onUnmounted } from "vue";
+import { inject, onMounted, onUnmounted, ref } from "vue";
 import { useStorage } from "@/composables/useStorage";
+import { parseUrlHash, updateUrlHash } from "@/composables/useUrlHash";
 
-const state = useStorage("view", {
-    mapView: {
-        center: null,
-        zoom: null,
-    },
-});
-
-let mapInstance = null;
+// Per-instance cache: instanceId -> { state, mapInstance }
+const mapCache = new Map();
 
 function throttle(fn, delay) {
     let lastCall = 0;
@@ -34,6 +29,18 @@ function throttle(fn, delay) {
  * @param {Object} [options={}] - MapLibre MapOptions to merge with defaults
  */
 export const useMap = (containerRef = null, options = {}) => {
+    const instanceId = inject("navigatorId", "navigator");
+
+    if (!mapCache.has(instanceId)) {
+        mapCache.set(instanceId, {
+            state: useStorage("view", { mapView: { center: null, zoom: null } }),
+            mapInstance: null,
+            currentView: ref(null), // { lat, lng, zoom } — updated on every map move
+        });
+    }
+
+    const cached = mapCache.get(instanceId);
+
     if (containerRef !== null) {
         onMounted(() => {
             const map = new maplibregl.Map({
@@ -44,35 +51,56 @@ export const useMap = (containerRef = null, options = {}) => {
             });
 
             map.on("load", () => {
-                // Restore persisted map view
-                if (state.mapView.center && state.mapView.zoom) {
+                // Determine initial view: URL hash takes priority over localStorage
+                const hashView = parseUrlHash();
+                if (hashView) {
+                    map.jumpTo({ center: hashView.center, zoom: hashView.zoom });
+                } else if (cached.state.mapView.center && cached.state.mapView.zoom) {
                     map.jumpTo({
-                        center: state.mapView.center,
-                        zoom: state.mapView.zoom,
+                        center: cached.state.mapView.center,
+                        zoom: cached.state.mapView.zoom,
                     });
                 }
 
-                // Persist map view on movement
+                // Update the reactive ref and URL hash from the current map state.
+                // Does NOT write localStorage — that only happens on user movement.
+                const refreshView = () => {
+                    const c = map.getCenter();
+                    const z = map.getZoom();
+                    cached.currentView.value = { lat: c.lat, lng: c.lng, zoom: z };
+                    updateUrlHash(z, c.lat, c.lng);
+                };
+
+                // Initialise the ref and hash immediately (before any user movement)
+                refreshView();
+
+                // On map movement: persist to localStorage, update ref, and update hash
                 map.on(
                     "moveend",
                     throttle(() => {
-                        state.mapView.center = map.getCenter();
-                        state.mapView.zoom = map.getZoom();
+                        const c = map.getCenter();
+                        const z = map.getZoom();
+                        cached.state.mapView.center = c;
+                        cached.state.mapView.zoom = z;
+                        cached.currentView.value = { lat: c.lat, lng: c.lng, zoom: z };
+                        updateUrlHash(z, c.lat, c.lng);
                     }, 1000),
                 );
 
-                mapInstance = map;
+                cached.mapInstance = map;
             });
         });
 
         onUnmounted(() => {
-            mapInstance?.remove();
-            mapInstance = null;
+            cached.mapInstance?.remove();
+            cached.mapInstance = null;
+            mapCache.delete(instanceId);
         });
     }
 
     return {
-        map: mapInstance,
+        map: cached.mapInstance,
+        currentView: cached.currentView,
     };
 };
 

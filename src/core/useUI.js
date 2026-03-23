@@ -1,154 +1,150 @@
-import { ref, computed, markRaw } from "vue";
+import { ref, computed, markRaw, inject } from "vue";
 
-// --- State ---
+// Per-instance state: instanceId -> state object
+const instances = new Map();
+// Per-instance resize listener cleanup: instanceId -> cleanup fn
+const resizeCleanups = new Map();
 
-// Device / Screen Size
-const width = ref(window.innerWidth);
-
-// First Load — true when navigator_view has never been persisted
-const isFirstLoad = ref(!localStorage.getItem("navigator_view"));
-
-// Nav (Left Sidebar)
-const isNavVisible = ref(width.value >= 992); // Toggles entire sidebar visibility
-const isNavExpanded = ref(false); // Toggles expanded/collapsed mode (desktop hover or mobile open)
-
-// Panel (Right Sidebar / Content Panel)
-const isPanelVisible = ref(false); // Toggles entire panel visibility
-const isPanelExpanded = ref(false); // Toggles expanded/collapsed mode
-const activePanelId = ref(null); // String ID for active panel
-const activePanelComponent = ref(null); // The actual Vue component to render
+function createState(instanceId) {
+    // isFirstLoad is true when the map view has never been persisted for this instance.
+    // The "view" namespace mirrors what useMap uses — if that key exists the user has
+    // visited before.
+    const storageKey = `navigator_view_${instanceId}`;
+    return {
+        width: ref(window.innerWidth),
+        isFirstLoad: ref(!localStorage.getItem(storageKey)),
+        isNavVisible: ref(window.innerWidth >= 992),
+        isNavExpanded: ref(false),
+        isPanelVisible: ref(false),
+        isPanelExpanded: ref(false),
+        activePanelId: ref(null),
+        activePanelComponent: ref(null),
+    };
+}
 
 export const useUI = () => {
+    const instanceId = inject("navigatorId", "navigator");
+
+    if (!instances.has(instanceId)) {
+        instances.set(instanceId, createState(instanceId));
+
+        const s = instances.get(instanceId);
+        const onResize = () => {
+            s.width.value = window.innerWidth;
+            if (s.width.value >= 992) {
+                s.isNavVisible.value = true;
+            } else if (s.isNavVisible.value && !s.isNavExpanded.value) {
+                s.isNavVisible.value = false;
+            }
+        };
+
+        window.addEventListener("resize", onResize);
+        resizeCleanups.set(instanceId, () =>
+            window.removeEventListener("resize", onResize),
+        );
+    }
+
+    const s = instances.get(instanceId);
+
     // --- Computed ---
 
-    const isDesktop = computed(() => width.value >= 992);
-    const isTablet = computed(() => width.value >= 768 && width.value < 992);
-    const isMobile = computed(() => width.value < 768);
+    const isDesktop = computed(() => s.width.value >= 992);
+    const isTablet = computed(() => s.width.value >= 768 && s.width.value < 992);
+    const isMobile = computed(() => s.width.value < 768);
 
     // --- Actions ---
 
-    // Window Resize Handler
-    window.addEventListener("resize", () => {
-        width.value = window.innerWidth;
-
-        // Auto-adjust states based on breakpoints
-        if (isDesktop.value) {
-            isNavVisible.value = true; // Always show nav on desktop
-        } else {
-            // Hide nav if it was only temporarily shown (not fully expanded interaction)
-            if (isNavVisible.value && !isNavExpanded.value) {
-                isNavVisible.value = false;
-            }
-        }
-    });
-
-    // Navigation Actions
     const toggleNav = () => {
-        isNavVisible.value = !isNavVisible.value;
-        // Ensure expanded state matches visibility on mobile
-        if (isNavVisible.value && !isDesktop.value) {
-            isNavExpanded.value = true;
+        s.isNavVisible.value = !s.isNavVisible.value;
+        if (s.isNavVisible.value && !isDesktop.value) {
+            s.isNavExpanded.value = true;
         } else {
-            isNavExpanded.value = false;
+            s.isNavExpanded.value = false;
         }
     };
 
     const closeNav = () => {
-        isNavVisible.value = false;
+        s.isNavVisible.value = false;
         if (!isDesktop.value) {
-            isNavExpanded.value = false;
+            s.isNavExpanded.value = false;
         }
     };
 
     const setNavExpanded = (value) => {
-        isNavExpanded.value = value;
+        s.isNavExpanded.value = value;
     };
-
-    // Panel Actions
 
     /**
      * Open a panel with specific content.
-     * Ensures the panel is visible and expanded.
      * @param {string} id - Unique identifier for the panel
      * @param {Object} component - The Vue component to render
      */
     const openPanel = (id, component) => {
-        // Update content
-        activePanelId.value = id;
+        s.activePanelId.value = id;
         if (component) {
-            activePanelComponent.value = markRaw(component);
+            s.activePanelComponent.value = markRaw(component);
         }
-
-        // Ensure visible and expanded
-        isPanelVisible.value = true;
-        isPanelExpanded.value = true;
-
-        // Close mobile nav if open
-        if (isNavVisible.value && !isDesktop.value) {
-            isNavVisible.value = false;
+        s.isPanelVisible.value = true;
+        s.isPanelExpanded.value = true;
+        if (s.isNavVisible.value && !isDesktop.value) {
+            s.isNavVisible.value = false;
         }
-        isNavExpanded.value = false;
+        s.isNavExpanded.value = false;
     };
 
     /**
-     * Toggles a panel's visibility or expansion state.
+     * Toggle a panel open/closed, or switch to a new panel.
      * @param {string} id - Unique identifier for the panel
      * @param {Object} component - The Vue component to render
      */
     const togglePanel = (id, component) => {
-        // Mobile: Always treat as opening a new view (overlay)
-        if (isNavVisible.value && !isDesktop.value) {
+        if (s.isNavVisible.value && !isDesktop.value) {
             openPanel(id, component);
             return;
         }
 
-        // Desktop: Toggle logic
-        if (activePanelId.value === id) {
-            if (isPanelVisible.value) {
-                if (isPanelExpanded.value) {
-                    // If open and expanded, close it
-                    isPanelVisible.value = false;
-                    activePanelId.value = null;
+        if (s.activePanelId.value === id) {
+            if (s.isPanelVisible.value) {
+                if (s.isPanelExpanded.value) {
+                    s.isPanelVisible.value = false;
+                    s.activePanelId.value = null;
                 } else {
-                    // If collapsed, expand it
-                    isPanelExpanded.value = true;
+                    s.isPanelExpanded.value = true;
                 }
             } else {
-                // If hidden, open it
                 openPanel(id, component);
             }
         } else {
-            // New panel selected
             openPanel(id, component);
         }
     };
 
     const closePanel = () => {
-        isPanelVisible.value = false;
+        s.isPanelVisible.value = false;
     };
 
     const togglePanelExpanded = () => {
-        isPanelExpanded.value = !isPanelExpanded.value;
+        s.isPanelExpanded.value = !s.isPanelExpanded.value;
     };
 
     const setPanelExpanded = (value) => {
-        isPanelExpanded.value = value;
+        s.isPanelExpanded.value = value;
     };
 
     const setFirstLoadComplete = () => {
-        isFirstLoad.value = false;
+        s.isFirstLoad.value = false;
     };
 
     return {
         // State
-        width,
-        isNavVisible,
-        isNavExpanded,
-        isPanelVisible,
-        isPanelExpanded,
-        activePanelId,
-        activePanelComponent,
-        isFirstLoad,
+        width: s.width,
+        isNavVisible: s.isNavVisible,
+        isNavExpanded: s.isNavExpanded,
+        isPanelVisible: s.isPanelVisible,
+        isPanelExpanded: s.isPanelExpanded,
+        activePanelId: s.activePanelId,
+        activePanelComponent: s.activePanelComponent,
+        isFirstLoad: s.isFirstLoad,
 
         // Computed
         isDesktop,
