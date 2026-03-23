@@ -1,6 +1,6 @@
 {
   "name": "@ogis/navigator",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "type": "module",
   "description": "A Vue 3-based map navigator powered by MapLibre GL JS",
   "homepage": "https://www.npmjs.com/package/@ogis/navigator",
