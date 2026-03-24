@@ -139,12 +139,15 @@ export const useLocate = () => {
             // Skip relative (non-compass) readings from the generic event
             if ("absolute" in event && !event.absolute) return;
 
+            // alpha increases counter-clockwise; convert to a clockwise compass bearing.
+            const bearing = (360 - event.alpha) % 360;
+
             if (c.smoothedHeading === null) {
-                c.smoothedHeading = event.alpha;
+                c.smoothedHeading = bearing;
             } else {
                 c.smoothedHeading = smoothAngle(
                     c.smoothedHeading,
-                    event.alpha,
+                    bearing,
                     HEADING_SMOOTH,
                 );
             }
