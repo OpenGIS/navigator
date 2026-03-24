@@ -6,9 +6,9 @@
  * Document First process. Exits with code 1 if any issues are found.
  *
  * Rules:
- *   1. Every docs/N.*.md must have a tests/e2e/N.*.spec.js
+ *   1. Every docs/*.md must have a tests/e2e/*.spec.js (by matching stem name)
  *      (except docs marked as developer guides with no runtime behaviour)
- *   2. Every tests/e2e/screenshots/N.*.spec.js must have a docs/N.*.md
+ *   2. Every tests/e2e/screenshots/*.spec.js must have a docs/*.md (by matching stem name)
  *   3. Every screenshot image referenced in docs must exist on disk
  */
 
@@ -22,7 +22,7 @@ const SCREENSHOTS_DIR = join(TESTS_DIR, "screenshots");
 const ASSETS_DIR = join(ROOT, "assets");
 
 // Docs that are developer guides with no runtime behaviour to test
-const GUIDE_ONLY_DOCS = ["3.features.md"];
+const GUIDE_ONLY_DOCS = ["features.md"];
 
 let issues = 0;
 
@@ -75,22 +75,18 @@ for (const { docDir, testsDir, label } of collectDocSections()) {
       continue;
     }
 
-    const prefix = doc.match(/^\d+/)?.[0];
-    if (!prefix) continue;
+    const stem = doc.replace(/\.md$/, "");
 
     if (!existsSync(testsDir)) {
-      fail(`${label}${doc} has no matching tests/e2e/${label}${prefix}.*.spec.js (tests dir missing)`);
+      fail(`${label}${doc} has no matching tests/e2e/${label}${stem}.spec.js (tests dir missing)`);
       continue;
     }
 
-    const specFiles = readdirSync(testsDir).filter(
-      (f) => f.startsWith(`${prefix}.`) && f.endsWith(".spec.js"),
-    );
-
-    if (specFiles.length === 0) {
-      fail(`${label}${doc} has no matching tests/e2e/${label}${prefix}.*.spec.js`);
+    const expectedSpec = `${stem}.spec.js`;
+    if (!existsSync(join(testsDir, expectedSpec))) {
+      fail(`${label}${doc} has no matching tests/e2e/${label}${expectedSpec}`);
     } else {
-      pass(`${label}${doc} → tests/e2e/${label}${specFiles[0]}`);
+      pass(`${label}${doc} → tests/e2e/${label}${expectedSpec}`);
     }
   }
 }
@@ -107,22 +103,18 @@ for (const { docDir, screenshotsDir, label } of collectDocSections()) {
   );
 
   for (const spec of screenshotSpecs) {
-    const prefix = spec.match(/^\d+/)?.[0];
-    if (!prefix) continue;
+    const stem = spec.replace(/\.spec\.js$/, "");
+    const expectedDoc = `${stem}.md`;
 
     if (!existsSync(docDir)) {
-      fail(`tests/e2e/screenshots/${label}${spec} has no matching docs/${label}${prefix}.*.md`);
+      fail(`tests/e2e/screenshots/${label}${spec} has no matching docs/${label}${expectedDoc}`);
       continue;
     }
 
-    const matchingDocs = readdirSync(docDir).filter((f) =>
-      f.startsWith(`${prefix}.`),
-    );
-
-    if (matchingDocs.length === 0) {
-      fail(`tests/e2e/screenshots/${label}${spec} has no matching docs/${label}${prefix}.*.md`);
+    if (!existsSync(join(docDir, expectedDoc))) {
+      fail(`tests/e2e/screenshots/${label}${spec} has no matching docs/${label}${expectedDoc}`);
     } else {
-      pass(`tests/e2e/screenshots/${label}${spec} → docs/${label}${matchingDocs[0]}`);
+      pass(`tests/e2e/screenshots/${label}${spec} → docs/${label}${expectedDoc}`);
     }
   }
 }
@@ -131,7 +123,7 @@ for (const { docDir, screenshotsDir, label } of collectDocSections()) {
 
 console.log("\nRule 3: screenshot images referenced in docs exist on disk");
 
-const imageRefPattern = /!\[.*?\]\((\.\.\/assets\/screenshots\/[^)]+)\)/g;
+const imageRefPattern = /!\[.*?\]\((\.\.(?:\/\.\.)?\/assets\/screenshots\/[^)]+)\)/g;
 
 for (const { docDir, label } of collectDocSections()) {
   if (!existsSync(docDir)) continue;

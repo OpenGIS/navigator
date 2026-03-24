@@ -1,9 +1,16 @@
 <script setup>
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { useMap } from "@/core/useMap";
+import { useUI } from "@/core/useUI";
+import { useLocate } from "@/features/locate/useLocate";
 import Icon from "@/components/ui/icon.vue";
+import SettingsPanel from "@/features/settings/panel.vue";
 
 const { currentView } = useMap();
+const { togglePanel } = useUI();
+const { mode: locateMode, headingLost, position, permissionGranted, retryOrientation, retryPosition } = useLocate();
+
+const sharePosition = ref(false);
 
 const formattedCoords = computed(() => {
   if (!currentView.value) return null;
@@ -16,10 +23,19 @@ const formattedZoom = computed(() =>
 );
 
 const shareUrl = computed(() => {
+  const zoom = currentView.value ? Math.round(currentView.value.zoom) : 0;
+  const base = `${window.location.origin}${window.location.pathname}`;
+
+  if (sharePosition.value && position.value) {
+    const { lat, lng } = position.value;
+    const hash = `#map=${zoom}/${lat.toFixed(6)}/${lng.toFixed(6)}`;
+    return `${base}${hash}`;
+  }
+
   if (!currentView.value) return window.location.href;
-  const { lat, lng, zoom } = currentView.value;
-  const hash = `#map=${Math.round(zoom)}/${lat.toFixed(6)}/${lng.toFixed(6)}`;
-  return `${window.location.origin}${window.location.pathname}${hash}`;
+  const { lat, lng } = currentView.value;
+  const hash = `#map=${zoom}/${lat.toFixed(6)}/${lng.toFixed(6)}`;
+  return `${base}${hash}`;
 });
 </script>
 
@@ -38,6 +54,19 @@ const shareUrl = computed(() => {
       <span class="text-body-secondary">Zoom</span>
       <span class="ms-2 font-monospace">{{ formattedZoom }}</span>
     </p>
+    <div v-if="permissionGranted" class="form-check mb-2">
+      <input
+        class="form-check-input"
+        type="checkbox"
+        id="share-position-toggle"
+        v-model="sharePosition"
+        :disabled="!position"
+      />
+      <label class="form-check-label small" for="share-position-toggle">
+        Share my position
+        <span v-if="!position" class="text-body-tertiary"> (not active)</span>
+      </label>
+    </div>
     <a
       :href="shareUrl"
       target="_blank"
@@ -45,7 +74,7 @@ const shareUrl = computed(() => {
       class="navigator-share-link btn btn-sm btn-outline-primary w-100 d-flex align-items-center justify-content-center gap-1"
     >
       <Icon width="16" height="16" fill="currentColor" name="globe" />
-      Share this view
+      {{ sharePosition && position ? 'Share my position' : 'Share this view' }}
     </a>
   </div>
 
@@ -129,5 +158,44 @@ const shareUrl = computed(() => {
         </a>
       </div>
     </div>
+  </div>
+
+  <div v-if="locateMode === 'error'"
+    class="sidebar-section sidebar-section-body p-3 border-top"
+    id="menu-position-lost-alert"
+  >
+    <div class="alert alert-danger d-flex align-items-center gap-2 py-2 px-3 mb-0 small" role="alert">
+      <span>Location access lost.</span>
+      <button
+        type="button"
+        class="btn btn-sm btn-danger ms-auto py-0"
+        @click="retryPosition"
+      >Re-request</button>
+    </div>
+  </div>
+
+  <div v-if="headingLost && (locateMode === 'active' || locateMode === 'following')"
+    class="sidebar-section sidebar-section-body p-3 border-top"
+    id="menu-heading-lost-alert"
+  >
+    <div class="alert alert-warning d-flex align-items-center gap-2 py-2 px-3 mb-0 small" role="alert">
+      <span>Compass unavailable.</span>
+      <button
+        type="button"
+        class="btn btn-sm btn-warning ms-auto py-0"
+        @click="retryOrientation"
+      >Re-request</button>
+    </div>
+  </div>
+
+  <div class="sidebar-section sidebar-section-body p-3 border-top">
+    <button
+      type="button"
+      class="btn btn-sm btn-outline-secondary w-100 d-flex align-items-center gap-2"
+      @click="togglePanel('settings', SettingsPanel)"
+    >
+      <Icon width="16" height="16" fill="currentColor" name="gear" />
+      Settings
+    </button>
   </div>
 </template>

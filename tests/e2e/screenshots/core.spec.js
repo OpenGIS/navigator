@@ -2,13 +2,13 @@ import { test } from "@playwright/test";
 import path from "path";
 
 /**
- * Screenshots for docs/2.core.md
+ * Screenshots for docs/core.md
  *
  * Each screenshot captures a meaningful UI state described in the docs.
- * Output: assets/screenshots/docs/2.core/
+ * Output: assets/screenshots/docs/core/
  */
 
-const OUT = path.resolve("assets/screenshots/docs/2.core");
+const OUT = path.resolve("assets/screenshots/docs/core");
 
 // Initial test view — used across screenshots for a consistent, recognisable location
 const TEST_HASH = "#map=18/50.653900/-128.009400";

@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 /**
- * Tests for docs/features/1.locate.md
+ * Tests for docs/features/locate.md
  *
  * Covers the Locate button states, permission flow modals, and map marker.
  */
@@ -247,5 +247,71 @@ test.describe("Locate / Error state", () => {
 
         await page.locator("#locate-button").click();
         await expect(page.getByText("Location access denied")).toBeVisible();
+    });
+});
+
+// ─── Locate / Menu alerts and navbar badge ────────────────────────────────────
+
+test.describe("Locate / Menu alerts and navbar badge", () => {
+    test("navbar alert badge is not visible when locate is inactive", async ({
+        page,
+    }) => {
+        await withNoLocateStorage(page);
+        await page.goto("/");
+        await page.waitForSelector(".navigator-map canvas");
+
+        await expect(page.locator(".navigator-alert-badge")).toBeHidden();
+    });
+
+    test("navbar alert badge appears when location access is denied", async ({
+        page,
+    }) => {
+        await withGrantedStorage(page);
+        // No geolocation permission — clicking locate will trigger onError
+        await page.goto("/");
+        await page.waitForLoadState("networkidle");
+
+        await page.locator("#locate-button").click();
+
+        await expect
+            .poll(() => page.locator("#locate-button").textContent(), {
+                timeout: 5000,
+            })
+            .toMatch(/Error/);
+
+        // Close the error modal so the badge is visible
+        await page.locator("#locate-error-close").click();
+
+        await expect(page.locator(".navigator-alert-badge")).toBeVisible();
+    });
+
+    test("position lost alert appears in menu when location access is denied", async ({
+        page,
+    }) => {
+        await withGrantedStorage(page);
+        await page.goto("/");
+        await page.waitForLoadState("networkidle");
+
+        await page.locator("#locate-button").click();
+
+        await expect
+            .poll(() => page.locator("#locate-button").textContent(), {
+                timeout: 5000,
+            })
+            .toMatch(/Error/);
+
+        await page.locator("#locate-error-close").click();
+
+        // Open menu panel and check for alert
+        const offcanvas = page.locator(".offcanvas.show");
+        if (!(await offcanvas.isVisible())) {
+            await page.click(".navbar-toggler");
+            await offcanvas.waitFor();
+        }
+
+        await expect(page.locator("#menu-position-lost-alert")).toBeVisible();
+        await expect(
+            page.locator("#menu-position-lost-alert"),
+        ).toContainText("Location access lost");
     });
 });

@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 /**
- * Tests for docs/2.core.md
+ * Tests for docs/core.md
  *
  * Covers useMap (map lifecycle, view persistence, mapOptions) and
  * useUI (responsive breakpoints, panel actions, first load).
@@ -121,6 +121,30 @@ test.describe("useMap / URL hash", () => {
     const href = await shareLink.getAttribute("href");
     expect(href).toMatch(/#map=/);
     expect(href).toContain("/50.6539");
+  });
+
+  test("share position checkbox is hidden when locate permission was never granted", async ({ page }) => {
+    await withNoViewStorage(page);
+    await page.goto("/#map=18/50.653900/-128.009400");
+    await page.waitForLoadState("networkidle");
+
+    await expect(page.locator("#share-position-toggle")).toBeHidden();
+  });
+
+  test("share position checkbox is visible when locate permission was previously granted", async ({ page }) => {
+    await withNoViewStorage(page);
+    // Seed permissionGranted in locate storage
+    await page.addInitScript(() => {
+      localStorage.setItem(
+        "navigator_locate_app",
+        JSON.stringify({ permissionGranted: true }),
+      );
+    });
+    await page.goto("/#map=18/50.653900/-128.009400");
+    await page.waitForLoadState("networkidle");
+
+    await expect(page.locator(".navigator-panel")).toBeVisible({ timeout: 5000 });
+    await expect(page.locator("#share-position-toggle")).toBeVisible();
   });
 });
 

@@ -120,6 +120,27 @@ If no orientation data is available (e.g. desktop without a sensor, or permissio
 
 ---
 
+## Menu alerts and navbar badge
+
+When the locate feature has an active alert, a red `!` badge appears on the sidebar toggle button in the top navigation bar. This signals to the user that the menu contains an actionable message even when the panel is closed.
+
+![Navbar toggle badge showing an alert](../../assets/screenshots/docs/features/locate/navbar-badge.png)
+
+The badge is hidden when there are no active alerts.
+
+### Alert conditions
+
+Two alerts can be active simultaneously. Each appears as a minimal inline alert inside the main menu panel with a **Re-request** button:
+
+| Alert | Condition | Action |
+|---|---|---|
+| **Location access lost** | Geolocation permission denied or revoked (`mode === 'error'`) | Restarts geolocation watching |
+| **Compass unavailable** | Orientation events stopped after an initial successful reading | Re-requests `DeviceOrientationEvent` permission and restarts watching |
+
+The **Re-request** buttons are user-gesture handlers, satisfying the iOS Safari requirement that `DeviceOrientationEvent.requestPermission()` be called within a gesture.
+
+---
+
 ## Following mode
 
 When the button is in the **Following** state, the map is re-centred on the user's position each time a new fix arrives. The zoom level is preserved.

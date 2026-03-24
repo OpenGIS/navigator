@@ -34,7 +34,9 @@ export const useLocate = () => {
             mode: ref(null), // null | 'active' | 'following' | 'error'
             position: ref(null), // Position | null
             compassHeading: ref(null), // smoothed DeviceOrientation compass bearing
+            headingLost: ref(false), // true when orientation events have stopped arriving
             smoothedHeading: null, // internal: raw float used for smoothing
+            headingTimeoutId: null, // timeout handle for heading-loss detection
             showConfirmModal: ref(false),
             showErrorModal: ref(false),
             watcherId: null,
@@ -134,10 +136,29 @@ export const useLocate = () => {
     const startOrientationWatching = () => {
         if (c.orientationListener) return; // already listening
 
+        // Schedule a timeout that fires if no valid heading event arrives.
+        // Resets on every valid event; used to detect iOS permission expiry or
+        // hardware becoming unavailable.
+        const scheduleHeadingTimeout = () => {
+            clearTimeout(c.headingTimeoutId);
+            c.headingTimeoutId = setTimeout(() => {
+                c.headingLost.value = true;
+                c.compassHeading.value = null;
+                if (c.headingMarker) {
+                    c.headingMarker.remove();
+                    c.headingMarker = null;
+                }
+            }, 8000);
+        };
+
         const handler = (event) => {
             if (event.alpha === null) return;
             // Skip relative (non-compass) readings from the generic event
             if ("absolute" in event && !event.absolute) return;
+
+            // Valid reading received — clear any loss state and reset the watchdog.
+            c.headingLost.value = false;
+            scheduleHeadingTimeout();
 
             // alpha increases counter-clockwise; convert to a clockwise compass bearing.
             const bearing = (360 - event.alpha) % 360;
@@ -164,6 +185,9 @@ export const useLocate = () => {
 
         window.addEventListener(eventName, handler);
         c.orientationListener = { eventName, handler };
+        // Note: the watchdog is NOT started here. It only starts after the first
+        // valid heading event fires, so devices without compass hardware (desktops,
+        // some tablets) never produce a false "Compass unavailable" alert.
     };
 
     const stopOrientationWatching = () => {
@@ -175,6 +199,9 @@ export const useLocate = () => {
         c.orientationListener = null;
         c.smoothedHeading = null;
         c.compassHeading.value = null;
+        clearTimeout(c.headingTimeoutId);
+        c.headingTimeoutId = null;
+        c.headingLost.value = false;
     };
 
     // ─── Geolocation callbacks ────────────────────────────────────────────────
@@ -288,14 +315,50 @@ export const useLocate = () => {
         c.position.value = null;
     };
 
+    /**
+     * Re-request orientation (compass) permission and restart watching.
+     * Must be called within a user-gesture handler so iOS Safari grants the
+     * DeviceOrientationEvent permission.
+     */
+    const retryOrientation = async () => {
+        stopOrientationWatching();
+        const granted = await requestOrientationPermission();
+        if (granted) {
+            c.headingLost.value = false;
+            startOrientationWatching();
+        } else {
+            c.headingLost.value = true;
+        }
+    };
+
+    /**
+     * Re-request geolocation after a permission error.
+     * Bypasses the confirmation modal since the user is explicitly retrying.
+     */
+    const retryPosition = async () => {
+        c.mode.value = null;
+        c.showErrorModal.value = false;
+        await startWatching();
+    };
+
     return {
         mode: computed(() => c.mode.value),
         position: computed(() => c.position.value),
         compassHeading: computed(() => c.compassHeading.value),
+        headingLost: computed(() => c.headingLost.value),
+        permissionGranted: computed(() => c.storage.permissionGranted),
+        hasAlerts: computed(
+            () =>
+                c.mode.value === "error" ||
+                (c.headingLost.value &&
+                    (c.mode.value === "active" || c.mode.value === "following")),
+        ),
         showConfirmModal: c.showConfirmModal,
         showErrorModal: c.showErrorModal,
         cycle,
         confirmLocate,
         stop,
+        retryOrientation,
+        retryPosition,
     };
 };

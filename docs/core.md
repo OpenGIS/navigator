@@ -28,7 +28,7 @@ The navigation menu panel displays the current map coordinates and zoom level, a
 
 The **Current view** section is hidden on a true first visit (no URL hash, no persisted view). It appears as soon as a view is available — either because the page loaded with a `#map=…` hash, the user has a previously saved view, or the map has been panned or zoomed.
 
-![Menu panel with current view coordinates and share link](../assets/screenshots/docs/2.core/url-hash.png)
+![Menu panel with current view coordinates and share link](../assets/screenshots/docs/core/url-hash.png)
 
 ---
 
@@ -125,7 +125,7 @@ const { isDesktop, isPanelVisible, openPanel, togglePanel } = useUI();
 
 On resize, `isNavVisible` is automatically managed: it is forced `true` on desktop and hidden on smaller screens if the nav was not explicitly expanded.
 
-![Mobile viewport — panel closed, top bar visible](../assets/screenshots/docs/2.core/mobile.png)
+![Mobile viewport — panel closed, top bar visible](../assets/screenshots/docs/core/mobile.png)
 
 ### Panel
 
@@ -157,7 +157,7 @@ togglePanel('my-feature', MyPanel);
 
 Closes the panel without changing the active component.
 
-![Desktop panel open on returning visit](../assets/screenshots/docs/2.core/panel.png)
+![Desktop panel open on returning visit](../assets/screenshots/docs/core/panel.png)
 
 ### First load
 
@@ -170,7 +170,7 @@ const { isFirstLoad, setFirstLoadComplete } = useUI();
 setFirstLoadComplete();
 ```
 
-![Desktop initial load — first-load alert visible with panel open](../assets/screenshots/docs/2.core/first-load.png)
+![Desktop initial load — first-load alert visible with panel open](../assets/screenshots/docs/core/first-load.png)
 
 ### Full API
 

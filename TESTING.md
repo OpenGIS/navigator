@@ -9,8 +9,8 @@ E2E tests mirror the documentation. Each doc file has a corresponding spec file,
 
 | Doc | Spec | Coverage |
 |-----|------|----------|
-| `docs/1.instances.md` | `tests/e2e/1.instances.spec.js` | Instance creation, `id`, `mapOptions`, multiple instances, storage convention |
-| `docs/2.core.md` | `tests/e2e/2.core.spec.js` | `useMap` lifecycle, view persistence, URL hash, `useUI` panel, breakpoints, first load |
+| `docs/instances.md` | `tests/e2e/instances.spec.js` | Instance creation, `id`, `mapOptions`, multiple instances, storage convention |
+| `docs/core.md` | `tests/e2e/core.spec.js` | `useMap` lifecycle, view persistence, URL hash, `useUI` panel, breakpoints, first load |
 
 When a new doc file is added (e.g. `docs/4.myfeature.md`), a corresponding `tests/e2e/4.myfeature.spec.js` should be created with a `test.describe` block for each heading.
 
@@ -21,11 +21,11 @@ Screenshots are captured by Playwright and embedded in documentation for illustr
 | Screenshot spec | Output | Used in |
 |-----------------|--------|---------|
 | `tests/e2e/screenshots/readme.spec.js` | `assets/screenshots/app-preview.png` | `README.md` |
-| `tests/e2e/screenshots/2.core.spec.js` | `assets/screenshots/docs/2.core/` | `docs/2.core.md` |
+| `tests/e2e/screenshots/core.spec.js` | `assets/screenshots/docs/core/` | `docs/core.md` |
 
 ### Conventions
 
-- One screenshot spec per doc file, numbered to match (e.g. `screenshots/3.features.spec.js` for `docs/3.features.md`).
+- One screenshot spec per doc file, numbered to match (e.g. `screenshots/features.spec.js` for `docs/features.md`).
 - Screenshots capture the full viewport at **1280×720** (desktop) unless a specific breakpoint is being illustrated.
 - Test names describe the UI state being captured (e.g. `"useUI / First load — desktop initial load"`).
 - Not every section needs a screenshot — add one when the visual output meaningfully illustrates the behaviour being documented.
@@ -41,7 +41,7 @@ npx playwright test tests/e2e/screenshots/
 To regenerate a single file:
 
 ```bash
-npx playwright test tests/e2e/screenshots/2.core.spec.js
+npx playwright test tests/e2e/screenshots/core.spec.js
 ```
 
 Screenshots are committed to the repository so that docs render correctly in GitHub and npm.
@@ -94,16 +94,16 @@ test.describe("My feature / My heading", () => {
 ```
 tests/
   e2e/
-    1.instances.spec.js        ← docs/1.instances.md
-    2.core.spec.js             ← docs/2.core.md
+    instances.spec.js        ← docs/instances.md
+    core.spec.js             ← docs/core.md
     screenshots/
       readme.spec.js           ← assets/screenshots/app-preview.png
-      2.core.spec.js           ← assets/screenshots/docs/2.core/
+      core.spec.js           ← assets/screenshots/docs/core/
 assets/
   screenshots/
     app-preview.png            ← README.md hero image
     docs/
-      2.core/
+      core/
         first-load.png
         panel.png
         mobile.png

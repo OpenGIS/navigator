@@ -14,12 +14,15 @@ import MenuPanel from "@/components/ui/side/menu.vue";
 
 import { useMap } from "@/core/useMap";
 import { useUI } from "@/core/useUI";
+import { useSettings } from "@/features/settings/useSettings";
 
 const instanceId = inject("navigatorId", "navigator");
 
 // Map — template ref passed so useMap manages the full lifecycle
 const mapContainer = ref(null);
 useMap(mapContainer, props.mapOptions);
+
+const { resolvedTheme } = useSettings();
 
 // UI Store
 const {
@@ -50,6 +53,7 @@ if (isDesktop.value) {
 </script>
 
 <template>
+	<div :data-bs-theme="resolvedTheme" style="display: contents">
 	<div style="display: none" v-html="iconSprite"></div>
 	<div class="navigator-top">
 		<Top />
@@ -67,6 +71,7 @@ if (isDesktop.value) {
 		:class="{ 'panel-open': isPanelVisible && isDesktop }"
 		@click="handleMapClick"
 	/>
+	</div>
 </template>
 
 <style scoped>

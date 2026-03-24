@@ -49,7 +49,7 @@ src/
     useUI.js            # UI state: breakpoints, panel, nav, first-load
   composables/
     useStorage.js       # localStorage wrapper, instance-scoped
-  features/             # one sub-directory per feature (see docs/3.features.md)
+  features/             # one sub-directory per feature (see docs/features.md)
   components/
     ui/
       top.vue           # top navigation bar
@@ -105,7 +105,7 @@ Core elements use classes, not ids, to avoid collisions in multi-instance setups
 
 ### Features
 
-A feature is a self-contained directory under `src/features/{name}/` containing a composable, a panel component, a button component, and optionally a storage namespace. See `docs/3.features.md` for the full pattern.
+A feature is a self-contained directory under `src/features/{name}/` containing a composable, a panel component, a button component, and optionally a storage namespace. See `docs/features.md` for the full pattern.
 
 ---
 
@@ -125,10 +125,10 @@ Current mapping:
 
 | Doc | Tests | Screenshots |
 |-----|-------|-------------|
-| `docs/1.instances.md` | `tests/e2e/1.instances.spec.js` | — |
-| `docs/2.core.md` | `tests/e2e/2.core.spec.js` | `tests/e2e/screenshots/2.core.spec.js` |
-| `docs/3.features.md` | — (developer guide, no runtime behaviour) | — |
-| `docs/features/1.locate.md` | `tests/e2e/features/1.locate.spec.js` | — |
+| `docs/instances.md` | `tests/e2e/instances.spec.js` | — |
+| `docs/core.md` | `tests/e2e/core.spec.js` | `tests/e2e/screenshots/core.spec.js` |
+| `docs/features.md` | — (developer guide, no runtime behaviour) | — |
+| `docs/features/locate.md` | `tests/e2e/features/locate.spec.js` | — |
 
 ---
 
@@ -136,7 +136,7 @@ Current mapping:
 
 1. Create `docs/N.feature-name.md`
 2. Create `tests/e2e/N.feature-name.spec.js`
-3. Create `src/features/feature-name/` (see `docs/3.features.md`)
+3. Create `src/features/feature-name/` (see `docs/features.md`)
 4. If the feature has illustratable UI, create `tests/e2e/screenshots/N.feature-name.spec.js`
 5. Run `npm test && npm run check:sync`
 
@@ -151,8 +151,8 @@ A Playwright MCP server is configured in `.github/mcp.json`. Agents with MCP sup
 ## Further Reading
 
 - `README.md` — install and usage
-- `docs/1.instances.md` — `Navigator.init()` API, multi-instance, storage convention
-- `docs/2.core.md` — `useMap` and `useUI` full API
-- `docs/3.features.md` — how to build a feature
+- `docs/instances.md` — `Navigator.init()` API, multi-instance, storage convention
+- `docs/core.md` — `useMap` and `useUI` full API
+- `docs/features.md` — how to build a feature
 - `TESTING.md` — testing conventions, screenshot strategy
 - `tasks/sync-review.md` — agent task for a full Document First sync review

@@ -1,8 +1,9 @@
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { inject, onMounted, onUnmounted, ref } from "vue";
+import { inject, onMounted, onUnmounted, ref, watch } from "vue";
 import { useStorage } from "@/composables/useStorage";
 import { parseUrlHash, updateUrlHash } from "@/composables/useUrlHash";
+import { useSettings } from "@/features/settings/useSettings";
 
 // Per-instance cache: instanceId -> { state, mapInstance }
 const mapCache = new Map();
@@ -35,13 +36,23 @@ export const useMap = (containerRef = null, options = {}) => {
         mapCache.set(instanceId, {
             state: useStorage("view", { mapView: { center: null, zoom: null } }),
             mapInstance: null,
-            currentView: ref(null), // { lat, lng, zoom } — updated on every map move
+            scaleControl: null,
+            currentView: ref(null),
         });
     }
 
     const cached = mapCache.get(instanceId);
 
     if (containerRef !== null) {
+        const { isMetric } = useSettings();
+
+        // Keep the scale control unit in sync with the units preference.
+        watch(isMetric, (metric) => {
+            if (cached.scaleControl) {
+                cached.scaleControl.setUnit(metric ? "metric" : "imperial");
+            }
+        });
+
         onMounted(() => {
             const map = new maplibregl.Map({
                 container: containerRef.value,
@@ -101,6 +112,14 @@ export const useMap = (containerRef = null, options = {}) => {
                 );
 
                 cached.mapInstance = map;
+
+                // Scale bar — unit follows the units preference in settings.
+                const scaleControl = new maplibregl.ScaleControl({
+                    maxWidth: 120,
+                    unit: isMetric.value ? "metric" : "imperial",
+                });
+                map.addControl(scaleControl, "bottom-right");
+                cached.scaleControl = scaleControl;
             });
         });
 

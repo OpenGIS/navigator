@@ -63,7 +63,7 @@ Navigator.init({
 });
 ```
 
-See [`docs/1.instances.md`](docs/1.instances.md) for full details.
+See [`docs/instances.md`](docs/instances.md) for full details.
 
 ## Development
 

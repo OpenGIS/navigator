@@ -15,7 +15,7 @@ const iconColor = computed(() => {
     if (mode.value === "active" || mode.value === "following")
         return "var(--bs-primary)";
     if (mode.value === "error") return "var(--bs-danger)";
-    return "white";
+    return "currentColor";
 });
 
 const label = computed(() => {
@@ -179,6 +179,8 @@ const label = computed(() => {
 .locate-btn {
     cursor: pointer;
     line-height: 1;
+    position: relative;
+    padding-bottom: 18px; /* reserve space for the absolutely-positioned label */
 }
 
 .locate-btn:focus-visible {
@@ -191,8 +193,14 @@ const label = computed(() => {
     font-size: 0.625rem;
     font-weight: 600;
     letter-spacing: 0.03em;
-    margin-top: 2px;
     text-transform: uppercase;
+    /* Take the label out of the flow so it never widens the button */
+    position: absolute;
+    bottom: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    pointer-events: none;
 }
 </style>
 
