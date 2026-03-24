@@ -7,6 +7,18 @@ import { Position } from "@/classes/Position";
 // Per-instance cache: instanceId -> instance state
 const locateCache = new Map();
 
+// Smoothing factor for compass heading (0 = no update, 1 = no smoothing).
+// 0.15 is a gentle low-pass that removes jitter while still tracking rotation.
+const HEADING_SMOOTH = 0.15;
+
+/** Interpolate between two angles (degrees) handling the 0°/360° wrap. */
+function smoothAngle(current, next, factor) {
+    let diff = next - current;
+    if (diff > 180) diff -= 360;
+    if (diff < -180) diff += 360;
+    return (current + diff * factor + 360) % 360;
+}
+
 /**
  * Composable for the Locate feature.
  *
@@ -21,9 +33,12 @@ export const useLocate = () => {
             storage: useStorage("locate", { permissionGranted: false }),
             mode: ref(null), // null | 'active' | 'following' | 'error'
             position: ref(null), // Position | null
+            compassHeading: ref(null), // smoothed DeviceOrientation compass bearing
+            smoothedHeading: null, // internal: raw float used for smoothing
             showConfirmModal: ref(false),
             showErrorModal: ref(false),
             watcherId: null,
+            orientationListener: null, // { eventName, handler }
             positionMarker: null,
             headingMarker: null,
         });
@@ -47,12 +62,19 @@ export const useLocate = () => {
         return el;
     };
 
-    const updateMarkers = (pos) => {
+    /**
+     * Sync both markers to the current position and compass heading.
+     * Called after every position or orientation update.
+     */
+    const syncMarkers = () => {
+        if (!c.position.value) return;
         const map = getMapInstance(instanceId);
         if (!map) return;
 
-        const lngLat = [pos.lng, pos.lat];
+        const { lng, lat } = c.position.value;
+        const lngLat = [lng, lat];
 
+        // Position marker
         if (!c.positionMarker) {
             c.positionMarker = new maplibregl.Marker({
                 element: createPositionElement(),
@@ -64,7 +86,8 @@ export const useLocate = () => {
             c.positionMarker.setLngLat(lngLat);
         }
 
-        if (pos.heading !== null && pos.heading !== undefined) {
+        // Heading marker — only shown when compass data is available
+        if (c.compassHeading.value !== null) {
             if (!c.headingMarker) {
                 c.headingMarker = new maplibregl.Marker({
                     element: createHeadingElement(),
@@ -76,7 +99,7 @@ export const useLocate = () => {
             } else {
                 c.headingMarker.setLngLat(lngLat);
             }
-            c.headingMarker.setRotation(pos.heading);
+            c.headingMarker.setRotation(c.compassHeading.value);
         } else if (c.headingMarker) {
             c.headingMarker.remove();
             c.headingMarker = null;
@@ -90,6 +113,67 @@ export const useLocate = () => {
         c.headingMarker = null;
     };
 
+    // ─── DeviceOrientation ────────────────────────────────────────────────────
+
+    /**
+     * Request DeviceOrientationEvent permission on iOS (Safari ≥ 13).
+     * On other platforms the API is available without an explicit grant.
+     */
+    const requestOrientationPermission = async () => {
+        if (typeof DeviceOrientationEvent?.requestPermission === "function") {
+            try {
+                const result = await DeviceOrientationEvent.requestPermission();
+                return result === "granted";
+            } catch {
+                return false;
+            }
+        }
+        return true;
+    };
+
+    const startOrientationWatching = () => {
+        if (c.orientationListener) return; // already listening
+
+        const handler = (event) => {
+            if (event.alpha === null) return;
+            // Skip relative (non-compass) readings from the generic event
+            if ("absolute" in event && !event.absolute) return;
+
+            if (c.smoothedHeading === null) {
+                c.smoothedHeading = event.alpha;
+            } else {
+                c.smoothedHeading = smoothAngle(
+                    c.smoothedHeading,
+                    event.alpha,
+                    HEADING_SMOOTH,
+                );
+            }
+            c.compassHeading.value = Math.round(c.smoothedHeading);
+            syncMarkers();
+        };
+
+        // deviceorientationabsolute always provides an absolute compass bearing.
+        // Fall back to deviceorientation on devices that don't fire the absolute event.
+        const eventName =
+            "ondeviceorientationabsolute" in window
+                ? "deviceorientationabsolute"
+                : "deviceorientation";
+
+        window.addEventListener(eventName, handler);
+        c.orientationListener = { eventName, handler };
+    };
+
+    const stopOrientationWatching = () => {
+        if (!c.orientationListener) return;
+        window.removeEventListener(
+            c.orientationListener.eventName,
+            c.orientationListener.handler,
+        );
+        c.orientationListener = null;
+        c.smoothedHeading = null;
+        c.compassHeading.value = null;
+    };
+
     // ─── Geolocation callbacks ────────────────────────────────────────────────
 
     const onPosition = (geoPos) => {
@@ -97,25 +181,28 @@ export const useLocate = () => {
             c.storage.permissionGranted = true;
         }
 
-        const pos = new Position({
+        c.position.value = new Position({
             lat: geoPos.coords.latitude,
             lng: geoPos.coords.longitude,
-            heading: geoPos.coords.heading,
+            heading: geoPos.coords.heading, // direction of travel (may be null at rest)
             accuracy: geoPos.coords.accuracy,
             speed: geoPos.coords.speed,
         });
 
-        c.position.value = pos;
-        updateMarkers(pos);
+        syncMarkers();
 
         if (c.mode.value === "following") {
             const map = getMapInstance(instanceId);
-            if (map) map.easeTo({ center: [pos.lng, pos.lat] });
+            if (map)
+                map.easeTo({
+                    center: [c.position.value.lng, c.position.value.lat],
+                });
         }
     };
 
     const onError = (err) => {
         stopWatcher();
+        stopOrientationWatching();
         removeMarkers();
         c.mode.value = "error";
         if (err.code === 1 /* PERMISSION_DENIED */) {
@@ -125,12 +212,19 @@ export const useLocate = () => {
 
     // ─── Internal helpers ─────────────────────────────────────────────────────
 
-    const startWatching = () => {
+    const startWatching = async () => {
         if (!("geolocation" in navigator)) {
             c.mode.value = "error";
             return;
         }
         c.mode.value = "active";
+
+        // Request orientation permission (no-op on non-iOS) then start listening.
+        // Both happen inside the same user-gesture call stack so iOS treats them
+        // as a single permission prompt.
+        await requestOrientationPermission();
+        startOrientationWatching();
+
         c.watcherId = navigator.geolocation.watchPosition(onPosition, onError, {
             enableHighAccuracy: true,
         });
@@ -185,6 +279,7 @@ export const useLocate = () => {
     /** Stop tracking and return to the inactive state. */
     const stop = () => {
         stopWatcher();
+        stopOrientationWatching();
         removeMarkers();
         c.mode.value = null;
         c.position.value = null;
@@ -193,6 +288,7 @@ export const useLocate = () => {
     return {
         mode: computed(() => c.mode.value),
         position: computed(() => c.position.value),
+        compassHeading: computed(() => c.compassHeading.value),
         showConfirmModal: c.showConfirmModal,
         showErrorModal: c.showErrorModal,
         cycle,

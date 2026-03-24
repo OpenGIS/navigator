@@ -2,7 +2,7 @@
 import { computed } from "vue";
 import { useLocate } from "@/features/locate/useLocate";
 
-const { mode, position } = useLocate();
+const { mode, position, compassHeading } = useLocate();
 
 const formattedCoords = computed(() => {
     if (!position.value) return null;
@@ -20,8 +20,8 @@ const formattedSpeed = computed(() => {
 });
 
 const formattedHeading = computed(() => {
-    if (!position.value || position.value.heading === null) return null;
-    return `${Math.round(position.value.heading)}°`;
+    if (compassHeading.value === null) return null;
+    return `${compassHeading.value}°`;
 });
 </script>
 
