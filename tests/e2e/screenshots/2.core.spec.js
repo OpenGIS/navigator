@@ -29,7 +29,7 @@ test.use({ viewport: { width: 1280, height: 720 } });
 
 test("useUI / First load — desktop initial load", async ({ page }) => {
   await withNoViewStorage(page);
-  await page.goto(`/${TEST_HASH}`);
+  await page.goto("/");
   await page.waitForLoadState("networkidle");
 
   // Wait for panel slide-in to complete

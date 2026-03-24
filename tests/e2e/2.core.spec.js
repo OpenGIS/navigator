@@ -65,6 +65,37 @@ test.describe("useMap / URL hash", () => {
     expect(page.url()).toMatch(/#map=/);
   });
 
+  test("menu hides current view section on initial load with no hash", async ({ page }) => {
+    await withNoViewStorage(page);
+    await page.goto("/");
+    await page.waitForLoadState("networkidle");
+
+    // Panel is open on desktop but "Current view" section must not be visible
+    await expect(page.locator(".navigator-panel")).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText("Current view")).toBeHidden();
+    await expect(page.locator(".navigator-share-link")).toBeHidden();
+  });
+
+  test("menu shows current view section after the map is panned", async ({ page }) => {
+    await withNoViewStorage(page);
+    await page.goto("/");
+    await page.waitForLoadState("networkidle");
+
+    await expect(page.getByText("Current view")).toBeHidden();
+
+    const canvas = page.locator(".navigator-map canvas");
+    await canvas.dragTo(canvas, {
+      sourcePosition: { x: 200, y: 200 },
+      targetPosition: { x: 400, y: 200 },
+    });
+
+    // Section appears after first moveend (throttled to 1 s)
+    await expect
+      .poll(() => page.getByText("Current view").isVisible(), { timeout: 5000 })
+      .toBe(true);
+    await expect(page.locator(".navigator-share-link")).toBeVisible();
+  });
+
   test("menu shows current coordinates", async ({ page }) => {
     await withNoViewStorage(page);
     await page.goto("/#map=18/50.653900/-128.009400");

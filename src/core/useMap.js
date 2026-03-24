@@ -53,9 +53,12 @@ export const useMap = (containerRef = null, options = {}) => {
             map.on("load", () => {
                 // Determine initial view: URL hash takes priority over localStorage
                 const hashView = parseUrlHash();
+                const hasStoredView = !!(
+                    cached.state.mapView.center && cached.state.mapView.zoom
+                );
                 if (hashView) {
                     map.jumpTo({ center: hashView.center, zoom: hashView.zoom });
-                } else if (cached.state.mapView.center && cached.state.mapView.zoom) {
+                } else if (hasStoredView) {
                     map.jumpTo({
                         center: cached.state.mapView.center,
                         zoom: cached.state.mapView.zoom,
@@ -71,8 +74,18 @@ export const useMap = (containerRef = null, options = {}) => {
                     updateUrlHash(z, c.lat, c.lng);
                 };
 
-                // Initialise the ref and hash immediately (before any user movement)
-                refreshView();
+                // Only populate currentView when there is a meaningful view to share
+                // (a URL hash or a previously persisted view). On a true first visit
+                // currentView stays null so the "Current view / Share this view"
+                // section in the menu remains hidden.
+                if (hashView || hasStoredView) {
+                    refreshView();
+                } else {
+                    // Still write the URL hash even on a first visit
+                    const c = map.getCenter();
+                    const z = map.getZoom();
+                    updateUrlHash(z, c.lat, c.lng);
+                }
 
                 // On map movement: persist to localStorage, update ref, and update hash
                 map.on(
