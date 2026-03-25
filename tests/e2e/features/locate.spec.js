@@ -266,6 +266,63 @@ test.describe("Locate / Error state", () => {
     });
 });
 
+// ─── Locate / Compass heading ─────────────────────────────────────────────────
+
+test.describe("Locate / Compass heading", () => {
+    test.beforeEach(async ({ page }) => {
+        await withGrantedStorage(page);
+        await grantGeolocation(page);
+        await page.goto("/");
+        await page.waitForLoadState("networkidle");
+    });
+
+    test("compass heading matches the dispatched device orientation alpha", async ({
+        page,
+    }) => {
+        // Activate locate so a position marker exists
+        await page.locator("#locate-button").click();
+        await page.locator(".navigator-locate-position").waitFor({
+            state: "visible",
+            timeout: 5000,
+        });
+
+        // Simulate a compass reading of 90° (east).
+        // Per the DeviceOrientation spec, alpha = 90 means the device is
+        // facing east (alpha increases clockwise from north).
+        await page.evaluate(() => {
+            const eventName =
+                "ondeviceorientationabsolute" in window
+                    ? "deviceorientationabsolute"
+                    : "deviceorientation";
+            const event = new DeviceOrientationEvent(eventName, {
+                alpha: 90,
+                beta: 0,
+                gamma: 0,
+                absolute: true,
+            });
+            window.dispatchEvent(event);
+        });
+
+        // Wait for the heading marker to appear
+        await page.locator(".navigator-locate-heading").waitFor({
+            state: "visible",
+            timeout: 5000,
+        });
+
+        // Extract the rotation applied to the heading marker by MapLibre.
+        // With rotationAlignment: "map" and map bearing 0, the CSS transform
+        // contains rotateZ(<heading>deg).
+        const rotation = await page.locator(".navigator-locate-heading").evaluate((el) => {
+            const transform = el.style.transform;
+            const match = transform.match(/rotateZ\(([^)]+)deg\)/);
+            return match ? parseFloat(match[1]) : null;
+        });
+
+        // The marker should be rotated 90° (pointing east), not 270° (west).
+        expect(rotation).toBe(90);
+    });
+});
+
 // ─── Locate / Menu alerts and navbar badge ────────────────────────────────────
 
 test.describe("Locate / Menu alerts and navbar badge", () => {

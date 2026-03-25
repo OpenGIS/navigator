@@ -160,8 +160,8 @@ export const useLocate = () => {
             c.headingLost.value = false;
             scheduleHeadingTimeout();
 
-            // alpha increases counter-clockwise; convert to a clockwise compass bearing.
-            const bearing = (360 - event.alpha) % 360;
+            // alpha is already a clockwise compass bearing (0° = north, 90° = east).
+            const bearing = event.alpha;
 
             if (c.smoothedHeading === null) {
                 c.smoothedHeading = bearing;
