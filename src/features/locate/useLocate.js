@@ -53,7 +53,7 @@ export const useLocate = () => {
     const createPositionElement = () => {
         const el = document.createElement("div");
         el.className = "navigator-locate-position";
-        el.innerHTML = `<svg width="48" height="48" fill="currentColor"><use href="#position-heading"/></svg>`;
+        el.innerHTML = `<svg width="48" height="48" fill="currentColor"><use href="#position"/></svg>`;
         return el;
     };
 
