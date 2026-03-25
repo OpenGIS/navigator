@@ -62,7 +62,7 @@ const label = computed(() => {
                     <div class="modal-content">
                         <div class="modal-header">
                             <h5 class="modal-title" id="locate-confirm-title">
-                                Allow location access?
+                                Permission Required
                             </h5>
                             <button
                                 type="button"
@@ -72,15 +72,11 @@ const label = computed(() => {
                             ></button>
                         </div>
                         <div class="modal-body">
-                            <p>
-                                Navigator will ask your browser for permission to
-                                access your location. If you allow it, your
-                                position will be shown on the map.
-                            </p>
-                            <p class="mb-0 text-body-secondary small">
-                                Tip: if you change your mind, you can turn off
-                                location sharing by pressing the Locate button
-                                again.
+                            <p class="mb-0">
+                                To display your current location and compass
+                                heading, this app needs your permission. When
+                                prompted, please allow location and compass
+                                access.
                             </p>
                         </div>
                         <div class="modal-footer">
@@ -97,7 +93,7 @@ const label = computed(() => {
                                 id="locate-confirm-allow"
                                 @click="confirmLocate"
                             >
-                                Allow location access
+                                I Understand
                             </button>
                         </div>
                     </div>

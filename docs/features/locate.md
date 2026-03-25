@@ -70,14 +70,12 @@ When `permissionGranted` is `true`, pressing Locate goes straight to the Geoloca
 
 Shown the first time the user presses Locate (before the browser prompt).
 
-**Title:** Allow location access?
+**Title:** Permission Required
 
-**Body:** Navigator will ask your browser for permission to access your location. If you allow it, your position will be shown on the map.
-
-> Tip: if you change your mind, you can turn off location sharing by pressing the Locate button again.
+**Body:** To display your current location and compass heading, this app needs your permission. When prompted, please allow location and compass access.
 
 **Actions:**
-- **Allow location access** (primary button) — proceeds to the browser prompt
+- **I Understand** (primary button) — proceeds to the browser prompt
 - **Cancel** (secondary / close) — dismisses the modal, no action taken
 
 ![Confirmation modal](../../assets/screenshots/docs/features/locate/confirmation-modal.png)
@@ -119,6 +117,8 @@ A crosshairs icon centred on the user's current `lat`/`lng` coordinate. The mark
 ### Heading marker
 
 If the device provides a compass bearing via the [`DeviceOrientationEvent`](https://developer.mozilla.org/en-US/docs/Web/API/DeviceOrientationEvent) API, a separate heading indicator icon is rendered at the same position, rotated to match the bearing. The bearing is smoothed with a low-pass filter to prevent jitter from magnetometer noise.
+
+![Heading marker](../../assets/screenshots/docs/features/locate/marker-heading.png)
 
 Using `DeviceOrientationEvent` (rather than `GeolocationCoordinates.heading`) means the heading indicator is stable at rest — it reflects the compass direction the device is pointing, not the direction it is travelling.
 

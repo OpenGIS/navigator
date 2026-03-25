@@ -48,7 +48,7 @@ test("confirmation modal — first-time locate", async ({ page }) => {
     await page.waitForLoadState("networkidle");
 
     await page.locator("#locate-button").click();
-    await page.getByText("Allow location access?").waitFor({ state: "visible" });
+    await page.getByText("Permission Required").waitFor({ state: "visible" });
     await page.waitForTimeout(200);
 
     await page.screenshot({
@@ -167,6 +167,46 @@ test("map marker — position", async ({ page }) => {
     const pad = 60;
     await page.screenshot({
         path: path.join(OUT, "marker-position.png"),
+        clip: {
+            x: Math.max(0, box.x - pad),
+            y: Math.max(0, box.y - pad),
+            width: box.width + pad * 2,
+            height: box.height + pad * 2,
+        },
+    });
+});
+
+test("map marker — heading", async ({ page }) => {
+    await withGrantedStorage(page);
+    await grantGeolocation(page);
+    await page.goto(`/${TEST_HASH}`);
+    await page.waitForLoadState("networkidle");
+
+    await page.locator("#locate-button").click();
+    await page.locator(".navigator-locate-position").waitFor({ state: "visible", timeout: 5000 });
+
+    // Simulate a compass heading via DeviceOrientationEvent.
+    // Chromium listens on deviceorientationabsolute when available.
+    await page.evaluate(() => {
+        const eventName = "ondeviceorientationabsolute" in window
+            ? "deviceorientationabsolute"
+            : "deviceorientation";
+        const event = new DeviceOrientationEvent(eventName, {
+            alpha: 45,
+            beta: 0,
+            gamma: 0,
+            absolute: true,
+        });
+        window.dispatchEvent(event);
+    });
+    await page.locator(".navigator-locate-heading").waitFor({ state: "visible", timeout: 5000 });
+    await page.waitForTimeout(300);
+
+    const heading = page.locator(".navigator-locate-heading");
+    const box = await heading.boundingBox();
+    const pad = 60;
+    await page.screenshot({
+        path: path.join(OUT, "marker-heading.png"),
         clip: {
             x: Math.max(0, box.x - pad),
             y: Math.max(0, box.y - pad),

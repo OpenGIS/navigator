@@ -78,7 +78,7 @@ test.describe("Locate / Confirmation modal", () => {
     }) => {
         await page.locator("#locate-button").click();
         await expect(
-            page.getByText("Allow location access?"),
+            page.getByText("Permission Required"),
         ).toBeVisible();
     });
 
@@ -87,7 +87,7 @@ test.describe("Locate / Confirmation modal", () => {
     }) => {
         await page.locator("#locate-button").click();
         await expect(
-            page.getByText(/Navigator will ask your browser for permission/),
+            page.getByText(/To display your current location and compass heading/),
         ).toBeVisible();
     });
 
@@ -96,7 +96,7 @@ test.describe("Locate / Confirmation modal", () => {
     }) => {
         await page.locator("#locate-button").click();
         await page.getByText("Cancel").click();
-        await expect(page.getByText("Allow location access?")).toBeHidden();
+        await expect(page.getByText("Permission Required")).toBeHidden();
         await expect(page.locator("#locate-button")).toContainText("Locate");
     });
 
@@ -109,7 +109,7 @@ test.describe("Locate / Confirmation modal", () => {
         await page.waitForLoadState("networkidle");
 
         await page.locator("#locate-button").click();
-        await expect(page.getByText("Allow location access?")).toBeHidden();
+        await expect(page.getByText("Permission Required")).toBeHidden();
     });
 });
 
