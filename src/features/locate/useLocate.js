@@ -1,5 +1,6 @@
 import { ref, computed, inject } from "vue";
 import maplibregl from "maplibre-gl";
+import { magvar } from "magvar";
 import { useStorage } from "@/composables/useStorage";
 import { getMapInstance } from "@/core/useMap";
 import { Position } from "@/classes/Position";
@@ -36,6 +37,7 @@ export const useLocate = () => {
             compassHeading: ref(null), // smoothed DeviceOrientation compass bearing
             headingLost: ref(false), // true when orientation events have stopped arriving
             smoothedHeading: null, // internal: raw float used for smoothing
+            magneticDeclination: 0, // degrees East; corrects webkitCompassHeading to true north
             headingTimeoutId: null, // timeout handle for heading-loss detection
             showConfirmModal: ref(false),
             showErrorModal: ref(false),
@@ -169,13 +171,13 @@ export const useLocate = () => {
             scheduleHeadingTimeout();
 
             // iOS Safari provides a true compass heading via webkitCompassHeading
-            // (0-360° clockwise from north). Prefer it over alpha, which on iOS
-            // is only relative to the device's starting orientation.
-            // For absolute events (Android), convert alpha (counter-clockwise) to
-            // a clockwise compass bearing.
+            // (0-360° clockwise from magnetic north). We correct it to true north by
+            // adding the magnetic declination for the user's current position.
+            // For absolute events (Android), alpha is already relative to true north,
+            // so we just convert counter-clockwise to clockwise.
             const bearing =
                 typeof event.webkitCompassHeading === "number"
-                    ? event.webkitCompassHeading
+                    ? (event.webkitCompassHeading + c.magneticDeclination + 360) % 360
                     : (360 - event.alpha) % 360;
 
             if (c.smoothedHeading === null) {
@@ -226,12 +228,15 @@ export const useLocate = () => {
             c.storage.permissionGranted = true;
         }
 
+        const { latitude, longitude, heading, accuracy, speed } = geoPos.coords;
+        c.magneticDeclination = magvar(latitude, longitude);
+
         c.position.value = new Position({
-            lat: geoPos.coords.latitude,
-            lng: geoPos.coords.longitude,
-            heading: geoPos.coords.heading, // direction of travel (may be null at rest)
-            accuracy: geoPos.coords.accuracy,
-            speed: geoPos.coords.speed,
+            lat: latitude,
+            lng: longitude,
+            heading, // direction of travel (may be null at rest)
+            accuracy,
+            speed,
         });
 
         syncMarkers();
