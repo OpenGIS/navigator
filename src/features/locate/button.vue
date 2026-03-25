@@ -36,7 +36,12 @@ const label = computed(() => {
         :aria-pressed="mode !== null && mode !== 'error'"
         @click="cycle"
     >
-        <Icon width="40" height="40" :fill="iconColor" :name="iconName" />
+        <Icon
+            width="40"
+            height="40"
+            :fill="iconColor"
+            :name="iconName"
+        />
         <span class="locate-btn__label" :style="{ color: iconColor }">{{
             label
         }}</span>
@@ -45,9 +50,7 @@ const label = computed(() => {
     <!-- Confirmation modal — shown on first use before the browser permission prompt -->
     <Teleport to="body">
         <template v-if="showConfirmModal">
-            <div
-                class="modal-backdrop fade show navigator-modal-backdrop"
-            ></div>
+            <div class="modal-backdrop fade show navigator-modal-backdrop"></div>
             <div
                 class="modal fade show d-block navigator-modal"
                 tabindex="-1"
@@ -102,9 +105,7 @@ const label = computed(() => {
     <!-- Error modal — shown on permission denied, or when clicking the Error button -->
     <Teleport to="body">
         <template v-if="showErrorModal">
-            <div
-                class="modal-backdrop fade show navigator-modal-backdrop"
-            ></div>
+            <div class="modal-backdrop fade show navigator-modal-backdrop"></div>
             <div
                 class="modal fade show d-block navigator-modal"
                 tabindex="-1"

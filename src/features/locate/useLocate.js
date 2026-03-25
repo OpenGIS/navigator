@@ -50,30 +50,19 @@ export const useLocate = () => {
 
     // ─── Map markers ─────────────────────────────────────────────────────────
 
-    /** Create an SVG element that references a sprite symbol via xlink:href.
-     *  Using the DOM API (not innerHTML) ensures the xlink namespace is set
-     *  correctly, which is required for <use> resolution on iOS Safari. */
-    const createSpriteIcon = (className, symbolId) => {
-        const NS = "http://www.w3.org/2000/svg";
-        const XLINK = "http://www.w3.org/1999/xlink";
+    const createPositionElement = () => {
         const el = document.createElement("div");
-        el.className = className;
-        const svg = document.createElementNS(NS, "svg");
-        svg.setAttribute("width", "32");
-        svg.setAttribute("height", "32");
-        svg.setAttribute("fill", "currentColor");
-        const use = document.createElementNS(NS, "use");
-        use.setAttributeNS(XLINK, "xlink:href", `#${symbolId}`);
-        svg.appendChild(use);
-        el.appendChild(svg);
+        el.className = "navigator-locate-position";
+        el.innerHTML = `<svg width="32" height="32" fill="currentColor"><use href="#position"/></svg>`;
         return el;
     };
 
-    const createPositionElement = () =>
-        createSpriteIcon("navigator-locate-position", "position");
-
-    const createHeadingElement = () =>
-        createSpriteIcon("navigator-locate-heading", "position-heading");
+    const createHeadingElement = () => {
+        const el = document.createElement("div");
+        el.className = "navigator-locate-heading";
+        el.innerHTML = `<svg width="32" height="32" fill="currentColor"><use href="#position-heading"/></svg>`;
+        return el;
+    };
 
     /**
      * Sync both markers to the current position and compass heading.
