@@ -4,6 +4,12 @@ Context for agentic coding tools. Read this before making any changes to the cod
 
 ---
 
+## Git Policy
+
+**Do not** stage (`git add`) or commit (`git commit`) changes. The developer manages all git operations manually. Git may be used in read-only mode for context (e.g. `git diff`, `git log`, `git status`).
+
+---
+
 ## What is this project?
 
 Navigator is an open-source mapping library published to npm as [`@ogis/navigator`](https://www.npmjs.com/package/@ogis/navigator). It wraps [MapLibre GL JS](https://maplibre.org/) and [Vue 3](https://vuejs.org/) into an embeddable map widget with a persistent UI layer. Consumers call `Navigator.init()` from a `<script type="module">` tag.
