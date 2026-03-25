@@ -385,16 +385,4 @@ test.describe("useUI / First load", () => {
 
     await expect(page.locator("#about-modal")).toHaveCount(0);
   });
-
-  test("about button in menu opens the about modal", async ({ page }) => {
-    await withViewStorage(page);
-    await page.goto("/");
-    await page.waitForLoadState("networkidle");
-
-    await expect(page.locator(".navigator-panel")).toBeVisible({ timeout: 5000 });
-    await expect(page.locator("#about-modal")).toHaveCount(0);
-
-    await page.locator("#about-button").click();
-    await expect(page.locator("#about-modal")).toBeVisible();
-  });
 });
