@@ -91,7 +91,7 @@ if (isDesktop.value) {
 }
 
 .navigator-top {
-	z-index: 1060;
+	z-index: 1040;
 	position: absolute;
 	top: 0;
 	left: 0;

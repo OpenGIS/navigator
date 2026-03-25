@@ -291,6 +291,7 @@ test.describe("useUI / Panel", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
     await page.waitForLoadState("networkidle");
+    await dismissAboutModal(page);
   });
 
   test("openPanel — panel is visible after opening on desktop", async ({ page }) => {
