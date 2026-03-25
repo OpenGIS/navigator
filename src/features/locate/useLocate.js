@@ -53,7 +53,7 @@ export const useLocate = () => {
     const createPositionElement = () => {
         const el = document.createElement("div");
         el.className = "navigator-locate-position";
-        el.innerHTML = `<svg width="32" height="32" fill="currentColor"><use href="#position"/></svg>`;
+        el.innerHTML = `<svg width="32" height="32" fill="currentColor"><use href="#position-heading"/></svg>`;
         return el;
     };
 
@@ -364,7 +364,8 @@ export const useLocate = () => {
             () =>
                 c.mode.value === "error" ||
                 (c.headingLost.value &&
-                    (c.mode.value === "active" || c.mode.value === "following")),
+                    (c.mode.value === "active" ||
+                        c.mode.value === "following")),
         ),
         showConfirmModal: c.showConfirmModal,
         showErrorModal: c.showErrorModal,
