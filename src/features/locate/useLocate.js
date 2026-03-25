@@ -76,20 +76,12 @@ export const useLocate = () => {
         const { lng, lat } = c.position.value;
         const lngLat = [lng, lat];
 
-        // Position marker
-        if (!c.positionMarker) {
-            c.positionMarker = new maplibregl.Marker({
-                element: createPositionElement(),
-                anchor: "center",
-            })
-                .setLngLat(lngLat)
-                .addTo(map);
-        } else {
-            c.positionMarker.setLngLat(lngLat);
-        }
-
-        // Heading marker — only shown when compass data is available
         if (c.compassHeading.value !== null) {
+            // Heading available — show heading marker only
+            if (c.positionMarker) {
+                c.positionMarker.remove();
+                c.positionMarker = null;
+            }
             if (!c.headingMarker) {
                 c.headingMarker = new maplibregl.Marker({
                     element: createHeadingElement(),
@@ -102,9 +94,22 @@ export const useLocate = () => {
                 c.headingMarker.setLngLat(lngLat);
             }
             c.headingMarker.setRotation(c.compassHeading.value);
-        } else if (c.headingMarker) {
-            c.headingMarker.remove();
-            c.headingMarker = null;
+        } else {
+            // No heading — show position marker only
+            if (c.headingMarker) {
+                c.headingMarker.remove();
+                c.headingMarker = null;
+            }
+            if (!c.positionMarker) {
+                c.positionMarker = new maplibregl.Marker({
+                    element: createPositionElement(),
+                    anchor: "center",
+                })
+                    .setLngLat(lngLat)
+                    .addTo(map);
+            } else {
+                c.positionMarker.setLngLat(lngLat);
+            }
         }
     };
 
@@ -144,10 +149,7 @@ export const useLocate = () => {
             c.headingTimeoutId = setTimeout(() => {
                 c.headingLost.value = true;
                 c.compassHeading.value = null;
-                if (c.headingMarker) {
-                    c.headingMarker.remove();
-                    c.headingMarker = null;
-                }
+                syncMarkers();
             }, 8000);
         };
 
