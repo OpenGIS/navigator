@@ -19,7 +19,7 @@ src/features/{feature-name}/
 
 ```
 src/features/locate/
-  usePosition.js
+  useLocate.js
   panel.vue
   button.vue
 ```
@@ -54,19 +54,21 @@ const state = useStorage("locate", {
 
 ### Accessing the Map
 
-Interact with the MapLibre map via `useMap()` from `@/core/useMap`. Call it inside a function (not at module top level) to safely access the current map instance:
+Interact with the MapLibre map via `getMapInstance(instanceId)` from `@/core/useMap`. Call it inside a function (not at module top level) to safely access the current map instance:
 
 ```js
-import { useMap } from "@/core/useMap";
+import { getMapInstance } from "@/core/useMap";
 
-const doSomethingWithMap = () => {
-  const { map } = useMap();
+const doSomethingWithMap = (instanceId) => {
+  const map = getMapInstance(instanceId);
   if (!map) return;
   // map.addSource(...), map.addLayer(...), etc.
 };
 ```
 
-If you need to add custom icons, use `addPositionIcons` (or a similar helper in `src/helpers/mapIcons.js`) before adding layers.
+The `instanceId` comes from `inject("navigatorId", "navigator")` in the composable setup.
+
+If you need to add custom icons, use helpers in `src/helpers/mapIcons.js` before adding layers.
 
 ### Resuming State on Load
 
@@ -78,27 +80,48 @@ if (state.mode && !alreadyRunning) {
 }
 ```
 
+### Instance Isolation
+
+Every composable must support multiple Navigator instances. Use `inject("navigatorId")` and cache per-instance state in a module-level `Map`:
+
+```js
+import { ref, computed, inject } from "vue";
+
+const cache = new Map();
+
+export const useLocate = () => {
+  const instanceId = inject("navigatorId", "navigator");
+
+  if (!cache.has(instanceId)) {
+    cache.set(instanceId, {
+      storage: useStorage("locate", { permissionGranted: false }),
+      mode: ref(null),
+      // ... other per-instance state
+    });
+  }
+
+  const c = cache.get(instanceId);
+  // ... actions that reference c
+
+  return { /* ... */ };
+};
+```
+
 ### Returned API
 
 Return only what consumers need. Wrap state values in `computed()` to expose them as read-only refs:
 
 ```js
-import { computed } from "vue";
-
-export const useLocate = () => {
-  // ...
-
-  return {
-    mode: computed(() => state.mode),
-    currentData: computed(() => state.currentData),
-    start,
-    stop,
-    cycle,
-  };
+return {
+  mode: computed(() => c.mode.value),
+  position: computed(() => c.position.value),
+  compassHeading: computed(() => c.compassHeading.value),
+  cycle,
+  stop,
 };
 ```
 
-**Reference:** `src/features/locate/usePosition.js`
+**Reference:** `src/features/locate/useLocate.js`
 
 ---
 
@@ -108,8 +131,16 @@ The panel is a Vue SFC that is loaded into the shared side panel via `useUI`. It
 
 ```vue
 <script setup>
+import { computed } from "vue";
 import { useLocate } from "@/features/locate/useLocate";
-const { currentData } = useLocate();
+
+const { mode, position, compassHeading } = useLocate();
+
+const formattedCoords = computed(() => {
+    if (!position.value) return null;
+    const { lat, lng } = position.value;
+    return `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+});
 </script>
 
 <template>
@@ -135,20 +166,32 @@ import Icon from "@/components/ui/icon.vue";
 
 const { mode, cycle } = useLocate();
 
-const iconName = computed(() => (mode.value === "active" ? "feature-active" : "feature"));
-const iconColor = computed(() => (mode.value ? getColour("primary") : "white"));
+const iconName = computed(() => (mode.value === "following" ? "position-lock" : "position"));
+const iconColor = computed(() => {
+    if (mode.value === "active" || mode.value === "following") return "var(--bs-primary)";
+    if (mode.value === "error") return "var(--bs-danger)";
+    return "currentColor";
+});
+const label = computed(() => {
+    if (mode.value === "active") return "Located";
+    if (mode.value === "following") return "Following";
+    if (mode.value === "error") return "Error";
+    return "Locate";
+});
 </script>
 
 <template>
-  <a
-    href="#"
-    class="navbar-nav-link navbar-nav-link-icon rounded-pill"
-    :class="{ active: mode }"
+  <button
+    type="button"
+    class="locate-btn border-0 bg-transparent d-flex flex-column align-items-center p-1"
     id="locate-button"
-    @click="cycle()"
+    :aria-label="label"
+    :aria-pressed="mode !== null && mode !== 'error'"
+    @click="cycle"
   >
     <Icon width="40" height="40" :fill="iconColor" :name="iconName" />
-  </a>
+    <span class="locate-btn__label" :style="{ color: iconColor }">{{ label }}</span>
+  </button>
 </template>
 ```
 
@@ -162,22 +205,23 @@ There are two integration points: `App.vue` and `src/components/ui/top.vue`.
 
 ### `App.vue`
 
-Import the composable to initialise feature state on load. Import the panel component so it can be registered with the UI:
+If your feature needs to initialise state on load or auto-open a panel, import the composable and panel in `App.vue`:
 
 ```js
-import { useLocate } from "@/features/locate/useLocate";
-import LocatePanel from "@/features/locate/panel.vue";
+import { useMyFeature } from "@/features/my-feature/useMyFeature";
+import MyFeaturePanel from "@/features/my-feature/panel.vue";
 
-// Destructure any state that App.vue needs to observe (e.g. for data attributes)
-const { mode } = useLocate();
+const { mode } = useMyFeature();
 
 // On desktop, open the panel automatically on first load
 if (isDesktop.value) {
-  openPanel("locate", LocatePanel);
+  openPanel("my-feature", MyFeaturePanel);
 }
 ```
 
 The `openPanel(id, component)` and `togglePanel(id, component)` methods come from `useUI()`.
+
+> **Note:** The locate feature does not wire itself in App.vue — it is activated entirely through its button in `top.vue`. Only features that need to initialise on load or respond to app-level lifecycle events need an App.vue integration.
 
 ### `src/components/ui/top.vue`
 
@@ -186,11 +230,10 @@ Import the button component and place it in the top navigation bar:
 ```vue
 <script setup>
 import LocateButton from "@/features/locate/button.vue";
-// ... also import the panel for the sidebar-info toggle if applicable
 </script>
 
 <template>
-  <nav class="navbar navbar-dark bg-primary">
+  <nav class="navbar bg-body" data-bs-theme="dark">
     <div class="container-fluid">
       <!-- end slot -->
       <ul class="end nav">
@@ -209,9 +252,9 @@ import LocateButton from "@/features/locate/button.vue";
 
 When adding a new feature:
 
-1. **Create** `src/features/{feature-name}/use{Feature}.js` — singleton composable with `useStorage` for state, `useMap` for map access, and a clean exported API.
+1. **Create** `src/features/{feature-name}/use{Feature}.js` — singleton composable with instance isolation via `inject("navigatorId")`, `useStorage` for persistence, `getMapInstance` for map access, and a clean exported API.
 2. **Create** `src/features/{feature-name}/panel.vue` — side panel content that reads from the composable.
 3. **Create** `src/features/{feature-name}/button.vue` — top-bar trigger that reads state and calls composable actions.
 4. **Create** `src/classes/{Feature}.js` if you need a non-trivial data model.
-5. **Wire up** in `App.vue`: initialise the composable and call `openPanel` on desktop load if appropriate.
+5. **Wire up** in `App.vue` (if needed): initialise the composable and call `openPanel` on desktop load if appropriate.
 6. **Wire up** in `src/components/ui/top.vue`: import and render the button component.
