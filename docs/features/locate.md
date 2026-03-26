@@ -33,6 +33,14 @@ The Error state is not part of the cycle. Clicking the Error button re-opens the
 
 ---
 
+## Initial zoom
+
+When the Locate button is pressed and the first position fix is successfully acquired, the map flies to the user's position at **zoom 16**. This ensures the user immediately sees their precise location without needing to adjust the zoom manually.
+
+The initial zoom fires only once per activation — on the very first fix after Locate is started. Subsequent fixes in **Active** mode do not move the map. In **Following** mode the map re-centres on every update at the current zoom level.
+
+---
+
 ## Permission flow
 
 Geolocation permission, once denied in a browser, is difficult to re-grant — particularly on mobile. To protect against accidental denial, the feature tracks whether the user has ever successfully shared their location, using `useStorage`.

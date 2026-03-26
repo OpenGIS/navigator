@@ -38,6 +38,7 @@ export const useLocate = () => {
             headingLost: ref(false), // true when orientation events have stopped arriving
             smoothedHeading: null, // internal: raw float used for smoothing
             magneticDeclination: 0, // degrees East; corrects webkitCompassHeading to true north
+            needsInitialZoom: false, // true until the first fix after activation
             headingTimeoutId: null, // timeout handle for heading-loss detection
             showConfirmModal: ref(false),
             showErrorModal: ref(false),
@@ -239,6 +240,12 @@ export const useLocate = () => {
             speed,
         });
 
+        if (c.needsInitialZoom) {
+            c.needsInitialZoom = false;
+            const map = getMapInstance(instanceId);
+            if (map) map.flyTo({ center: [longitude, latitude], zoom: 16 });
+        }
+
         syncMarkers();
 
         if (c.mode.value === "following") {
@@ -268,6 +275,7 @@ export const useLocate = () => {
             return;
         }
         c.mode.value = "active";
+        c.needsInitialZoom = true;
 
         // Request orientation permission (no-op on non-iOS) then start listening.
         // Both happen inside the same user-gesture call stack so iOS treats them

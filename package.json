@@ -1,9 +1,9 @@
 {
   "name": "@ogis/navigator",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "type": "module",
   "description": "A Vue 3-based map navigator powered by MapLibre GL JS",
-  "homepage": "https://www.npmjs.com/package/@ogis/navigator",
+  "homepage": "https://www.ogis.org/navigator",
   "license": "MIT",
   "repository": {
     "type": "git",

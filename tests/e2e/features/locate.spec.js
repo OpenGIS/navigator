@@ -183,6 +183,68 @@ test.describe("Locate / Active and Following states", () => {
     });
 });
 
+// ─── Locate / Initial zoom ───────────────────────────────────────────────────
+
+test.describe("Locate / Initial zoom", () => {
+    test("map flies to the user's position at zoom 16 on first fix", async ({
+        page,
+    }) => {
+        await withGrantedStorage(page);
+        await grantGeolocation(page, { latitude: 51.5, longitude: -0.1 });
+        await page.goto("/");
+        await page.waitForLoadState("networkidle");
+
+        await page.locator("#locate-button").click();
+
+        await expect
+            .poll(() => page.locator("#locate-button").textContent(), {
+                timeout: 5000,
+            })
+            .toMatch(/Located/);
+
+        await expect
+            .poll(() => page.url(), { timeout: 6000 })
+            .toMatch(/#map=16\//);
+    });
+
+    test("initial zoom fires again when locate is re-activated after stopping", async ({
+        page,
+    }) => {
+        await withGrantedStorage(page);
+        await grantGeolocation(page, { latitude: 51.5, longitude: -0.1 });
+        await page.goto("/");
+        await page.waitForLoadState("networkidle");
+
+        // First activation — map flies to zoom 16
+        await page.locator("#locate-button").click();
+        await expect
+            .poll(() => page.url(), { timeout: 6000 })
+            .toMatch(/#map=16\//);
+
+        // Stop locate (active → following → inactive)
+        await page.locator("#locate-button").click();
+        await page.locator("#locate-button").click();
+        await expect(page.locator("#locate-button")).toContainText("Locate");
+
+        // Move to a different location before re-activating
+        await page.context().setGeolocation({
+            latitude: 48.8566,
+            longitude: 2.3522,
+        });
+
+        // Re-activate — should zoom to 16 at the new position
+        await page.locator("#locate-button").click();
+        await expect
+            .poll(() => page.locator("#locate-button").textContent(), {
+                timeout: 5000,
+            })
+            .toMatch(/Located/);
+        await expect
+            .poll(() => page.url(), { timeout: 6000 })
+            .toMatch(/#map=16\/48\./);
+    });
+});
+
 // ─── Locate / Error state ─────────────────────────────────────────────────────
 
 test.describe("Locate / Error state", () => {
