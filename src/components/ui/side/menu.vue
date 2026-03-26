@@ -168,12 +168,16 @@ const shareUrl = computed(() => {
       <IconButton
         icon="gear"
         label="Settings"
+        :icon-width="32"
+        :icon-height="32"
         @click="togglePanel('settings', SettingsPanel)"
       />
       <IconButton
         id="about-button"
         icon="info-circle"
         label="About"
+        :icon-width="32"
+        :icon-height="32"
         @click="openAboutModal"
       />
     </PanelBar>

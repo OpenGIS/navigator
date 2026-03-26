@@ -4,7 +4,8 @@ import Icon from "@/components/ui/icon.vue";
 defineProps({
   icon: { type: String, required: true },
   label: { type: String, required: true },
-  iconSize: { type: Number, default: 40 },
+  iconWidth: { type: Number, default: 40 },
+  iconHeight: { type: Number, default: 40 },
   iconColor: { type: String, default: "currentColor" },
   active: { type: Boolean, default: false },
   id: { type: String, default: undefined },
@@ -14,11 +15,11 @@ defineProps({
 <template>
   <button
     type="button"
-    class="icon-btn border-0 bg-transparent d-flex flex-column align-items-center p-1"
+    class="icon-btn border-0 bg-transparent d-flex flex-column align-items-center"
     :id="id"
     :aria-pressed="active"
   >
-    <Icon :width="iconSize" :height="iconSize" :fill="iconColor" :name="icon" />
+    <Icon :width="iconWidth" :height="iconHeight" :fill="iconColor" :name="icon" />
     <span class="icon-btn__label" :style="{ color: iconColor }">{{ label }}</span>
     <slot />
   </button>
@@ -29,7 +30,7 @@ defineProps({
   cursor: pointer;
   line-height: 1;
   position: relative;
-  padding-bottom: 18px;
+  padding: 4px 4px 18px;
 }
 
 .icon-btn:focus-visible {

@@ -19,7 +19,8 @@ const { hasAlerts } = useLocate();
         <IconButton
           icon="sidebar-info"
           label="Menu"
-          :icon-size="48"
+          :icon-width="48"
+          :icon-height="48"
           class="navbar-toggler position-relative"
           @click="togglePanel('menu', MenuPanel)"
         >
