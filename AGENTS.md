@@ -145,7 +145,9 @@ Current mapping:
 | Doc | Tests | Screenshots |
 |-----|-------|-------------|
 | `docs/instances.md` | `tests/e2e/instances.spec.js` | — |
-| `docs/core.md` | `tests/e2e/core.spec.js` | `tests/e2e/screenshots/core.spec.js` |
+| `docs/core.md` | — (guide, no runtime behaviour) | — |
+| `docs/map.md` | `tests/e2e/map.spec.js` | `tests/e2e/screenshots/map.spec.js` |
+| `docs/ui.md` | `tests/e2e/ui.spec.js` | `tests/e2e/screenshots/ui.spec.js` |
 | `docs/features.md` | — (developer guide, no runtime behaviour) | — |
 | `docs/features/locate.md` | `tests/e2e/features/locate.spec.js` | — |
 
@@ -171,7 +173,8 @@ A Playwright MCP server is configured in `.github/mcp.json`. Agents with MCP sup
 
 - `README.md` — install and usage
 - `docs/instances.md` — `Navigator.init()` API, multi-instance, storage convention
-- `docs/core.md` — `useMap` and `useUI` full API
+- `docs/map.md` — `useMap` full API
+- `docs/ui.md` — `useUI` full API
 - `docs/features.md` — how to build a feature
 - `TESTING.md` — testing conventions, screenshot strategy
 - `tasks/sync-review.md` — agent task for a full Document First sync review

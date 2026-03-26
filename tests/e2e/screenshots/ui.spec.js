@@ -2,15 +2,14 @@ import { test } from "@playwright/test";
 import path from "path";
 
 /**
- * Screenshots for docs/core.md
+ * Screenshots for docs/ui.md
  *
  * Each screenshot captures a meaningful UI state described in the docs.
- * Output: assets/screenshots/docs/core/
+ * Output: assets/screenshots/docs/ui/
  */
 
-const OUT = path.resolve("assets/screenshots/docs/core");
+const OUT = path.resolve("assets/screenshots/docs/ui");
 
-// Initial test view — used across screenshots for a consistent, recognisable location
 const TEST_HASH = "#map=18/50.653900/-128.009400";
 
 const withNoViewStorage = (page) =>
@@ -24,7 +23,7 @@ const withViewStorage = (page) =>
     ),
   );
 
-// Desktop viewport used across all screenshots in this file
+// Desktop viewport used across most screenshots in this file
 test.use({ viewport: { width: 1280, height: 720 } });
 
 test("useUI / First load — desktop initial load", async ({ page }) => {
@@ -63,22 +62,5 @@ test("useUI / Responsive breakpoints — mobile viewport", async ({ page }) => {
 
   await page.screenshot({
     path: `${OUT}/mobile.png`,
-  });
-});
-
-test("useMap / URL hash — share link in menu", async ({ page }) => {
-  await withNoViewStorage(page);
-  await page.goto(`/${TEST_HASH}`);
-  await page.waitForLoadState("networkidle");
-
-  // Dismiss About modal (first-load)
-  await page.locator("#about-modal-close").click();
-  await page.locator("#about-modal").waitFor({ state: "hidden" });
-
-  await page.locator(".navigator-panel").waitFor({ state: "visible" });
-  await page.waitForTimeout(400);
-
-  await page.screenshot({
-    path: `${OUT}/url-hash.png`,
   });
 });
