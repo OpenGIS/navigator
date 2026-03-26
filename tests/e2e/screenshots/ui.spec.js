@@ -12,9 +12,6 @@ const OUT = path.resolve("assets/screenshots/docs/ui");
 
 const TEST_HASH = "#map=18/50.653900/-128.009400";
 
-const withNoViewStorage = (page) =>
-  page.addInitScript(() => localStorage.removeItem("navigator_view_app"));
-
 const withViewStorage = (page) =>
   page.addInitScript(() =>
     localStorage.setItem(
@@ -25,20 +22,6 @@ const withViewStorage = (page) =>
 
 // Desktop viewport used across most screenshots in this file
 test.use({ viewport: { width: 1280, height: 720 } });
-
-test("useUI / First load — desktop initial load", async ({ page }) => {
-  await withNoViewStorage(page);
-  await page.goto("/");
-  await page.waitForLoadState("networkidle");
-
-  // Wait for About modal to appear
-  await page.locator("#about-modal").waitFor({ state: "visible" });
-  await page.waitForTimeout(400);
-
-  await page.screenshot({
-    path: `${OUT}/first-load.png`,
-  });
-});
 
 test("useUI / Panel — desktop returning visit", async ({ page }) => {
   await withViewStorage(page);

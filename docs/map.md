@@ -100,3 +100,15 @@ const { map } = useMap();
 ### Scale bar
 
 A [MapLibre `ScaleControl`](https://maplibre.org/maplibre-gl-js/docs/API/classes/ScaleControl/) is added to the bottom-left corner of the map. The unit (metric or imperial) follows the units preference from the settings feature and updates immediately when the setting changes.
+
+### Multilingual map labels
+
+Map labels follow the user's active language. On load, `useMap` applies a [coalesce expression](https://maplibre.org/maplibre-gl-js/docs/style-spec/expressions/#coalesce) to every symbol layer that renders an OSM name field:
+
+```
+name:{locale}  →  name (local)  →  name:en
+```
+
+The expression is updated reactively whenever the language changes in Settings — no page reload required.
+
+See [`docs/locale.md` — OSM Multilingual Names](./locale.md#osm-multilingual-names) for full details.

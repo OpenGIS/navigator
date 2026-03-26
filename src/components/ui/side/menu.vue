@@ -3,6 +3,7 @@ import { computed, ref } from "vue";
 import { useMap } from "@/core/useMap";
 import { useUI } from "@/core/useUI";
 import { useLocate } from "@/features/locate/useLocate";
+import { useLocale } from "@/core/useLocale";
 import Icon from "@/components/ui/icon.vue";
 import IconButton from "@/components/ui/icon-button.vue";
 import PanelBar from "@/components/ui/side/panel-bar.vue";
@@ -11,6 +12,7 @@ import SettingsPanel from "@/features/settings/panel.vue";
 const { currentView } = useMap();
 const { togglePanel, openAboutModal } = useUI();
 const { mode: locateMode, headingLost, position, permissionGranted, retryOrientation, retryPosition } = useLocate();
+const { t } = useLocale();
 
 const sharePosition = ref(false);
 
@@ -44,17 +46,17 @@ const shareUrl = computed(() => {
 <template>
   <div class="d-flex flex-column flex-grow-1">
     <div class="sidebar-section sidebar-section-body p-3 pb-0">
-      <h5 class="mb-0">Navigator</h5>
+      <h5 class="mb-0">{{ t('menu.title') }}</h5>
     </div>
 
     <div v-if="currentView" class="sidebar-section sidebar-section-body p-3 border-top">
-      <h6 class="mb-2 text-muted small text-uppercase fw-semibold">Current view</h6>
+      <h6 class="mb-2 text-muted small text-uppercase fw-semibold">{{ t('menu.currentView') }}</h6>
       <p class="mb-1 small">
-        <span class="text-body-secondary">Lat/Lng</span>
+        <span class="text-body-secondary">{{ t('menu.latLng') }}</span>
         <span class="ms-2 font-monospace">{{ formattedCoords }}</span>
       </p>
       <p class="mb-2 small">
-        <span class="text-body-secondary">Zoom</span>
+        <span class="text-body-secondary">{{ t('menu.zoom') }}</span>
         <span class="ms-2 font-monospace">{{ formattedZoom }}</span>
       </p>
       <div v-if="permissionGranted" class="form-check mb-2">
@@ -66,8 +68,8 @@ const shareUrl = computed(() => {
           :disabled="!position"
         />
         <label class="form-check-label small" for="share-position-toggle">
-          Share my position
-          <span v-if="!position" class="text-body-tertiary"> (not active)</span>
+          {{ t('menu.shareMyPosition') }}
+          <span v-if="!position" class="text-body-tertiary"> {{ t('menu.positionNotActive') }}</span>
         </label>
       </div>
       <a
@@ -77,20 +79,18 @@ const shareUrl = computed(() => {
         class="navigator-share-link btn btn-sm btn-outline-primary w-100 d-flex align-items-center justify-content-center gap-1"
       >
         <Icon width="16" height="16" fill="currentColor" name="globe" />
-        {{ sharePosition && position ? 'Share my position' : 'Share this view' }}
+        {{ sharePosition && position ? t('menu.shareMyPosition') : t('menu.shareThisView') }}
       </a>
     </div>
 
     <div class="sidebar-section sidebar-section-body p-3 border-top mt-auto">
-      <p class="mb-2">
-        An open source mapping application built with MapLibre GL JS and Vue 3.
-      </p>
-      <p class="mb-0">Thanks <em>Open Source</em>!</p>
+      <p class="mb-2">{{ t('menu.description') }}</p>
+      <p class="mb-0">{{ t('menu.thankOpenSource') }}</p>
     </div>
 
     <div class="sidebar-section sidebar-section-body p-3 border-top">
       <h6 class="mb-3 w-100 d-flex align-items-center">
-        Attribution
+        {{ t('menu.attribution') }}
 
         <Icon
           class="ms-auto text-danger"
@@ -141,12 +141,12 @@ const shareUrl = computed(() => {
       id="menu-position-lost-alert"
     >
       <div class="alert alert-danger d-flex align-items-center gap-2 py-2 px-3 mb-0 small" role="alert">
-        <span>Location access lost.</span>
+        <span>{{ t('menu.locationLost') }}</span>
         <button
           type="button"
           class="btn btn-sm btn-danger ms-auto py-0"
           @click="retryPosition"
-        >Re-request</button>
+        >{{ t('menu.reRequest') }}</button>
       </div>
     </div>
 
@@ -155,19 +155,19 @@ const shareUrl = computed(() => {
       id="menu-heading-lost-alert"
     >
       <div class="alert alert-warning d-flex align-items-center gap-2 py-2 px-3 mb-0 small" role="alert">
-        <span>Compass unavailable.</span>
+        <span>{{ t('menu.compassUnavailable') }}</span>
         <button
           type="button"
           class="btn btn-sm btn-warning ms-auto py-0"
           @click="retryOrientation"
-        >Re-request</button>
+        >{{ t('menu.reRequest') }}</button>
       </div>
     </div>
 
     <PanelBar>
       <IconButton
         icon="gear"
-        label="Settings"
+        :label="t('menu.settings')"
         :icon-width="32"
         :icon-height="32"
         @click="togglePanel('settings', SettingsPanel)"
@@ -175,7 +175,7 @@ const shareUrl = computed(() => {
       <IconButton
         id="about-button"
         icon="info-circle"
-        label="About"
+        :label="t('menu.about')"
         :icon-width="32"
         :icon-height="32"
         @click="openAboutModal"

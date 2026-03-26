@@ -285,3 +285,92 @@ test.describe("Persistence", () => {
 		await expect(page.locator("#settings-units")).toHaveValue("imperial");
 	});
 });
+
+test.describe("Language", () => {
+	test("language select is present in the settings panel", async ({ page }) => {
+		await page.goto("/");
+		await page.waitForSelector(".navigator-map canvas");
+
+		await openMenuPanel(page);
+		await page.getByRole("button", { name: /settings/i }).click();
+
+		await expect(page.locator("#settings-language")).toBeVisible();
+	});
+
+	test.describe("browser language default — French (fr-FR)", () => {
+		test.use({ locale: "fr-FR" });
+
+		test("language select defaults to French for French browser locale", async ({
+			page,
+		}) => {
+			await page.goto("/");
+			await page.waitForSelector(".navigator-map canvas");
+
+			const offcanvas = page.locator(".offcanvas.show");
+			if (!(await offcanvas.isVisible())) {
+				await page.click(".navbar-toggler");
+				await offcanvas.waitFor();
+			}
+			// Settings button will be in French
+			await page.getByRole("button", { name: /paramètres/i }).click();
+
+			await expect(page.locator("#settings-language")).toHaveValue("fr");
+		});
+	});
+
+	test("selecting a language updates the UI immediately", async ({ page }) => {
+		// Seed English so we have a known start state
+		await page.goto("/");
+		await page.evaluate((key) => {
+			localStorage.setItem(key, JSON.stringify({ theme: null, units: null, language: "en" }));
+		}, SETTINGS_STORAGE_KEY);
+		await page.reload();
+		await page.waitForSelector(".navigator-map canvas");
+
+		await openMenuPanel(page);
+		await page.getByRole("button", { name: /settings/i }).click();
+
+		await page.locator("#settings-language").selectOption("fr");
+
+		// After switching to French, the settings heading should be in French
+		await expect(page.getByRole("heading", { name: /paramètres/i })).toBeVisible();
+	});
+
+	test("language preference is saved to localStorage", async ({ page }) => {
+		await page.goto("/");
+		await page.evaluate((key) => {
+			localStorage.setItem(key, JSON.stringify({ theme: null, units: null, language: "en" }));
+		}, SETTINGS_STORAGE_KEY);
+		await page.reload();
+		await page.waitForSelector(".navigator-map canvas");
+
+		await openMenuPanel(page);
+		await page.getByRole("button", { name: /settings/i }).click();
+
+		await page.locator("#settings-language").selectOption("fr");
+
+		const stored = await page.evaluate(
+			(key) => JSON.parse(localStorage.getItem(key)),
+			SETTINGS_STORAGE_KEY,
+		);
+		expect(stored.language).toBe("fr");
+	});
+
+	test("persisted language is applied on page reload", async ({ page }) => {
+		await page.goto("/");
+		await page.evaluate((key) => {
+			localStorage.setItem(key, JSON.stringify({ theme: null, units: null, language: "fr" }));
+		}, SETTINGS_STORAGE_KEY);
+		await page.reload();
+		await page.waitForSelector(".navigator-map canvas");
+
+		const offcanvas = page.locator(".offcanvas.show");
+		if (!(await offcanvas.isVisible())) {
+			await page.click(".navbar-toggler");
+			await offcanvas.waitFor();
+		}
+		await page.getByRole("button", { name: /paramètres/i }).click();
+
+		await expect(page.getByRole("heading", { name: /paramètres/i })).toBeVisible();
+	});
+});

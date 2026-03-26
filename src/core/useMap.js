@@ -4,6 +4,7 @@ import { inject, onMounted, onUnmounted, ref, watch } from "vue";
 import { useStorage } from "@/composables/useStorage";
 import { parseUrlHash, updateUrlHash } from "@/composables/useUrlHash";
 import { useSettings } from "@/features/settings/useSettings";
+import { useLocale } from "@/core/useLocale";
 
 // Per-instance cache: instanceId -> { state, mapInstance }
 const mapCache = new Map();
@@ -17,6 +18,42 @@ function throttle(fn, delay) {
             fn(...args);
         }
     };
+}
+
+/**
+ * Returns true if a text-field layout value references an OSM name field.
+ * Road refs, house numbers, and other non-name fields are excluded.
+ */
+function isNameBased(textField) {
+    if (!textField) return false;
+    const str = typeof textField === "string" ? textField : JSON.stringify(textField);
+    return str.includes("name");
+}
+
+/**
+ * Apply a multilingual coalesce expression to all symbol layers that render
+ * OSM name fields. Called after map load and whenever the active language changes.
+ * Layers whose text-field does not reference a name property (e.g. road refs)
+ * are left untouched.
+ *
+ * @param {import('maplibre-gl').Map} map
+ * @param {string} tag - BCP 47 language subtag (e.g. 'fr', 'en')
+ */
+function applyMapLanguage(map, tag) {
+    const expression = [
+        "coalesce",
+        ["get", `name:${tag}`],
+        ["get", "name"],
+        ["get", "name:en"],
+    ];
+    const layers = map.getStyle()?.layers ?? [];
+    for (const layer of layers) {
+        if (layer.type !== "symbol") continue;
+        const textField = map.getLayoutProperty(layer.id, "text-field");
+        if (isNameBased(textField)) {
+            map.setLayoutProperty(layer.id, "text-field", expression);
+        }
+    }
 }
 
 /**
@@ -45,12 +82,18 @@ export const useMap = (containerRef = null, options = {}) => {
 
     if (containerRef !== null) {
         const { isMetric } = useSettings();
+        const { mapLanguageTag } = useLocale();
 
         // Keep the scale control unit in sync with the units preference.
         watch(isMetric, (metric) => {
             if (cached.scaleControl) {
                 cached.scaleControl.setUnit(metric ? "metric" : "imperial");
             }
+        });
+
+        // Update map label language whenever the active locale changes.
+        watch(mapLanguageTag, (tag) => {
+            if (cached.mapInstance) applyMapLanguage(cached.mapInstance, tag);
         });
 
         onMounted(() => {
@@ -112,6 +155,9 @@ export const useMap = (containerRef = null, options = {}) => {
                 );
 
                 cached.mapInstance = map;
+
+                // Apply the active language to map labels immediately after load.
+                applyMapLanguage(map, mapLanguageTag.value);
 
                 // Scale bar — unit follows the units preference in settings.
                 const scaleControl = new maplibregl.ScaleControl({

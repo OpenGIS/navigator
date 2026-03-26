@@ -22,7 +22,7 @@ const SCREENSHOTS_DIR = join(TESTS_DIR, "screenshots");
 const ASSETS_DIR = join(ROOT, "assets");
 
 // Docs that are developer guides with no runtime behaviour to test
-const GUIDE_ONLY_DOCS = ["features.md", "core.md"];
+const GUIDE_ONLY_DOCS = ["features.md", "testing.md"];
 
 let issues = 0;
 

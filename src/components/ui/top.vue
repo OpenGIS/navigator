@@ -2,12 +2,14 @@
 import About from "@/components/ui/about.vue";
 import MenuPanel from "@/components/ui/side/menu.vue";
 import { useUI } from "@/core/useUI";
+import { useLocale } from "@/core/useLocale";
 import { useLocate } from "@/features/locate/useLocate";
 import IconButton from "@/components/ui/icon-button.vue";
 import LocateButton from "@/features/locate/button.vue";
 
 const { togglePanel } = useUI();
 const { hasAlerts } = useLocate();
+const { t } = useLocale();
 </script>
 
 <template>
@@ -18,7 +20,7 @@ const { hasAlerts } = useLocate();
       <div class="start">
         <IconButton
           icon="sidebar-info"
-          label="Menu"
+          :label="t('nav.menu')"
           :icon-width="48"
           :icon-height="48"
           class="navbar-toggler position-relative"
@@ -28,7 +30,7 @@ const { hasAlerts } = useLocate();
             v-if="hasAlerts"
             class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger navigator-alert-badge"
             aria-live="polite"
-          >!<span class="visually-hidden">menu has alerts</span></span>
+          >!<span class="visually-hidden">{{ t('nav.menuAlerts') }}</span></span>
         </IconButton>
       </div>
       <!-- END Start -->

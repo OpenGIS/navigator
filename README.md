@@ -40,6 +40,11 @@ Navigator.init({ id: "my-map" });
 ```js
 Navigator.init({
   id: "my-map", // DOM element id to mount into (created if absent); defaults to 'navigator'
+  locale: "fr", // default language; uses browser language if omitted
+  messages: {   // override any UI label for any language
+    en: { "about.title": "My Map" },
+    fr: { "about.title": "Ma carte" },
+  },
   mapOptions: {
     // passed directly to the MapLibre Map constructor
     center: [-128.0094, 50.6539],
@@ -47,6 +52,8 @@ Navigator.init({
   },
 });
 ```
+
+See [`docs/config.md`](docs/config.md) for the full configuration reference.
 
 ### Multiple instances
 
@@ -73,11 +80,11 @@ Document → Test → Implement → Screenshot
 
 **2. Write the tests** — Translate each doc heading into a `test.describe` block in the corresponding spec file. If you can't write a test for something, the docs description is too vague — sharpen it first.
 
-**3. Implement until the tests pass** — The docs and tests define the target; the implementation just needs to reach it. Run `npm test` to track progress.
+**3. Implement until the tests pass** — The docs and tests define the target; the implementation just needs to reach it. Run `npm test -- tests/e2e/{relevant}.spec.js` to track progress. See [docs/testing.md](docs/testing.md) for how to find the right spec.
 
 **4. Add screenshots to the docs** — For sections where a picture helps, add a screenshot spec in `tests/e2e/screenshots/` and embed the output in the docs. Not every section needs one.
 
-See [TESTING.md](TESTING.md) for the full testing and screenshot strategy.
+See [docs/testing.md](docs/testing.md) for the full testing and screenshot strategy.
 
 ### Install
 
@@ -94,10 +101,10 @@ npm run dev
 ### Test
 
 ```bash
-npm test
+npm test -- tests/e2e/{spec}.spec.js
 ```
 
-See [TESTING.md](TESTING.md) for the testing strategy and how to add tests.
+See [docs/testing.md](docs/testing.md) for the testing strategy and how to find the right spec file.
 
 ### Build
 

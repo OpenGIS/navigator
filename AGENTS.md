@@ -21,7 +21,8 @@ Navigator is an open-source mapping library published to npm as [`@ogis/navigato
 ```bash
 npm run dev          # start Vite dev server (demo at http://localhost:5173)
 npm run build        # build the library for distribution
-npm test             # run all Playwright E2E tests
+npm test -- tests/e2e/{spec}.spec.js   # run only the relevant spec (preferred during development)
+npm test             # run all tests (final check before confirming a task done)
 npm run check:sync   # verify docs/tests/screenshots are in sync
 ```
 
@@ -37,10 +38,10 @@ Document → Test → Implement → Screenshot
 
 1. **Write the docs first.** Add or update the relevant `docs/N.name.md` file before writing any code.
 2. **Write tests against the docs.** Each heading in a doc maps to a `test.describe` block in the corresponding spec.
-3. **Implement until tests pass.** Run `npm test`.
+3. **Implement until tests pass.** Run `npm test -- tests/e2e/{relevant}.spec.js` to track progress during development. See [docs/testing.md](docs/testing.md) for how to find the right spec.
 4. **Add screenshots where helpful.** Screenshot specs live in `tests/e2e/screenshots/` and output to `assets/screenshots/docs/`.
 
-Before marking any task done, run `npm test` and `npm run check:sync`. Both must pass.
+Before marking any task done, run `npm test` (full suite) and `npm run check:sync`. Both must pass.
 
 ---
 
@@ -144,12 +145,15 @@ Current mapping:
 
 | Doc | Tests | Screenshots |
 |-----|-------|-------------|
+| `docs/config.md` | `tests/e2e/config.spec.js` | — |
 | `docs/instances.md` | `tests/e2e/instances.spec.js` | — |
-| `docs/core.md` | — (guide, no runtime behaviour) | — |
+| `docs/core.md` | `tests/e2e/core.spec.js` | `tests/e2e/screenshots/core.spec.js` |
 | `docs/map.md` | `tests/e2e/map.spec.js` | `tests/e2e/screenshots/map.spec.js` |
 | `docs/ui.md` | `tests/e2e/ui.spec.js` | `tests/e2e/screenshots/ui.spec.js` |
+| `docs/locale.md` | `tests/e2e/locale.spec.js` | — |
 | `docs/features.md` | — (developer guide, no runtime behaviour) | — |
-| `docs/features/locate.md` | `tests/e2e/features/locate.spec.js` | — |
+| `docs/features/locate.md` | `tests/e2e/features/locate.spec.js` | `tests/e2e/screenshots/features/locate.spec.js` |
+| `docs/features/settings.md` | `tests/e2e/features/settings.spec.js` | — |
 
 ---
 
@@ -159,7 +163,7 @@ Current mapping:
 2. Create `tests/e2e/N.feature-name.spec.js`
 3. Create `src/features/feature-name/` (see `docs/features.md`)
 4. If the feature has illustratable UI, create `tests/e2e/screenshots/N.feature-name.spec.js`
-5. Run `npm test && npm run check:sync`
+5. Run `npm test -- tests/e2e/{relevant}.spec.js` during development, then `npm test && npm run check:sync` as a final check
 
 ---
 
@@ -172,9 +176,10 @@ A Playwright MCP server is configured in `.github/mcp.json`. Agents with MCP sup
 ## Further Reading
 
 - `README.md` — install and usage
-- `docs/instances.md` — `Navigator.init()` API, multi-instance, storage convention
+- `docs/config.md` — `Navigator.init()` config API reference (all options)
+- `docs/instances.md` — multi-instance setup, storage convention, architecture
 - `docs/map.md` — `useMap` full API
 - `docs/ui.md` — `useUI` full API
 - `docs/features.md` — how to build a feature
-- `TESTING.md` — testing conventions, screenshot strategy
+- `docs/testing.md` — testing conventions, screenshot strategy, how to run specific specs
 - `tasks/sync-review.md` — agent task for a full Document First sync review

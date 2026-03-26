@@ -1,10 +1,12 @@
 <script setup>
 import { computed } from "vue";
 import { useLocate } from "@/features/locate/useLocate";
+import { useLocale } from "@/core/useLocale";
 import IconButton from "@/components/ui/icon-button.vue";
 
 const { mode, showConfirmModal, showErrorModal, cycle, confirmLocate } =
     useLocate();
+const { t } = useLocale();
 
 const iconName = computed(() => {
     if (mode.value === "following") return "position-lock";
@@ -19,10 +21,10 @@ const iconColor = computed(() => {
 });
 
 const label = computed(() => {
-    if (mode.value === "active") return "Located";
-    if (mode.value === "following") return "Following";
-    if (mode.value === "error") return "Error";
-    return "Locate";
+    if (mode.value === "active") return t("locate.button.located");
+    if (mode.value === "following") return t("locate.button.following");
+    if (mode.value === "error") return t("locate.button.error");
+    return t("locate.button.locate");
 });
 </script>
 
@@ -53,22 +55,17 @@ const label = computed(() => {
                     <div class="modal-content">
                         <div class="modal-header">
                             <h5 class="modal-title" id="locate-confirm-title">
-                                Permission Required
+                                {{ t('locate.modal.permissionTitle') }}
                             </h5>
                             <button
                                 type="button"
                                 class="btn-close"
-                                aria-label="Cancel"
+                                aria-label="Close"
                                 @click="showConfirmModal = false"
                             ></button>
                         </div>
                         <div class="modal-body">
-                            <p class="mb-0">
-                                To display your current location and compass
-                                heading, this app needs your permission. When
-                                prompted, please allow location and compass
-                                access.
-                            </p>
+                            <p class="mb-0">{{ t('locate.modal.permissionBody') }}</p>
                         </div>
                         <div class="modal-footer">
                             <button
@@ -76,7 +73,7 @@ const label = computed(() => {
                                 class="btn btn-secondary"
                                 @click="showConfirmModal = false"
                             >
-                                Cancel
+                                {{ t('locate.modal.cancel') }}
                             </button>
                             <button
                                 type="button"
@@ -84,7 +81,7 @@ const label = computed(() => {
                                 id="locate-confirm-allow"
                                 @click="confirmLocate"
                             >
-                                I Understand
+                                {{ t('locate.modal.iUnderstand') }}
                             </button>
                         </div>
                     </div>
@@ -108,7 +105,7 @@ const label = computed(() => {
                     <div class="modal-content">
                         <div class="modal-header">
                             <h5 class="modal-title" id="locate-error-title">
-                                Location access denied
+                                {{ t('locate.modal.deniedTitle') }}
                             </h5>
                             <button
                                 type="button"
@@ -118,31 +115,12 @@ const label = computed(() => {
                             ></button>
                         </div>
                         <div class="modal-body">
-                            <p>
-                                Your browser has blocked location access for
-                                this page. To re-enable it:
-                            </p>
+                            <p>{{ t('locate.modal.deniedIntro') }}</p>
                             <ul class="small mb-0">
-                                <li>
-                                    <strong>Chrome / Edge (desktop):</strong>
-                                    Click the lock icon in the address bar →
-                                    Site settings → Location → Allow.
-                                </li>
-                                <li>
-                                    <strong>Firefox (desktop):</strong> Click
-                                    the lock icon → Clear permission → reload
-                                    the page and try again.
-                                </li>
-                                <li>
-                                    <strong>Safari (desktop / iOS):</strong>
-                                    Settings → Privacy &amp; Security → Location
-                                    Services → find your browser → Allow.
-                                </li>
-                                <li>
-                                    <strong>Android Chrome:</strong> Settings →
-                                    Site settings → Location → find this site
-                                    and allow it.
-                                </li>
+                                <li><strong>Chrome / Edge (desktop):</strong> {{ t('locate.modal.deniedChrome') }}</li>
+                                <li><strong>Firefox (desktop):</strong> {{ t('locate.modal.deniedFirefox') }}</li>
+                                <li><strong>Safari (desktop / iOS):</strong> {{ t('locate.modal.deniedSafari') }}</li>
+                                <li><strong>Android Chrome:</strong> {{ t('locate.modal.deniedAndroid') }}</li>
                             </ul>
                         </div>
                         <div class="modal-footer">
@@ -152,7 +130,7 @@ const label = computed(() => {
                                 id="locate-error-close"
                                 @click="showErrorModal = false"
                             >
-                                Close
+                                {{ t('locate.modal.close') }}
                             </button>
                         </div>
                     </div>

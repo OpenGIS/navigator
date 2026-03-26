@@ -42,12 +42,27 @@ The locate feature's speed readout in the position panel respects this setting. 
 
 ---
 
+## Language
+
+A **Language** dropdown selects the language used throughout the Navigator interface.
+
+| Option | Language |
+|--------|----------|
+| English | English |
+| Français | French |
+
+**Default on first load:** the dropdown reflects the browser's language setting. If the browser language matches an available translation (e.g. `fr` or `fr-CA` maps to Français), that language is pre-selected; otherwise English is used. No preference is written to storage until the user explicitly makes a selection.
+
+Once the user has selected a language, the choice overrides the browser default and persists to `localStorage`.
+
+---
+
 ## Persistence
 
 `useSettings` stores preferences with:
 
 ```js
-useStorage('settings', { theme: null, units: null })
+useStorage('settings', { theme: null, units: null, language: null })
 ```
 
 Storage key: `navigator_settings_{instanceId}`
@@ -55,6 +70,8 @@ Storage key: `navigator_settings_{instanceId}`
 `theme: null` means "follow the system preference". Once the user toggles the switch an explicit `'light'` or `'dark'` string is stored.
 
 `units: null` means "follow the browser locale default". The locale is resolved via `Intl.Locale(navigator.language).maximize().region` — US, LR, and MM map to `'imperial'`; all other regions map to `'metric'`. Once the user toggles the switch an explicit `'metric'` or `'imperial'` string is stored.
+
+`language: null` means "follow the browser language or the `locale` default set via `Navigator.init()`". Once the user selects a language from the dropdown an explicit code (`'en'`, `'fr'`, …) is stored.
 
 ---
 
@@ -76,6 +93,8 @@ const {
   isMetric,      // Computed<boolean>
   toggleTheme,   // () => void — toggles between 'light' and 'dark'
   setUnits,      // (units: 'metric'|'imperial') => void
+  language,      // Computed<string|null> — stored language code, or null if following default
+  setLanguage,   // (code: string) => void — persist a language choice
 } = useSettings()
 ```
 

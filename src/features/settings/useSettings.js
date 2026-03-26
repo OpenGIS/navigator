@@ -32,6 +32,7 @@ export const useSettings = () => {
 		const storage = useStorage("settings", {
 			theme: null, // null = follow system, 'light', or 'dark'
 			units: null, // null = follow locale default
+			language: null, // null = follow browser / Navigator.init() default
 		});
 		cache.set(instanceId, { storage });
 	}
@@ -57,6 +58,12 @@ export const useSettings = () => {
 		storage.units = units;
 	};
 
+	const language = computed(() => storage.language);
+
+	const setLanguage = (lang) => {
+		storage.language = lang;
+	};
+
 	return {
 		resolvedTheme,
 		isDark,
@@ -64,5 +71,7 @@ export const useSettings = () => {
 		resolvedUnits,
 		toggleTheme,
 		setUnits,
+		language,
+		setLanguage,
 	};
 };

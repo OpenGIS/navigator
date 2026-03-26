@@ -1,7 +1,11 @@
 <script setup>
 import { useUI } from "@/core/useUI";
+import { useLocale } from "@/core/useLocale";
+import { useSettings } from "@/features/settings/useSettings";
 
 const { showAboutModal, closeAboutModal } = useUI();
+const { t, locale, locales, localeNames, setLocale } = useLocale();
+const { resolvedUnits, setUnits } = useSettings();
 </script>
 
 <template>
@@ -20,7 +24,7 @@ const { showAboutModal, closeAboutModal } = useUI();
           <div class="modal-content">
             <div class="modal-header">
               <h5 class="modal-title" id="about-modal-title">
-                About Navigator
+                {{ t('about.title') }}
               </h5>
               <button
                 type="button"
@@ -30,17 +34,40 @@ const { showAboutModal, closeAboutModal } = useUI();
               ></button>
             </div>
             <div class="modal-body">
-              <p>
-                Welcome to <strong>Navigator</strong> — an open source mapping
-                application built with MapLibre GL JS and Vue 3.
-              </p>
-              <p>
-                Use the <strong>menu</strong> to explore the app and navigate the
-                map.
-              </p>
+              <p>{{ t('about.welcome') }}</p>
+              <p>{{ t('about.useMenu') }}</p>
+              <p class="fw-semibold mb-2">{{ t('about.preferences') }}</p>
+              <div class="mb-2">
+                <label for="about-language" class="form-label small mb-1">
+                  {{ t('settings.language') }}
+                </label>
+                <select
+                  id="about-language"
+                  class="form-select form-select-sm w-auto"
+                  :value="locale"
+                  @change="(e) => setLocale(e.target.value)"
+                >
+                  <option v-for="code in locales" :key="code" :value="code">
+                    {{ localeNames[code] }}
+                  </option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="about-units" class="form-label small mb-1">
+                  {{ t('settings.units') }}
+                </label>
+                <select
+                  id="about-units"
+                  class="form-select form-select-sm w-auto"
+                  :value="resolvedUnits"
+                  @change="(e) => setUnits(e.target.value)"
+                >
+                  <option value="metric">{{ t('settings.metric') }}</option>
+                  <option value="imperial">{{ t('settings.imperial') }}</option>
+                </select>
+              </div>
               <p class="mb-0 text-body-secondary small">
-                Powered by open data from OpenStreetMap and free vector tiles from
-                OpenFreeMap.
+                {{ t('about.poweredBy') }}
               </p>
             </div>
             <div class="modal-footer">
@@ -50,7 +77,7 @@ const { showAboutModal, closeAboutModal } = useUI();
                 id="about-modal-close"
                 @click="closeAboutModal"
               >
-                Get started
+                {{ t('about.getStarted') }}
               </button>
             </div>
           </div>

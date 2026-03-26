@@ -9,7 +9,12 @@
     <div id="app"></div>
     <script type="module">
       import Navigator from "/src/index.js";
-      Navigator.init({ id: "app" });
+      const params = new URLSearchParams(window.location.search);
+      const locale = params.get("locale") || undefined;
+      const messagesRaw = params.get("messages");
+      const messages = messagesRaw ? JSON.parse(decodeURIComponent(messagesRaw)) : undefined;
+      const debug = params.get("debug") === "true";
+      Navigator.init({ id: "app", locale, messages, debug });
     </script>
   </body>
 </html>

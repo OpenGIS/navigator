@@ -31,6 +31,8 @@ Navigator.init({
 })
 ```
 
+See [`docs/config.md`](./config.md) for the full configuration reference, including the `locale` and `messages` options.
+
 ### `id` — Instance identifier
 
 The `id` serves two purposes:
