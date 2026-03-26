@@ -36,7 +36,7 @@ A **Metric** toggle switch sets the unit system used across all features:
 | On | Metric (km, m/s) |
 | Off | Imperial (mi, mph) |
 
-The locate feature's speed readout in the position panel respects this setting. A **scale bar** is also shown in the bottom-right corner of the map; it updates immediately when the units switch is toggled.
+The locate feature's speed readout in the position panel respects this setting. A **scale bar** is also shown in the bottom-left corner of the map; it updates immediately when the units switch is toggled.
 
 **Default on first load:** the switch reflects the user's browser locale. Locales in the US, Liberia, and Myanmar default to imperial; all other locales default to metric. No preference is written to storage until the user explicitly toggles the switch — the same pattern used for the appearance setting.
 

@@ -118,7 +118,7 @@ export const useMap = (containerRef = null, options = {}) => {
                     maxWidth: 120,
                     unit: isMetric.value ? "metric" : "imperial",
                 });
-                map.addControl(scaleControl, "bottom-right");
+                map.addControl(scaleControl, "bottom-left");
                 cached.scaleControl = scaleControl;
             });
         });

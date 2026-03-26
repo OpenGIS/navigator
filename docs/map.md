@@ -96,3 +96,7 @@ const { map } = useMap();
 | Property | Type | Description |
 |----------|------|-------------|
 | `map` | `maplibregl.Map \| null` | The active MapLibre map instance, or `null` before load |
+
+### Scale bar
+
+A [MapLibre `ScaleControl`](https://maplibre.org/maplibre-gl-js/docs/API/classes/ScaleControl/) is added to the bottom-left corner of the map. The unit (metric or imperial) follows the units preference from the settings feature and updates immediately when the setting changes.
