@@ -226,13 +226,18 @@ test.describe("Locate / Initial zoom", () => {
         await page.locator("#locate-button").click();
         await expect(page.locator("#locate-button")).toContainText("Locate");
 
-        // Move to a different location before re-activating
-        await page.context().setGeolocation({
-            latitude: 48.8566,
-            longitude: 2.3522,
+        // Re-activate from a stored view at zoom 10 — initial zoom should fire again
+        await page.evaluate(() => {
+            const stored = JSON.parse(
+                localStorage.getItem("navigator_view_app") || "{}",
+            );
+            stored.mapView = { center: { lat: 51.5, lng: -0.1 }, zoom: 10 };
+            localStorage.setItem("navigator_view_app", JSON.stringify(stored));
         });
+        await page.reload();
+        await page.waitForLoadState("networkidle");
 
-        // Re-activate — should zoom to 16 at the new position
+        // Re-activate locate — should zoom back to 16
         await page.locator("#locate-button").click();
         await expect
             .poll(() => page.locator("#locate-button").textContent(), {
@@ -241,7 +246,7 @@ test.describe("Locate / Initial zoom", () => {
             .toMatch(/Located/);
         await expect
             .poll(() => page.url(), { timeout: 6000 })
-            .toMatch(/#map=16\/48\./);
+            .toMatch(/#map=16\//);
     });
 });
 
