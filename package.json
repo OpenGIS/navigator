@@ -1,6 +1,6 @@
 {
   "name": "@ogis/navigator",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "type": "module",
   "description": "A map for everyone, right in the browser.",
   "homepage": "https://www.ogis.org/navigator",
@@ -40,7 +40,7 @@
     "vue": "^3.5.30"
   },
   "dependencies": {
-    "@ogis/icons": "^0.2.6",
+    "@ogis/icons": "^0.2.7",
     "bootstrap": "^5.3.8",
     "magvar": "^2.0.1",
     "vue": "^3.5.30"
