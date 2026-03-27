@@ -23,24 +23,17 @@ const { t } = useLocale();
       </div>
       <div class="modal-body">
         <p>{{ t("modal.locate.deniedIntro") }}</p>
-        <ul class="small mb-0">
+        <ol class="small mb-0">
           <li>
-            <strong>Chrome / Edge (desktop):</strong>
-            {{ t("modal.locate.deniedChrome") }}
+            {{ t("modal.locate.tryOne") }}
           </li>
           <li>
-            <strong>Firefox (desktop):</strong>
-            {{ t("modal.locate.deniedFirefox") }}
+            {{ t("modal.locate.tryTwo") }}
           </li>
           <li>
-            <strong>Safari (desktop / iOS):</strong>
-            {{ t("modal.locate.deniedSafari") }}
+            {{ t("modal.locate.tryThree") }}
           </li>
-          <li>
-            <strong>Android Chrome:</strong>
-            {{ t("modal.locate.deniedAndroid") }}
-          </li>
-        </ul>
+        </ol>
       </div>
       <div class="modal-footer">
         <button

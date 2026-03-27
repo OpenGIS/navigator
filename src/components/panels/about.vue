@@ -23,7 +23,17 @@ const { t } = useLocale();
         </svg>
       </a>
 
-      <p class="mb-0">{{ t("panel.about.description") }}</p>
+      <p class="lead">{{ t("panel.about.descriptionOne") }}</p>
+
+      <p>{{ t("panel.about.descriptionTwo") }}</p>
+
+      <p>{{ t("panel.about.descriptionThree") }}</p>
+
+      <p>
+        {{ t("panel.about.by") }} <a href="https://www.ogis.org/">Open GIS</a>
+        {{ t("panel.about.on") }}
+        <a href="https://github.com/OpenGIS/navigator">GitHub</a>.
+      </p>
     </div>
 
     <div class="sidebar-section sidebar-section-body p-3 border-top">

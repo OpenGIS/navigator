@@ -35,7 +35,7 @@ test.describe("First load / Welcome modal", () => {
     await page.goto("/");
     await page.waitForLoadState("networkidle");
 
-    await expect(page.locator("#about-modal .modal-body")).toContainText("Navigator");
+    await expect(page.locator("#about-modal .modal-body")).toContainText("A map for everyone");
   });
 
   test("modal can be dismissed with Get Started button", async ({ page }) => {
@@ -95,11 +95,11 @@ test.describe("First load / Language", () => {
     await page.goto("/");
     await page.waitForLoadState("networkidle");
 
-    await expect(page.locator("#about-modal-title")).toContainText("About Navigator");
+    await expect(page.locator("#about-modal .modal-body")).toContainText("A map for everyone");
 
     await page.locator("#about-language").selectOption("fr");
 
-    await expect(page.locator("#about-modal-title")).toContainText("propos");
+    await expect(page.locator("#about-modal .modal-body")).toContainText("Une carte pour tout le monde");
   });
 
   test("language choice is saved to settings storage", async ({ page }) => {

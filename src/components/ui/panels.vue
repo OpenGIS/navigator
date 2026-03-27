@@ -3,7 +3,7 @@ import { computed } from "vue";
 import { useUI } from "@/composables/useUI";
 import { useLocale } from "@/composables/useLocale";
 import IconButton from "@/components/ui/icon-button.vue";
-import LocatePanel from "@/components/panels/locate.vue";
+import ViewPanel from "@/components/panels/view.vue";
 import SettingsPanel from "@/components/panels/settings.vue";
 import AboutPanel from "@/components/panels/about.vue";
 import PrivacyPanel from "@/components/panels/privacy.vue";
@@ -12,20 +12,20 @@ const { isPanelVisible, activePanel, setActivePanel, closePanel, isDesktop } = u
 const { t } = useLocale();
 
 const tabs = [
-  { id: "locate",   icon: "globe",        labelKey: "menu.mapView" },
+  { id: "view",     icon: "globe",        labelKey: "menu.mapView" },
   { id: "settings", icon: "gear",         labelKey: "menu.settings",   btnId: "settings-button" },
   { id: "about",    icon: "info-circle",  labelKey: "menu.about",      btnId: "about-button" },
   { id: "privacy",  icon: "lock",         labelKey: "menu.privacy",    btnId: "privacy-button" },
 ];
 
 const panelComponents = {
-  locate:   LocatePanel,
+  view:     ViewPanel,
   settings: SettingsPanel,
   about:    AboutPanel,
   privacy:  PrivacyPanel,
 };
 
-const activeComponent = computed(() => panelComponents[activePanel.value] ?? LocatePanel);
+const activeComponent = computed(() => panelComponents[activePanel.value] ?? ViewPanel);
 </script>
 
 <template>
