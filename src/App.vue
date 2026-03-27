@@ -12,9 +12,9 @@ import Top from "@/components/ui/top.vue";
 import SidePanel from "@/components/ui/side/panel.vue";
 import MenuPanel from "@/components/ui/side/menu.vue";
 
-import { useMap } from "@/core/useMap";
-import { useUI } from "@/core/useUI";
-import { useSettings } from "@/features/settings/useSettings";
+import { useMap } from "@/composables/useMap";
+import { useUI } from "@/composables/useUI";
+import { useSettings } from "@/composables/useSettings";
 
 const instanceId = inject("navigatorId", "navigator");
 
@@ -53,24 +53,27 @@ if (isDesktop.value) {
 </script>
 
 <template>
-	<div :data-bs-theme="resolvedTheme" style="display: contents">
-	<div style="display: none" v-html="iconSprite"></div>
-	<div class="navigator-top">
-		<Top />
-	</div>
-
-	<div class="navigator-content">
-		<SidePanel />
-	</div>
-
-	<!-- Map -->
 	<div
-		ref="mapContainer"
-		class="navigator-map"
-		:data-navigator-id="instanceId"
-		:class="{ 'panel-open': isPanelVisible && isDesktop }"
-		@click="handleMapClick"
-	/>
+		class="navigator-root position-fixed top-0 start-0 w-100 h-100 overflow-hidden"
+		:data-bs-theme="resolvedTheme"
+	>
+		<div style="display: none" v-html="iconSprite"></div>
+		<div class="navigator-top">
+			<Top />
+		</div>
+
+		<div class="navigator-content">
+			<SidePanel />
+		</div>
+
+		<!-- Map -->
+		<div
+			ref="mapContainer"
+			class="navigator-map"
+			:data-navigator-id="instanceId"
+			:class="{ 'panel-open': isPanelVisible && isDesktop }"
+			@click="handleMapClick"
+		/>
 	</div>
 </template>
 

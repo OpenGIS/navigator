@@ -14,6 +14,8 @@ Context for agentic coding tools. Read this before making any changes to the cod
 
 Navigator is an open-source mapping library published to npm as [`@ogis/navigator`](https://www.npmjs.com/package/@ogis/navigator). It wraps [MapLibre GL JS](https://maplibre.org/) and [Vue 3](https://vuejs.org/) into an embeddable map widget with a persistent UI layer. Consumers call `Navigator.init()` from a `<script type="module">` tag.
 
+The demo app (`index.html`) is also a fully installable PWA. It includes a Web App Manifest (`public/manifest.json`), PWA icons (`public/icon-*.png`), and viewport meta tags that disable page-level zoom so MapLibre handles all zooming. The demo is built with `npm run build:demo` using `vite.demo.config.js` (base: `/navigator/`).
+
 ---
 
 ## Commands
@@ -25,6 +27,13 @@ npm test -- tests/e2e/{spec}.spec.js   # run only the relevant spec (preferred d
 npm test             # run all tests (final check before confirming a task done)
 npm run check:sync   # verify docs/tests/screenshots are in sync
 ```
+
+### Running tests — timing guidance
+
+- A single spec takes **15–45 seconds**.
+- The full suite (`npm test`) takes **2–3 minutes**.
+
+When running tests with a shell tool, use `mode="sync"` with `initial_wait` set to at least **60** for a single spec and **240** for the full suite. You will be automatically notified when the command completes — **do not poll repeatedly with short waits**. Wait for the completion notification, then read the output once.
 
 ---
 
@@ -51,15 +60,24 @@ Before marking any task done, run `npm test` (full suite) and `npm run check:syn
 src/
   index.js              # public API — exports Navigator.init()
   App.vue               # root Vue component
-  core/
-    useMap.js           # MapLibre lifecycle, view persistence
-    useUI.js            # UI state: breakpoints, panel, nav, first-load
   composables/
     useStorage.js       # localStorage wrapper, instance-scoped
-  features/             # one sub-directory per feature (see docs/features.md)
+    useUrlHash.js       # URL hash read/write helpers
+    useMap.js           # MapLibre lifecycle, view persistence
+    useUI.js            # UI state: breakpoints, panel, nav, first-load
+    useLocale.js        # i18n: language resolution, translations
+    useSettings.js      # user preferences: theme, units, language
+    useLocate.js        # GPS locate feature
   components/
+    panels/
+      about.vue         # About panel
+      privacy.vue       # Privacy panel
+      locate.vue        # Locate panel
+      settings.vue      # Settings panel
     ui/
       top.vue           # top navigation bar
+      top/
+        locate.vue      # Locate button (top bar)
       about.vue         # About modal (first-load + menu button)
       side/
         panel.vue       # Bootstrap offcanvas side panel
@@ -125,7 +143,7 @@ center: [-128.0094, 50.6539]
 
 ### Features
 
-A feature is a self-contained directory under `src/features/{name}/` containing a composable, a panel component, a button component, and optionally a storage namespace. See `docs/features.md` for the full pattern.
+A feature's composable lives in `src/composables/`, its panel in `src/components/panels/`, and its top-bar button (if any) in `src/components/ui/top/`. See `docs/features.md` for the full pattern.
 
 ---
 
@@ -161,7 +179,7 @@ Current mapping:
 
 1. Create `docs/N.feature-name.md`
 2. Create `tests/e2e/N.feature-name.spec.js`
-3. Create `src/features/feature-name/` (see `docs/features.md`)
+3. Create `src/composables/use{FeatureName}.js`, `src/components/panels/{feature-name}.vue`, and `src/components/ui/top/{feature-name}.vue` (see `docs/features.md`)
 4. If the feature has illustratable UI, create `tests/e2e/screenshots/N.feature-name.spec.js`
 5. Run `npm test -- tests/e2e/{relevant}.spec.js` during development, then `npm test && npm run check:sync` as a final check
 

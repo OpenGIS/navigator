@@ -6,22 +6,20 @@ This guide explains how to structure and wire up a new feature in Navigator. The
 
 ## Directory Structure
 
-Each feature lives entirely within its own directory under `src/features/`:
+Feature logic is split across three directories:
 
 ```
-src/features/{feature-name}/
-  use{Feature}.js   ← composable: state, logic, map integration
-  panel.vue         ← side panel content
-  button.vue        ← top-bar button (if the feature has one)
+src/composables/use{Feature}.js     ← composable: state, logic, map integration
+src/components/panels/{feature}.vue ← side panel content
+src/components/ui/top/{feature}.vue ← top-bar button (if the feature has one)
 ```
 
 **Example — locate:**
 
 ```
-src/features/locate/
-  useLocate.js
-  panel.vue
-  button.vue
+src/composables/useLocate.js
+src/components/panels/locate.vue
+src/components/ui/top/locate.vue
 ```
 
 Supporting data classes belong in `src/classes/` when they are non-trivial objects:
@@ -43,7 +41,7 @@ Use `useStorage` from `@/composables/useStorage` to persist state to `localStora
 ```js
 import { useStorage } from "@/composables/useStorage";
 
-// Persisted to localStorage as "navigator_locate"
+// Persisted to localStorage as "navigator_locate_{instanceId}"
 const state = useStorage("locate", {
   mode: null,
   currentData: null,
@@ -54,10 +52,10 @@ const state = useStorage("locate", {
 
 ### Accessing the Map
 
-Interact with the MapLibre map via `getMapInstance(instanceId)` from `@/core/useMap`. Call it inside a function (not at module top level) to safely access the current map instance:
+Interact with the MapLibre map via `getMapInstance(instanceId)` from `@/composables/useMap`. Call it inside a function (not at module top level) to safely access the current map instance:
 
 ```js
-import { getMapInstance } from "@/core/useMap";
+import { getMapInstance } from "@/composables/useMap";
 
 const doSomethingWithMap = (instanceId) => {
   const map = getMapInstance(instanceId);
@@ -121,18 +119,18 @@ return {
 };
 ```
 
-**Reference:** `src/features/locate/useLocate.js`
+**Reference:** `src/composables/useLocate.js`
 
 ---
 
-## 2. The Panel (`panel.vue`)
+## 2. The Panel (`src/components/panels/{feature}.vue`)
 
 The panel is a Vue SFC that is loaded into the shared side panel via `useUI`. It imports its feature's composable directly and uses the returned state to render UI.
 
 ```vue
 <script setup>
 import { computed } from "vue";
-import { useLocate } from "@/features/locate/useLocate";
+import { useLocate } from "@/composables/useLocate";
 
 const { mode, position, compassHeading } = useLocate();
 
@@ -150,18 +148,18 @@ const formattedCoords = computed(() => {
 
 Panels are not registered globally; they are passed as a component reference to `useUI().openPanel()` or `useUI().togglePanel()` at runtime.
 
-**Reference:** `src/features/locate/panel.vue`
+**Reference:** `src/components/panels/locate.vue`
 
 ---
 
-## 3. The Button (`button.vue`)
+## 3. The Button (`src/components/ui/top/{feature}.vue`)
 
-A feature's toolbar button lives at `src/features/{feature-name}/button.vue`. It imports the feature's composable to read state and trigger actions, and uses the shared `Icon` component for its visual.
+A feature's toolbar button lives in `src/components/ui/top/`. It imports the feature's composable to read state and trigger actions, and uses the shared `Icon` component for its visual.
 
 ```vue
 <script setup>
 import { computed } from "vue";
-import { useLocate } from "@/features/locate/useLocate";
+import { useLocate } from "@/composables/useLocate";
 import Icon from "@/components/ui/icon.vue";
 
 const { mode, cycle } = useLocate();
@@ -195,7 +193,7 @@ const label = computed(() => {
 </template>
 ```
 
-**Reference:** `src/features/locate/button.vue`
+**Reference:** `src/components/ui/top/locate.vue`
 
 ---
 
@@ -208,8 +206,8 @@ There are two integration points: `App.vue` and `src/components/ui/top.vue`.
 If your feature needs to initialise state on load or auto-open a panel, import the composable and panel in `App.vue`:
 
 ```js
-import { useMyFeature } from "@/features/my-feature/useMyFeature";
-import MyFeaturePanel from "@/features/my-feature/panel.vue";
+import { useMyFeature } from "@/composables/useMyFeature";
+import MyFeaturePanel from "@/components/panels/my-feature.vue";
 
 const { mode } = useMyFeature();
 
@@ -229,7 +227,7 @@ Import the button component and place it in the top navigation bar:
 
 ```vue
 <script setup>
-import LocateButton from "@/features/locate/button.vue";
+import LocateButton from "@/components/ui/top/locate.vue";
 </script>
 
 <template>
@@ -252,9 +250,9 @@ import LocateButton from "@/features/locate/button.vue";
 
 When adding a new feature:
 
-1. **Create** `src/features/{feature-name}/use{Feature}.js` — singleton composable with instance isolation via `inject("navigatorId")`, `useStorage` for persistence, `getMapInstance` for map access, and a clean exported API.
-2. **Create** `src/features/{feature-name}/panel.vue` — side panel content that reads from the composable.
-3. **Create** `src/features/{feature-name}/button.vue` — top-bar trigger that reads state and calls composable actions.
+1. **Create** `src/composables/use{Feature}.js` — singleton composable with instance isolation via `inject("navigatorId")`, `useStorage` for persistence, `getMapInstance` for map access, and a clean exported API.
+2. **Create** `src/components/panels/{feature}.vue` — side panel content that reads from the composable.
+3. **Create** `src/components/ui/top/{feature}.vue` — top-bar trigger that reads state and calls composable actions.
 4. **Create** `src/classes/{Feature}.js` if you need a non-trivial data model.
 5. **Wire up** in `App.vue` (if needed): initialise the composable and call `openPanel` on desktop load if appropriate.
 6. **Wire up** in `src/components/ui/top.vue`: import and render the button component.

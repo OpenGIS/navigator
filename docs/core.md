@@ -32,7 +32,7 @@ On returning visits the Welcome modal is not shown — the user's stored languag
 
 ### About button
 
-The modal can be re-opened at any time via the **About** button in the navigation menu.
+The **About** button in the navigation menu opens the [About panel](#about-panel), which provides app information and attribution.
 
 ### API
 
@@ -47,3 +47,54 @@ const { isFirstLoad, showAboutModal, openAboutModal, closeAboutModal, setFirstLo
 | `openAboutModal()` | action | Opens the Welcome modal |
 | `closeAboutModal()` | action | Closes the modal and marks first load complete |
 | `setFirstLoadComplete()` | action | Marks first load complete without opening the modal |
+
+---
+
+## About panel
+
+The **About panel** is accessible at any time via the **About** button in the navigation menu. It provides a short description of Navigator and attribution for the open-source components it is built on.
+
+### Description
+
+The panel displays a brief introduction to Navigator.
+
+### Attribution
+
+The attribution table lists every open-source component and data source Navigator depends on, matching the **Thanks Open Source!** section in the README.
+
+| Component | Source |
+|-----------|--------|
+| **Map Data** | © [OpenStreetMap contributors](https://www.openstreetmap.org/copyright) |
+| **Tile Hosting** | [OpenFreeMap](https://openfreemap.org) |
+| **Rendering** | [MapLibre GL JS](https://maplibre.org/) |
+| **Tile Schema** | [OpenMapTiles](https://www.openmaptiles.org/) / [OSM Bright](https://github.com/openmaptiles/osm-bright-gl-style) |
+| **User Interface** | [Vue JS](https://vuejs.org/) / [Bootstrap](https://getbootstrap.com/) |
+
+![About panel — desktop](../assets/screenshots/docs/core/about-panel.png)
+
+---
+
+## Privacy panel
+
+The **Privacy panel** is accessible at any time via the **Privacy** button in the navigation menu (located before the About button). It explains what data Navigator stores, what third-party services are contacted, and what is never collected.
+
+### On your device
+
+Navigator stores the following data in your browser's `localStorage` only — it never leaves your device:
+
+- **Map view** — centre coordinates and zoom level, so the map reopens where you left it.
+- **Settings** — language, units, and colour theme preferences.
+
+### Third-party tile services
+
+When you view the map, your browser fetches map tiles directly from [OpenFreeMap](https://openfreemap.org). As with any network request, your IP address is visible to their servers. No other data is sent. Refer to the OpenFreeMap website for their privacy policy.
+
+### Location data
+
+If you use the **Locate** feature, your device's GPS coordinates are used only to show your position on the map. Location data is never transmitted to any server.
+
+### No tracking
+
+Navigator contains no analytics, no advertising, no cookies, and no tracking scripts of any kind.
+
+![Privacy panel — desktop](../assets/screenshots/docs/core/privacy-panel.png)

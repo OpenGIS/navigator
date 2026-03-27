@@ -21,6 +21,7 @@ function createState(instanceId) {
         isPanelExpanded: ref(false),
         activePanelId: ref(null),
         activePanelComponent: ref(null),
+        activeMenuSub: ref('location'),
     };
 }
 
@@ -133,6 +134,10 @@ export const useUI = () => {
         s.isPanelExpanded.value = value;
     };
 
+    const setMenuSub = (id) => {
+        s.activeMenuSub.value = id;
+    };
+
     const setFirstLoadComplete = () => {
         s.isFirstLoad.value = false;
     };
@@ -157,6 +162,7 @@ export const useUI = () => {
         isPanelExpanded: s.isPanelExpanded,
         activePanelId: s.activePanelId,
         activePanelComponent: s.activePanelComponent,
+        activeMenuSub: s.activeMenuSub,
         isFirstLoad: s.isFirstLoad,
         showAboutModal: s.showAboutModal,
 
@@ -174,6 +180,7 @@ export const useUI = () => {
         closePanel,
         togglePanelExpanded,
         setPanelExpanded,
+        setMenuSub,
         setFirstLoadComplete,
         openAboutModal,
         closeAboutModal,

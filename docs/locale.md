@@ -83,7 +83,7 @@ When French is selected, the entire Settings panel re-renders in French — incl
 ## Composable API — `useLocale()`
 
 ```js
-import { useLocale } from '@/core/useLocale'
+import { useLocale } from '@/composables/useLocale'
 
 const {
   locale,          // Ref<string>             — active language code, e.g. 'en', 'fr'
@@ -148,7 +148,7 @@ const {
 
 1. Copy `src/locales/en.json` to `src/locales/{code}.json` where `{code}` is the [BCP 47](https://www.ietf.org/rfc/bcp/bcp47.txt) language subtag (e.g. `de` for German, `pt` for Portuguese).
 2. Translate the values. Any untranslated key falls back to English automatically — partial translations are always safe to ship.
-3. Add the code to the `LOCALES` map and its native name to `LOCALE_NAMES` in `src/core/useLocale.js`.
+3. Add the code to the `LOCALES` map and its native name to `LOCALE_NAMES` in `src/composables/useLocale.js`.
 
 No other code changes are required.
 
@@ -195,7 +195,7 @@ The expression is re-applied reactively whenever `mapLanguageTag` changes, so sw
 If a feature needs to read the current map-label language tag (e.g. to query an external geocoder), import `mapLanguageTag` from `useLocale()`:
 
 ```js
-import { useLocale } from '@/core/useLocale'
+import { useLocale } from '@/composables/useLocale'
 
 const { mapLanguageTag } = useLocale()
 // Use mapLanguageTag.value in API calls or MapLibre expressions

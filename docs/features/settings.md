@@ -84,7 +84,7 @@ The top navigation bar always uses Bootstrap's built-in dark theming (`data-bs-t
 ## Composable API — `useSettings()`
 
 ```js
-import { useSettings } from '@/features/settings/useSettings'
+import { useSettings } from '@/composables/useSettings'
 
 const {
   resolvedTheme, // Computed<'light'|'dark'> — effective theme after resolving auto

@@ -169,12 +169,12 @@ Switching to Following from Active uses `map.easeTo()` for a smooth transition t
 
 ## Composable API — `useLocate()`
 
-**File:** `src/features/locate/useLocate.js`
+**File:** `src/composables/useLocate.js`
 
 ```js
-import { useLocate } from '@/features/locate/useLocate';
+import { useLocate } from '@/composables/useLocate';
 
-const { mode, position, start, stop, cycle } = useLocate();
+const { mode, position, compassHeading, headingLost, hasAlerts, cycle, stop } = useLocate();
 ```
 
 ### Returned properties
@@ -183,14 +183,22 @@ const { mode, position, start, stop, cycle } = useLocate();
 |------|------|-------------|
 | `mode` | `computed<string\|null>` | Current state: `null` (inactive), `'active'`, `'following'`, or `'error'` |
 | `position` | `computed<Position\|null>` | Latest `Position` object, or `null` if unavailable |
+| `compassHeading` | `computed<number\|null>` | Smoothed compass bearing in degrees, or `null` if unavailable |
+| `headingLost` | `computed<boolean>` | `true` when orientation events stopped after an initial successful reading |
+| `permissionGranted` | `computed<boolean>` | `true` once the user has successfully shared their location at least once |
+| `hasAlerts` | `computed<boolean>` | `true` when there is an active alert (location error or heading lost) |
+| `showConfirmModal` | `ref<boolean>` | Whether the permission confirmation modal is visible |
+| `showErrorModal` | `ref<boolean>` | Whether the permission denied modal is visible |
 
 ### Actions
 
 | Name | Signature | Description |
 |------|-----------|-------------|
 | `cycle` | `()` | Advance through Inactive → Active → Following → Inactive. Triggers the confirmation modal on first use. Re-opens the error modal when in error state. |
-| `start` | `()` | Begin location watching and set mode to `'active'` |
+| `confirmLocate` | `()` | Called when the user confirms the permission request; starts location watching |
 | `stop` | `()` | Stop location watching, remove map marker, set mode to `null` |
+| `retryOrientation` | `async ()` | Re-request compass permission and restart orientation watching (must be called from a user-gesture handler) |
+| `retryPosition` | `async ()` | Re-request geolocation after a permission error, bypassing the confirmation modal |
 
 ### `Position` object
 
@@ -217,10 +225,12 @@ Only `permissionGranted` is persisted. The active mode is **not** persisted — 
 ## File structure
 
 ```
-src/features/locate/
+src/composables/
   useLocate.js        ← composable
-  panel.vue           ← side panel content (position details)
-  button.vue          ← top-bar locate button
+src/components/panels/
+  locate.vue          ← side panel content (position details)
+src/components/ui/top/
+  locate.vue          ← top-bar locate button
 src/classes/
   Position.js         ← position data model
 ```

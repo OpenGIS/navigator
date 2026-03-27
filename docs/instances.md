@@ -168,4 +168,4 @@ A plugin will receive the Vue app instance and the Navigator instance ID, allowi
 - Extend the UI by providing panel or button components
 - Persist its own state via `useStorage(namespace, defaults)` (automatically instance-scoped)
 
-When designing a plugin, keep it self-contained inside `src/features/{name}/` following the conventions in [docs/features.md](./features.md).
+When designing a plugin, keep it self-contained following the conventions in [docs/features.md](./features.md): composable in `src/composables/`, panel in `src/components/panels/`, button in `src/components/ui/top/`.
