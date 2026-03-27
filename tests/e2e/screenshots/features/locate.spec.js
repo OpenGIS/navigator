@@ -226,23 +226,16 @@ test("map marker — heading", async ({ page }) => {
     });
 });
 
-// ─── Navbar badge ────────────────────────────────────────────────────────────
+// ─── Error modal ─────────────────────────────────────────────────────────────
 
 test("navbar badge — location error state", async ({ page }) => {
     await withGrantedStorage(page);
     await page.goto("/");
     await page.waitForLoadState("networkidle");
 
-    // Trigger the error state
+    // Trigger the error state — error modal opens automatically
     await page.locator("#locate-button").click();
-    await page
-        .locator("#locate-button")
-        .filter({ hasText: /Error/ })
-        .waitFor({ timeout: 5000 });
-
-    // Close the error modal so the badge is unobstructed
-    await page.locator("#locate-error-close").click();
-    await page.locator(".navigator-alert-badge").waitFor();
+    await page.locator("#locate-error-retry").waitFor({ timeout: 5000 });
     await waitForMapIdle(page);
 
     await page.screenshot({

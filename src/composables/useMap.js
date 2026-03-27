@@ -26,7 +26,8 @@ function throttle(fn, delay) {
  */
 function isNameBased(textField) {
     if (!textField) return false;
-    const str = typeof textField === "string" ? textField : JSON.stringify(textField);
+    const str =
+        typeof textField === "string" ? textField : JSON.stringify(textField);
     return str.includes("name");
 }
 
@@ -71,10 +72,12 @@ export const useMap = (containerRef = null, options = {}) => {
 
     if (!mapCache.has(instanceId)) {
         mapCache.set(instanceId, {
-            state: useStorage("view", { mapView: { center: null, zoom: null } }),
+            state: useStorage("view", {
+                mapView: { center: null, zoom: null },
+            }),
             mapInstance: null,
             scaleControl: null,
-            currentView: ref(null),
+            mapView: ref(null),
         });
     }
 
@@ -111,7 +114,10 @@ export const useMap = (containerRef = null, options = {}) => {
                     cached.state.mapView.center && cached.state.mapView.zoom
                 );
                 if (hashView) {
-                    map.jumpTo({ center: hashView.center, zoom: hashView.zoom });
+                    map.jumpTo({
+                        center: hashView.center,
+                        zoom: hashView.zoom,
+                    });
                 } else if (hasStoredView) {
                     map.jumpTo({
                         center: cached.state.mapView.center,
@@ -124,13 +130,13 @@ export const useMap = (containerRef = null, options = {}) => {
                 const refreshView = () => {
                     const c = map.getCenter();
                     const z = map.getZoom();
-                    cached.currentView.value = { lat: c.lat, lng: c.lng, zoom: z };
+                    cached.mapView.value = { lat: c.lat, lng: c.lng, zoom: z };
                     updateUrlHash(z, c.lat, c.lng);
                 };
 
-                // Only populate currentView when there is a meaningful view to share
+                // Only populate mapView when there is a meaningful view to share
                 // (a URL hash or a previously persisted view). On a true first visit
-                // currentView stays null so the "Current view / Share this view"
+                // mapView stays null so the "Current view / Share this view"
                 // section in the menu remains hidden.
                 if (hashView || hasStoredView) {
                     refreshView();
@@ -149,7 +155,11 @@ export const useMap = (containerRef = null, options = {}) => {
                         const z = map.getZoom();
                         cached.state.mapView.center = c;
                         cached.state.mapView.zoom = z;
-                        cached.currentView.value = { lat: c.lat, lng: c.lng, zoom: z };
+                        cached.mapView.value = {
+                            lat: c.lat,
+                            lng: c.lng,
+                            zoom: z,
+                        };
                         updateUrlHash(z, c.lat, c.lng);
                     }, 1000),
                 );
@@ -159,9 +169,15 @@ export const useMap = (containerRef = null, options = {}) => {
                 // Expose idle state as a data attribute so screenshot tests can
                 // reliably wait for tiles to finish rendering before capturing.
                 const container = containerRef.value;
-                map.on("idle", () => { container.dataset.mapIdle = "true"; });
-                map.on("movestart", () => { delete container.dataset.mapIdle; });
-                map.on("zoomstart", () => { delete container.dataset.mapIdle; });
+                map.on("idle", () => {
+                    container.dataset.mapIdle = "true";
+                });
+                map.on("movestart", () => {
+                    delete container.dataset.mapIdle;
+                });
+                map.on("zoomstart", () => {
+                    delete container.dataset.mapIdle;
+                });
 
                 // Apply the active language to map labels immediately after load.
                 applyMapLanguage(map, mapLanguageTag.value);
@@ -185,7 +201,7 @@ export const useMap = (containerRef = null, options = {}) => {
 
     return {
         map: cached.mapInstance,
-        currentView: cached.currentView,
+        mapView: cached.mapView,
     };
 };
 
@@ -201,4 +217,3 @@ export const getMapInstance = (instanceId) => {
     const cached = mapCache.get(instanceId);
     return cached ? cached.mapInstance : null;
 };
-

@@ -138,24 +138,15 @@ If no orientation data is available (e.g. desktop without a sensor, or permissio
 
 ---
 
-## Menu alerts and navbar badge
+## Error modal
 
-When the locate feature has an active alert, a red `!` badge appears on the sidebar toggle button in the top navigation bar. This signals to the user that the menu contains an actionable message even when the panel is closed.
+When geolocation permission is denied, the error modal appears automatically. It explains how to re-enable location access in each browser and provides a **Try Again** button.
 
-![Navbar toggle badge showing an alert](../../assets/screenshots/docs/features/locate/navbar-badge.png)
+![Error modal with retry button](../../assets/screenshots/docs/features/locate/navbar-badge.png)
 
-The badge is hidden when there are no active alerts.
+Clicking **Try Again** resets the locate mode to inactive and immediately re-requests geolocation, bypassing the confirmation step (since the user has already granted permission once). This exits the button's **Error** state.
 
-### Alert conditions
-
-Two alerts can be active simultaneously. Each appears as a minimal inline alert inside the main menu panel with a **Re-request** button:
-
-| Alert | Condition | Action |
-|---|---|---|
-| **Location access lost** | Geolocation permission denied or revoked (`mode === 'error'`) | Restarts geolocation watching |
-| **Compass unavailable** | Orientation events stopped after an initial successful reading | Re-requests `DeviceOrientationEvent` permission and restarts watching |
-
-The **Re-request** buttons are user-gesture handlers, satisfying the iOS Safari requirement that `DeviceOrientationEvent.requestPermission()` be called within a gesture.
+Clicking **Close** dismisses the modal but leaves the button in the **Error** state. Clicking the **Error** button again re-opens the modal.
 
 ---
 
@@ -174,7 +165,7 @@ Switching to Following from Active uses `map.easeTo()` for a smooth transition t
 ```js
 import { useLocate } from '@/composables/useLocate';
 
-const { mode, position, compassHeading, headingLost, hasAlerts, cycle, stop } = useLocate();
+const { mode, position, compassHeading, headingLost, cycle, stop } = useLocate();
 ```
 
 ### Returned properties
@@ -186,7 +177,6 @@ const { mode, position, compassHeading, headingLost, hasAlerts, cycle, stop } = 
 | `compassHeading` | `computed<number\|null>` | Smoothed compass bearing in degrees, or `null` if unavailable |
 | `headingLost` | `computed<boolean>` | `true` when orientation events stopped after an initial successful reading |
 | `permissionGranted` | `computed<boolean>` | `true` once the user has successfully shared their location at least once |
-| `hasAlerts` | `computed<boolean>` | `true` when there is an active alert (location error or heading lost) |
 | `showConfirmModal` | `ref<boolean>` | Whether the permission confirmation modal is visible |
 | `showErrorModal` | `ref<boolean>` | Whether the permission denied modal is visible |
 

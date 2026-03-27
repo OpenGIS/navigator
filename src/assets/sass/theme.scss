@@ -1,0 +1,233 @@
+// ============================================================
+// Navigator Theme  ·  src/assets/sass/theme.scss
+//
+// A cartographic-inspired Bootstrap 5.3 theme designed to
+// make the Navigator UI feel native to the map beneath it.
+//
+// Structure
+// ─────────────────────────────────────────────────────────
+// §1  Bootstrap functions    (required first)
+// §2  Navigator palette      (edit these to retheme)
+// §3  Bootstrap overrides    (variables that change defaults)
+// §4  Bootstrap infrastructure (variables, maps, mixins, root)
+// §5  Full Bootstrap component set
+// §6  Navigator component overrides
+//       a  Top navigation bar
+//       b  Side panel (Offcanvas)
+//       c  Panel navigation tabs
+//       d  Panel content sections
+//       e  Icon buttons
+//       f  Share URL textarea
+// ============================================================
+
+
+// ── §1  Bootstrap functions ───────────────────────────────────
+// Must come before any variable declarations so that Bootstrap's
+// colour-manipulation helpers (tint-color, shade-color, etc.)
+// are available when we define our palette below.
+
+@import "bootstrap/scss/functions";
+
+
+// ── §2  Navigator palette ─────────────────────────────────────
+// Four base hues drawn from the muted, neutral tones of an
+// OpenStreetMap-style basemap. Adjust these alone to shift
+// the entire theme without touching individual components.
+
+$navigator-blue:  #4a8dc8; // map-water blue  — the primary accent
+$navigator-navy:  #0e1423; // deep night sky  — always-dark navbar fill
+$navigator-sand:  #f5f3ee; // warm parchment  — light-mode panel background
+$navigator-slate: #1e2533; // near-black      — body text in light mode
+
+
+// ── §3  Bootstrap variable overrides ─────────────────────────
+// Only the defaults we intentionally change. Unmentioned
+// variables keep their Bootstrap values.
+
+// Brand
+$primary:       $navigator-blue;
+
+// Body (light mode)
+$body-bg:       $navigator-sand;
+$body-color:    $navigator-slate;
+
+// Borders — featherlight so they don't crowd the map
+$border-color:              rgba(0, 0, 0, 0.09);
+$border-color-translucent:  rgba(0, 0, 0, 0.09);
+
+// Panel geometry — slightly narrower than Bootstrap's 400 px default
+$offcanvas-horizontal-width:    340px;
+$offcanvas-transition-duration: 0.25s;
+
+// Typography — one notch tighter than the 16 px browser default,
+// giving the UI a compact, map-annotation feel
+$font-size-base: 0.9375rem; // 15 px
+
+
+// ── §4  Required Bootstrap infrastructure ─────────────────────
+// Must follow §3 so these files resolve against our overrides.
+
+@import "bootstrap/scss/variables";
+@import "bootstrap/scss/variables-dark";
+@import "bootstrap/scss/maps";
+@import "bootstrap/scss/mixins";
+@import "bootstrap/scss/root";
+
+
+// ── §5  Full Bootstrap component set ──────────────────────────
+// Imported individually (instead of the monolithic bootstrap.scss)
+// so that §4 variables are already resolved before each partial.
+
+@import "bootstrap/scss/reboot";
+@import "bootstrap/scss/type";
+@import "bootstrap/scss/images";
+@import "bootstrap/scss/containers";
+@import "bootstrap/scss/grid";
+@import "bootstrap/scss/tables";
+@import "bootstrap/scss/forms";
+@import "bootstrap/scss/buttons";
+@import "bootstrap/scss/transitions";
+@import "bootstrap/scss/dropdown";
+@import "bootstrap/scss/button-group";
+@import "bootstrap/scss/nav";
+@import "bootstrap/scss/navbar";
+@import "bootstrap/scss/card";
+@import "bootstrap/scss/accordion";
+@import "bootstrap/scss/breadcrumb";
+@import "bootstrap/scss/pagination";
+@import "bootstrap/scss/badge";
+@import "bootstrap/scss/alert";
+@import "bootstrap/scss/progress";
+@import "bootstrap/scss/list-group";
+@import "bootstrap/scss/close";
+@import "bootstrap/scss/toasts";
+@import "bootstrap/scss/modal";
+@import "bootstrap/scss/tooltip";
+@import "bootstrap/scss/popover";
+@import "bootstrap/scss/carousel";
+@import "bootstrap/scss/spinners";
+@import "bootstrap/scss/offcanvas";
+@import "bootstrap/scss/placeholders";
+@import "bootstrap/scss/helpers";
+@import "bootstrap/scss/utilities";
+@import "bootstrap/scss/utilities/api";
+
+
+// §6  Navigator component overrides ────────────────────────
+// Root-level custom property so that App.vue can read the
+// panel width without needing to access the offcanvas element.
+
+:root {
+  --navigator-panel-width: #{$offcanvas-horizontal-width};
+}
+
+
+// §6a  Top navigation bar
+// ─────────────────────────────────────────────────────────────
+// The navbar always uses data-bs-theme="dark" so it stays a
+// consistent dark anchor regardless of the user's colour mode.
+// The frosted-glass treatment lets the map's palette bleed
+// through, reinforcing the "map-native" feel.
+
+.navigator-top .navbar {
+  background: rgba($navigator-navy, 0.88) !important;
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+
+// §6b  Side panel (Bootstrap Offcanvas)
+// ─────────────────────────────────────────────────────────────
+// A semi-transparent panel lets the map remain perceptible
+// through the UI, keeping panel and map visually unified.
+
+.navigator-panel {
+  --bs-offcanvas-bg: rgba(247, 245, 240, 0.94);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  border-right: 1px solid rgba(0, 0, 0, 0.07) !important;
+  box-shadow: 3px 0 28px rgba(0, 0, 0, 0.07);
+}
+
+[data-bs-theme="dark"] .navigator-panel {
+  --bs-offcanvas-bg: rgba(14, 20, 36, 0.92);
+  border-right: 1px solid rgba(255, 255, 255, 0.07) !important;
+  box-shadow: 3px 0 28px rgba(0, 0, 0, 0.35);
+}
+
+
+// §6c  Panel navigation tabs
+// ─────────────────────────────────────────────────────────────
+// Sticky tab bar at the top of the panel. Slightly more opaque
+// than the panel body to visually anchor the active section.
+
+.panel-nav {
+  background: rgba(247, 245, 240, 0.97) !important;
+  border-bottom-color: rgba(0, 0, 0, 0.07) !important;
+}
+
+[data-bs-theme="dark"] .panel-nav {
+  background: rgba(14, 20, 36, 0.97) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.07) !important;
+}
+
+
+// §6d  Panel content sections
+// ─────────────────────────────────────────────────────────────
+// Rows inside panels are separated by a featherlight border
+// that guides the eye without adding visual weight.
+
+.sidebar-section.border-top {
+  border-top-color: rgba(0, 0, 0, 0.07) !important;
+}
+
+[data-bs-theme="dark"] .sidebar-section.border-top {
+  border-top-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+
+// §6e  Icon buttons (panel nav + top bar)
+// ─────────────────────────────────────────────────────────────
+// Inactive icons use a muted secondary tone; active/hover uses
+// the brand blue. The 0.15 s transition prevents jarring snaps.
+
+.icon-btn {
+  color: var(--bs-secondary-color);
+  transition: color 0.15s ease;
+
+  &:hover {
+    color: var(--bs-primary);
+  }
+}
+
+[data-bs-theme="dark"] .icon-btn {
+  color: rgba(255, 255, 255, 0.50);
+
+  &:hover {
+    color: var(--bs-primary);
+  }
+}
+
+
+// §6f  Share URL textarea
+// ─────────────────────────────────────────────────────────────
+// Readonly, selectable display area. Styled as ambient content
+// rather than an editable field so it doesn't demand attention.
+
+.navigator-share-textarea {
+  resize: none;
+  font-size: 0.78rem;
+  line-height: 1.55;
+  color: var(--bs-secondary-color);
+  background-color: var(--bs-tertiary-bg);
+  border-color: var(--bs-border-color-translucent);
+  cursor: text;
+
+  &:focus {
+    color: var(--bs-body-color);
+    background-color: var(--bs-secondary-bg);
+    border-color: rgba(var(--bs-primary-rgb), 0.4);
+    box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.12);
+  }
+}

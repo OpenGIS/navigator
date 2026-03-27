@@ -1,4 +1,4 @@
-import { ref, computed, markRaw, inject } from "vue";
+import { ref, computed, inject } from "vue";
 
 // Per-instance state: instanceId -> state object
 const instances = new Map();
@@ -19,9 +19,7 @@ function createState(instanceId) {
         isNavExpanded: ref(false),
         isPanelVisible: ref(false),
         isPanelExpanded: ref(false),
-        activePanelId: ref(null),
-        activePanelComponent: ref(null),
-        activeMenuSub: ref('location'),
+        activePanel: ref("locate"),
     };
 }
 
@@ -78,15 +76,9 @@ export const useUI = () => {
     };
 
     /**
-     * Open a panel with specific content.
-     * @param {string} id - Unique identifier for the panel
-     * @param {Object} component - The Vue component to render
+     * Open the panel.
      */
-    const openPanel = (id, component) => {
-        s.activePanelId.value = id;
-        if (component) {
-            s.activePanelComponent.value = markRaw(component);
-        }
+    const openPanel = () => {
         s.isPanelVisible.value = true;
         s.isPanelExpanded.value = true;
         if (s.isNavVisible.value && !isDesktop.value) {
@@ -96,29 +88,17 @@ export const useUI = () => {
     };
 
     /**
-     * Toggle a panel open/closed, or switch to a new panel.
-     * @param {string} id - Unique identifier for the panel
-     * @param {Object} component - The Vue component to render
+     * Toggle the panel open/closed.
      */
-    const togglePanel = (id, component) => {
+    const togglePanel = () => {
         if (s.isNavVisible.value && !isDesktop.value) {
-            openPanel(id, component);
+            openPanel();
             return;
         }
-
-        if (s.activePanelId.value === id) {
-            if (s.isPanelVisible.value) {
-                if (s.isPanelExpanded.value) {
-                    s.isPanelVisible.value = false;
-                    s.activePanelId.value = null;
-                } else {
-                    s.isPanelExpanded.value = true;
-                }
-            } else {
-                openPanel(id, component);
-            }
+        if (s.isPanelVisible.value) {
+            s.isPanelVisible.value = false;
         } else {
-            openPanel(id, component);
+            openPanel();
         }
     };
 
@@ -134,8 +114,8 @@ export const useUI = () => {
         s.isPanelExpanded.value = value;
     };
 
-    const setMenuSub = (id) => {
-        s.activeMenuSub.value = id;
+    const setActivePanel = (id) => {
+        s.activePanel.value = id;
     };
 
     const setFirstLoadComplete = () => {
@@ -160,9 +140,7 @@ export const useUI = () => {
         isNavExpanded: s.isNavExpanded,
         isPanelVisible: s.isPanelVisible,
         isPanelExpanded: s.isPanelExpanded,
-        activePanelId: s.activePanelId,
-        activePanelComponent: s.activePanelComponent,
-        activeMenuSub: s.activeMenuSub,
+        activePanel: s.activePanel,
         isFirstLoad: s.isFirstLoad,
         showAboutModal: s.showAboutModal,
 
@@ -180,7 +158,7 @@ export const useUI = () => {
         closePanel,
         togglePanelExpanded,
         setPanelExpanded,
-        setMenuSub,
+        setActivePanel,
         setFirstLoadComplete,
         openAboutModal,
         closeAboutModal,

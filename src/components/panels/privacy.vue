@@ -7,31 +7,31 @@ const { t } = useLocale();
 <template>
   <div class="navigator-privacy-panel d-flex flex-column flex-grow-1">
     <div class="sidebar-section sidebar-section-body p-3 pb-0">
-      <h5 class="mb-0">{{ t('privacy.title') }}</h5>
+      <h5 class="mb-0">{{ t('panel.privacy.title') }}</h5>
     </div>
 
     <div class="sidebar-section sidebar-section-body p-3 border-top">
-      <h6 class="mb-2 text-muted small text-uppercase fw-semibold">{{ t('privacy.onDevice') }}</h6>
-      <p class="mb-2 small">{{ t('privacy.onDeviceBody') }}</p>
+      <h6 class="mb-2 text-muted small text-uppercase fw-semibold">{{ t('panel.privacy.onDevice') }}</h6>
+      <p class="mb-2 small">{{ t('panel.privacy.onDeviceBody') }}</p>
       <ul class="mb-0 small ps-3">
-        <li class="mb-1">{{ t('privacy.mapView') }}</li>
-        <li>{{ t('privacy.settings') }}</li>
+        <li class="mb-1">{{ t('panel.privacy.mapView') }}</li>
+        <li>{{ t('panel.privacy.settings') }}</li>
       </ul>
     </div>
 
     <div class="sidebar-section sidebar-section-body p-3 border-top">
-      <h6 class="mb-2 text-muted small text-uppercase fw-semibold">{{ t('privacy.thirdParty') }}</h6>
-      <p class="mb-0 small">{{ t('privacy.thirdPartyBody') }}</p>
+      <h6 class="mb-2 text-muted small text-uppercase fw-semibold">{{ t('panel.privacy.thirdParty') }}</h6>
+      <p class="mb-0 small">{{ t('panel.privacy.thirdPartyBody') }}</p>
     </div>
 
     <div class="sidebar-section sidebar-section-body p-3 border-top">
-      <h6 class="mb-2 text-muted small text-uppercase fw-semibold">{{ t('privacy.location') }}</h6>
-      <p class="mb-0 small">{{ t('privacy.locationBody') }}</p>
+      <h6 class="mb-2 text-muted small text-uppercase fw-semibold">{{ t('panel.privacy.location') }}</h6>
+      <p class="mb-0 small">{{ t('panel.privacy.locationBody') }}</p>
     </div>
 
     <div class="sidebar-section sidebar-section-body p-3 border-top">
-      <h6 class="mb-2 text-muted small text-uppercase fw-semibold">{{ t('privacy.noTracking') }}</h6>
-      <p class="mb-0 small">{{ t('privacy.noTrackingBody') }}</p>
+      <h6 class="mb-2 text-muted small text-uppercase fw-semibold">{{ t('panel.privacy.noTracking') }}</h6>
+      <p class="mb-0 small">{{ t('panel.privacy.noTrackingBody') }}</p>
     </div>
   </div>
 </template>

@@ -9,8 +9,7 @@ const props = defineProps({
 
 // UI
 import Top from "@/components/ui/top.vue";
-import SidePanel from "@/components/ui/side/panel.vue";
-import MenuPanel from "@/components/ui/side/menu.vue";
+import Panels from "@/components/ui/panels.vue";
 
 import { useMap } from "@/composables/useMap";
 import { useUI } from "@/composables/useUI";
@@ -48,7 +47,7 @@ const handleMapClick = () => {
 };
 
 if (isDesktop.value) {
-	openPanel("menu", MenuPanel);
+	openPanel();
 }
 </script>
 
@@ -63,7 +62,7 @@ if (isDesktop.value) {
 		</div>
 
 		<div class="navigator-content">
-			<SidePanel />
+			<Panels />
 		</div>
 
 		<!-- Map -->
@@ -89,8 +88,8 @@ if (isDesktop.value) {
 }
 
 .navigator-map.panel-open {
-	left: var(--bs-offcanvas-width, 400px);
-	width: calc(100% - var(--bs-offcanvas-width, 400px));
+	left: var(--navigator-panel-width, 340px);
+	width: calc(100% - var(--navigator-panel-width, 340px));
 }
 
 .navigator-top {

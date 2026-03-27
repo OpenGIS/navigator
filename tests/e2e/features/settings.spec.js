@@ -25,9 +25,9 @@ async function openMenuPanel(page) {
 
 /** Returns the Navigator theme root (the wrapper with data-bs-theme). */
 function themeRoot(page) {
-	// The wrapper has data-bs-theme and inline display:contents; the navbar also
-	// carries data-bs-theme="dark" — use [style*="contents"] to target only our wrapper.
-	return page.locator('[data-bs-theme][style*="contents"]');
+	// .navigator-root carries :data-bs-theme="resolvedTheme"; the navbar also has
+	// data-bs-theme="dark" (hardcoded) — use .navigator-root to target only our root.
+	return page.locator(".navigator-root");
 }
 
 test.describe("Opening Settings", () => {

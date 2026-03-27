@@ -73,24 +73,29 @@ test.describe("useMap / URL hash", () => {
     expect(page.url()).toMatch(/#map=/);
   });
 
-  test("menu hides current view section on initial load with no hash", async ({ page }) => {
+  test("locate panel shows share URL matching current hash", async ({ page }) => {
     await withNoViewStorage(page);
-    await page.goto("/");
+    await page.goto("/#map=18/50.653900/-128.009400");
     await page.waitForLoadState("networkidle");
 
-    // Panel is open on desktop but "Current view" section must not be visible
     await expect(page.locator(".navigator-panel")).toBeVisible({ timeout: 5000 });
-    await expect(page.getByText("Current view")).toBeHidden();
-    await expect(page.locator(".navigator-share-link")).toBeHidden();
+
+    const textarea = page.locator(".navigator-share-textarea");
+    await expect(textarea).toBeVisible();
+
+    await expect
+      .poll(() => textarea.inputValue(), { timeout: 5000 })
+      .toMatch(/#map=.*50\.6539/);
   });
 
-  test("menu shows current view section after the map is panned", async ({ page }) => {
+  test("locate panel share URL updates after the map is panned", async ({ page }) => {
     await withNoViewStorage(page);
-    await page.goto("/");
+    await page.goto("/#map=10/51.500000/-0.100000");
     await page.waitForLoadState("networkidle");
     await dismissAboutModal(page);
 
-    await expect(page.getByText("Current view")).toBeHidden();
+    const textarea = page.locator(".navigator-share-textarea");
+    const initialValue = await textarea.inputValue();
 
     const canvas = page.locator(".navigator-map canvas");
     await canvas.dragTo(canvas, {
@@ -98,62 +103,9 @@ test.describe("useMap / URL hash", () => {
       targetPosition: { x: 400, y: 200 },
     });
 
-    // Section appears after first moveend (throttled to 1 s)
     await expect
-      .poll(() => page.getByText("Current view").isVisible(), { timeout: 5000 })
-      .toBe(true);
-    await expect(page.locator(".navigator-share-link")).toBeVisible();
-  });
-
-  test("menu shows current coordinates", async ({ page }) => {
-    await withNoViewStorage(page);
-    await page.goto("/#map=18/50.653900/-128.009400");
-    await page.waitForLoadState("networkidle");
-
-    await expect(page.locator(".navigator-panel")).toBeVisible({ timeout: 5000 });
-
-    // Coordinates section should be visible
-    await expect(page.getByText("Current view")).toBeVisible();
-    await expect(page.getByText(/50\.\d+/)).toBeVisible();
-  });
-
-  test("menu share link contains current hash", async ({ page }) => {
-    await withNoViewStorage(page);
-    await page.goto("/#map=18/50.653900/-128.009400");
-    await page.waitForLoadState("networkidle");
-
-    await expect(page.locator(".navigator-panel")).toBeVisible({ timeout: 5000 });
-
-    const shareLink = page.locator(".navigator-share-link");
-    await expect(shareLink).toBeVisible();
-
-    const href = await shareLink.getAttribute("href");
-    expect(href).toMatch(/#map=/);
-    expect(href).toContain("/50.6539");
-  });
-
-  test("share position checkbox is hidden when locate permission was never granted", async ({ page }) => {
-    await withNoViewStorage(page);
-    await page.goto("/#map=18/50.653900/-128.009400");
-    await page.waitForLoadState("networkidle");
-
-    await expect(page.locator("#share-position-toggle")).toBeHidden();
-  });
-
-  test("share position checkbox is visible when locate permission was previously granted", async ({ page }) => {
-    await withNoViewStorage(page);
-    // Seed permissionGranted in locate storage
-    await page.addInitScript(() => {
-      localStorage.setItem(
-        "navigator_locate_app",
-        JSON.stringify({ permissionGranted: true }),
-      );
-    });
-    await page.goto("/#map=18/50.653900/-128.009400");
-    await page.waitForLoadState("networkidle");
-
-    await expect(page.locator(".navigator-panel")).toBeVisible({ timeout: 5000 });
-    await expect(page.locator("#share-position-toggle")).toBeVisible();
+      .poll(() => textarea.inputValue(), { timeout: 5000 })
+      .not.toBe(initialValue);
   });
 });
 

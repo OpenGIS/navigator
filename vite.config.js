@@ -5,6 +5,15 @@ import vue from "@vitejs/plugin-vue";
 export default defineConfig({
   plugins: [vue()],
 
+  css: {
+    preprocessorOptions: {
+      scss: {
+        quietDeps: true,
+        silenceDeprecations: ["import", "legacy-js-api"],
+      },
+    },
+  },
+
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),

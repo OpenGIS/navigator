@@ -110,12 +110,12 @@ Navigator.init({
   id: 'my-map',
   messages: {
     en: {
-      'about.title':    'My Map',
-      'about.getStarted': 'Explore',
+      'modal.welcome.title':      'My Map',
+      'modal.welcome.getStarted': 'Explore',
     },
     fr: {
-      'about.title':    'Ma carte',
-      'about.getStarted': 'Explorer',
+      'modal.welcome.title':      'Ma carte',
+      'modal.welcome.getStarted': 'Explorer',
     },
   },
 });

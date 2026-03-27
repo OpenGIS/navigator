@@ -19,8 +19,15 @@ defineProps({
     :id="id"
     :aria-pressed="active"
   >
-    <Icon :width="iconWidth" :height="iconHeight" :fill="iconColor" :name="icon" />
-    <span class="icon-btn__label" :style="{ color: iconColor }">{{ label }}</span>
+    <Icon
+      :width="iconWidth"
+      :height="iconHeight"
+      :fill="iconColor"
+      :name="icon"
+    />
+    <span class="icon-btn__label" :style="{ color: iconColor }">{{
+      label
+    }}</span>
     <slot />
   </button>
 </template>
@@ -37,6 +44,7 @@ defineProps({
   color: var(--bs-primary);
 }
 
+/*
 .icon-btn[aria-pressed="true"]::after {
   content: '';
   position: absolute;
@@ -47,7 +55,7 @@ defineProps({
   background: var(--bs-primary);
   border-radius: 2px 2px 0 0;
 }
-
+*/
 .icon-btn:focus-visible {
   outline: 2px solid white;
   outline-offset: 2px;

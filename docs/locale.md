@@ -38,12 +38,12 @@ Navigator.init({
   id: 'my-map',
   messages: {
     en: {
-      'about.title': 'My Map',
-      'about.getStarted': 'Explore',
+      'modal.welcome.title':      'My Map',
+      'modal.welcome.getStarted': 'Explore',
     },
     fr: {
-      'about.title': 'Ma carte',
-      'about.getStarted': 'Explorer',
+      'modal.welcome.title':      'Ma carte',
+      'modal.welcome.getStarted': 'Explorer',
     },
   },
 })
@@ -117,8 +117,12 @@ const {
 | `menu.compassUnavailable` | Compass unavailable. |
 | `menu.settings` | Settings |
 | `menu.about` | About |
-| `about.title` | About Navigator |
-| `about.getStarted` | Get started |
+| `modal.welcome.title` | About Navigator |
+| `modal.welcome.welcome` | Welcome to Navigator… |
+| `modal.welcome.useMenu` | Use the menu to explore the app… |
+| `modal.welcome.preferences` | Choose your preferences |
+| `modal.welcome.poweredBy` | Powered by open data… |
+| `modal.welcome.getStarted` | Get started |
 | `settings.title` | Settings |
 | `settings.appearance` | Appearance |
 | `settings.darkMode` | Dark mode |
@@ -136,11 +140,11 @@ const {
 | `locate.button.located` | Located |
 | `locate.button.following` | Following |
 | `locate.button.error` | Error |
-| `locate.modal.permissionTitle` | Permission Required |
-| `locate.modal.cancel` | Cancel |
-| `locate.modal.iUnderstand` | I Understand |
-| `locate.modal.deniedTitle` | Location access denied |
-| `locate.modal.close` | Close |
+| `modal.locate.permissionTitle` | Permission Required |
+| `modal.locate.cancel` | Cancel |
+| `modal.locate.iUnderstand` | I Understand |
+| `modal.locate.deniedTitle` | Location access denied |
+| `modal.locate.close` | Close |
 
 ---
 

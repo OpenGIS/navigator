@@ -8,12 +8,12 @@ const { t, locale, locales, localeNames, setLocale } = useLocale();
 
 <template>
     <div class="sidebar-section sidebar-section-body p-3 pb-0">
-        <h5 class="mb-0">{{ t('settings.title') }}</h5>
+        <h5 class="mb-0">{{ t('panel.settings.title') }}</h5>
     </div>
 
     <div class="sidebar-section sidebar-section-body p-3 border-top">
         <h6 class="mb-3 text-muted small text-uppercase fw-semibold">
-            {{ t('settings.appearance') }}
+            {{ t('panel.settings.appearance') }}
         </h6>
         <div class="form-check form-switch">
             <input
@@ -25,26 +25,26 @@ const { t, locale, locales, localeNames, setLocale } = useLocale();
                 @change="toggleTheme"
             />
             <label class="form-check-label" for="settings-dark-mode">
-                {{ t('settings.darkMode') }}
+                {{ t('panel.settings.darkMode') }}
             </label>
         </div>
     </div>
 
     <div class="sidebar-section sidebar-section-body p-3 border-top">
-        <h6 class="mb-3 text-muted small text-uppercase fw-semibold">{{ t('settings.units') }}</h6>
+        <h6 class="mb-3 text-muted small text-uppercase fw-semibold">{{ t('panel.settings.units') }}</h6>
         <select
             id="settings-units"
             class="form-select form-select-sm w-auto"
             :value="resolvedUnits"
             @change="(e) => setUnits(e.target.value)"
         >
-            <option value="metric">{{ t('settings.metric') }}</option>
-            <option value="imperial">{{ t('settings.imperial') }}</option>
+            <option value="metric">{{ t('panel.settings.metric') }}</option>
+            <option value="imperial">{{ t('panel.settings.imperial') }}</option>
         </select>
     </div>
 
     <div class="sidebar-section sidebar-section-body p-3 border-top">
-        <h6 class="mb-3 text-muted small text-uppercase fw-semibold">{{ t('settings.language') }}</h6>
+        <h6 class="mb-3 text-muted small text-uppercase fw-semibold">{{ t('panel.settings.language') }}</h6>
         <select
             id="settings-language"
             class="form-select form-select-sm w-auto"

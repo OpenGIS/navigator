@@ -375,13 +375,6 @@ export const useLocate = () => {
         compassHeading: computed(() => c.compassHeading.value),
         headingLost: computed(() => c.headingLost.value),
         permissionGranted: computed(() => c.storage.permissionGranted),
-        hasAlerts: computed(
-            () =>
-                c.mode.value === "error" ||
-                (c.headingLost.value &&
-                    (c.mode.value === "active" ||
-                        c.mode.value === "following")),
-        ),
         showConfirmModal: c.showConfirmModal,
         showErrorModal: c.showErrorModal,
         cycle,

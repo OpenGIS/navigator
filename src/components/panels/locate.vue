@@ -1,89 +1,59 @@
 <script setup>
-import { computed } from "vue";
-import { useLocate } from "@/composables/useLocate";
-import { useSettings } from "@/composables/useSettings";
+import { computed, ref } from "vue";
+import { useMap } from "@/composables/useMap";
 import { useLocale } from "@/composables/useLocale";
+import Icon from "@/components/ui/icon.vue";
 
-const { mode, position, compassHeading } = useLocate();
-const { isMetric } = useSettings();
+const { mapView } = useMap();
 const { t } = useLocale();
 
-const formattedCoords = computed(() => {
-    if (!position.value) return null;
-    const { lat, lng } = position.value;
-    return `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+const copied = ref(false);
+
+const shareUrl = computed(() => {
+    const base = `${window.location.origin}${window.location.pathname}`;
+    if (!mapView.value) return `${base}${window.location.hash}` || base;
+    const { lat, lng } = mapView.value;
+    const zoom = Math.round(mapView.value.zoom);
+    return `${base}#map=${zoom}/${lat.toFixed(6)}/${lng.toFixed(6)}`;
 });
 
-const formattedAccuracy = computed(() => {
-    if (!position.value) return null;
-    if (isMetric.value) return `${Math.round(position.value.accuracy)} m`;
-    return `${Math.round(position.value.accuracy * 3.28084)} ft`;
-});
-
-const formattedSpeed = computed(() => {
-    if (!position.value || position.value.speed === null) return null;
-    if (isMetric.value) return `${(position.value.speed * 3.6).toFixed(1)} km/h`;
-    return `${(position.value.speed * 2.23694).toFixed(1)} mph`;
-});
-
-const formattedHeading = computed(() => {
-    if (compassHeading.value === null) return null;
-    return `${compassHeading.value}°`;
-});
+const copyLink = async () => {
+    try {
+        await navigator.clipboard.writeText(shareUrl.value);
+        copied.value = true;
+        setTimeout(() => { copied.value = false; }, 2000);
+    } catch {
+        // fallback: select the textarea text
+        const el = document.querySelector(".navigator-share-textarea");
+        if (el) { el.select(); document.execCommand("copy"); }
+    }
+};
 </script>
 
 <template>
     <div class="sidebar-section sidebar-section-body p-3 pb-0">
-        <h5 class="mb-0">{{ t('locate.title') }}</h5>
+        <h5 class="mb-0">{{ t('panel.locate.title') }}</h5>
     </div>
 
-    <div v-if="mode === null" class="sidebar-section sidebar-section-body p-3 border-top">
-        <p class="mb-0 text-body-secondary small">
-            {{ t('locate.pressLocate') }}
-        </p>
-    </div>
+    <div class="sidebar-section sidebar-section-body p-3 border-top">
+        <p class="mb-2 small text-body-secondary">{{ t('panel.locate.shareDescription') }}</p>
 
-    <div v-if="mode === 'error'" class="sidebar-section sidebar-section-body p-3 border-top">
-        <p class="mb-0 text-danger small">
-            {{ t('locate.accessDenied') }}
-        </p>
-    </div>
+        <textarea
+            class="navigator-share-textarea form-control form-control-sm font-monospace mb-2"
+            :value="shareUrl"
+            readonly
+            rows="3"
+            @focus="$event.target.select()"
+        ></textarea>
 
-    <div
-        v-if="position"
-        class="sidebar-section sidebar-section-body p-3 border-top"
-    >
-        <h6 class="mb-2 text-muted small text-uppercase fw-semibold">
-            {{ t('locate.position') }}
-        </h6>
-
-        <p class="mb-1 small">
-            <span class="text-body-secondary">{{ t('locate.latLng') }}</span>
-            <span class="ms-2 font-monospace">{{ formattedCoords }}</span>
-        </p>
-
-        <p class="mb-1 small">
-            <span class="text-body-secondary">{{ t('locate.accuracy') }}</span>
-            <span class="ms-2 font-monospace">{{ formattedAccuracy }}</span>
-        </p>
-
-        <p v-if="formattedSpeed" class="mb-1 small">
-            <span class="text-body-secondary">{{ t('locate.speed') }}</span>
-            <span class="ms-2 font-monospace">{{ formattedSpeed }}</span>
-        </p>
-
-        <p v-if="formattedHeading" class="mb-1 small">
-            <span class="text-body-secondary">{{ t('locate.heading') }}</span>
-            <span class="ms-2 font-monospace">{{ formattedHeading }}</span>
-        </p>
-    </div>
-
-    <div
-        v-if="mode === 'following'"
-        class="sidebar-section sidebar-section-body p-3 border-top"
-    >
-        <p class="mb-0 text-body-secondary small">
-            {{ t('locate.following') }}
-        </p>
+        <button
+            type="button"
+            class="btn btn-sm w-100 d-flex align-items-center justify-content-center gap-1"
+            :class="copied ? 'btn-success' : 'btn-outline-primary'"
+            @click="copyLink"
+        >
+            <Icon width="16" height="16" fill="currentColor" :name="copied ? 'check' : 'globe'" />
+            {{ copied ? t('panel.locate.copied') : t('panel.locate.copyLink') }}
+        </button>
     </div>
 </template>
