@@ -1,6 +1,10 @@
 # Navigator
 
-A free, Open-Source navigation app for the real world.
+A map for everyone, right in the browser.
+
+Navigator aims to be a general purpose mapping tool that anyone can use, built with Open-Source software and Open data.
+
+The app is free to use, does not require any registration, and does not collect any personal data.
 
 [Use Navigator](https://www.ogis.org/navigator/)
 
@@ -41,7 +45,8 @@ Navigator.init({ id: "my-map" });
 Navigator.init({
   id: "my-map", // DOM element id to mount into (created if absent); defaults to 'navigator'
   locale: "fr", // default language; uses browser language if omitted
-  messages: {   // override any UI label for any language
+  messages: {
+    // override any UI label for any language
     en: { "about.title": "My Map" },
     fr: { "about.title": "Ma carte" },
   },
@@ -60,8 +65,14 @@ See [`docs/config.md`](docs/config.md) for the full configuration reference.
 Each call to `Navigator.init()` creates a fully isolated instance with its own map, UI state, and localStorage namespace.
 
 ```js
-  Navigator.init({ id: 'map-a', mapOptions: { center: [-128.0094, 50.6539], zoom: 10 } });
-  Navigator.init({ id: 'map-b', mapOptions: { center: [-128.0094, 50.6539], zoom: 14 } });
+Navigator.init({
+  id: "map-a",
+  mapOptions: { center: [-128.0094, 50.6539], zoom: 10 },
+});
+Navigator.init({
+  id: "map-b",
+  mapOptions: { center: [-128.0094, 50.6539], zoom: 14 },
+});
 ```
 
 See [`docs/instances.md`](docs/instances.md) for full details.
@@ -71,6 +82,7 @@ See [`docs/instances.md`](docs/instances.md) for full details.
 The Navigator demo is installable as a Progressive Web App (PWA) on supported browsers and devices. When visited in a compatible browser, users will be prompted to add it to their home screen for a full-screen, app-like experience.
 
 The demo includes:
+
 - A [Web App Manifest](public/manifest.json) with icons, name, and display settings
 - Optimised viewport meta tags to prevent page-level zoom (map zoom is handled by MapLibre)
 - Apple-specific meta tags for iOS home screen installation

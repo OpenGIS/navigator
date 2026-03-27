@@ -19,7 +19,7 @@ function createState(instanceId) {
         isNavExpanded: ref(false),
         isPanelVisible: ref(false),
         isPanelExpanded: ref(false),
-        activePanel: ref("locate"),
+        activePanel: ref("view"),
     };
 }
 

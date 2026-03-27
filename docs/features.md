@@ -18,7 +18,7 @@ src/components/ui/top/{feature}.vue ← top-bar button (if the feature has one)
 
 ```
 src/composables/useLocate.js
-src/components/panels/locate.vue
+src/components/panels/view.vue       ← the "Map view" share panel
 src/components/ui/top/locate.vue
 ```
 
@@ -148,7 +148,7 @@ const formattedCoords = computed(() => {
 
 Panels are not registered globally; they are passed as a component reference to `useUI().openPanel()` or `useUI().togglePanel()` at runtime.
 
-**Reference:** `src/components/panels/locate.vue`
+**Reference:** `src/components/panels/view.vue`
 
 ---
 

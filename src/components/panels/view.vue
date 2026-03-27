@@ -17,13 +17,26 @@ const shareUrl = computed(() => {
     return `${base}#map=${zoom}/${lat.toFixed(6)}/${lng.toFixed(6)}`;
 });
 
+const osmUrl = computed(() => {
+    if (!mapView.value) return null;
+    const { lat, lng } = mapView.value;
+    const zoom = Math.round(mapView.value.zoom);
+    return `https://www.openstreetmap.org/#map=${zoom}/${lat.toFixed(6)}/${lng.toFixed(6)}`;
+});
+
+const osmEditUrl = computed(() => {
+    if (!mapView.value) return null;
+    const { lat, lng } = mapView.value;
+    const zoom = Math.round(mapView.value.zoom);
+    return `https://www.openstreetmap.org/edit#map=${zoom}/${lat.toFixed(6)}/${lng.toFixed(6)}`;
+});
+
 const copyLink = async () => {
     try {
         await navigator.clipboard.writeText(shareUrl.value);
         copied.value = true;
         setTimeout(() => { copied.value = false; }, 2000);
     } catch {
-        // fallback: select the textarea text
         const el = document.querySelector(".navigator-share-textarea");
         if (el) { el.select(); document.execCommand("copy"); }
     }
@@ -32,11 +45,11 @@ const copyLink = async () => {
 
 <template>
     <div class="sidebar-section sidebar-section-body p-3 pb-0">
-        <h5 class="mb-0">{{ t('panel.locate.title') }}</h5>
+        <h5 class="mb-0">{{ t('panel.view.title') }}</h5>
     </div>
 
     <div class="sidebar-section sidebar-section-body p-3 border-top">
-        <p class="mb-2 small text-body-secondary">{{ t('panel.locate.shareDescription') }}</p>
+        <p class="mb-2 small text-body-secondary">{{ t('panel.view.shareDescription') }}</p>
 
         <textarea
             class="navigator-share-textarea form-control form-control-sm font-monospace mb-2"
@@ -53,7 +66,30 @@ const copyLink = async () => {
             @click="copyLink"
         >
             <Icon width="16" height="16" fill="currentColor" :name="copied ? 'check' : 'globe'" />
-            {{ copied ? t('panel.locate.copied') : t('panel.locate.copyLink') }}
+            {{ copied ? t('panel.view.copied') : t('panel.view.copyLink') }}
         </button>
+
+        <hr class="my-2 opacity-25">
+
+        <div class="d-flex gap-2">
+            <a
+                class="btn btn-sm btn-outline-secondary flex-fill d-flex align-items-center justify-content-center gap-1"
+                :href="osmUrl ?? '#'"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                <Icon width="14" height="14" fill="currentColor" name="globe" />
+                {{ t('panel.view.viewOnOsm') }}
+            </a>
+            <a
+                class="btn btn-sm btn-outline-secondary flex-fill d-flex align-items-center justify-content-center gap-1"
+                :href="osmEditUrl ?? '#'"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                <Icon width="14" height="14" fill="currentColor" name="pencil" />
+                {{ t('panel.view.editOnOsm') }}
+            </a>
+        </div>
     </div>
 </template>

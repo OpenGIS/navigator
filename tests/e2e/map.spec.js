@@ -73,7 +73,7 @@ test.describe("useMap / URL hash", () => {
     expect(page.url()).toMatch(/#map=/);
   });
 
-  test("locate panel shows share URL matching current hash", async ({ page }) => {
+  test("view panel shows share URL matching current hash", async ({ page }) => {
     await withNoViewStorage(page);
     await page.goto("/#map=18/50.653900/-128.009400");
     await page.waitForLoadState("networkidle");
@@ -88,7 +88,7 @@ test.describe("useMap / URL hash", () => {
       .toMatch(/#map=.*50\.6539/);
   });
 
-  test("locate panel share URL updates after the map is panned", async ({ page }) => {
+  test("view panel share URL updates after the map is panned", async ({ page }) => {
     await withNoViewStorage(page);
     await page.goto("/#map=10/51.500000/-0.100000");
     await page.waitForLoadState("networkidle");
@@ -106,6 +106,28 @@ test.describe("useMap / URL hash", () => {
     await expect
       .poll(() => textarea.inputValue(), { timeout: 5000 })
       .not.toBe(initialValue);
+  });
+
+  test("view panel has View on OSM and Edit on OSM links", async ({ page }) => {
+    await withNoViewStorage(page);
+    await page.goto("/#map=14/51.505100/-0.090500");
+    await page.waitForLoadState("networkidle");
+
+    await expect(page.locator(".navigator-panel")).toBeVisible({ timeout: 5000 });
+
+    const viewLink = page.getByRole("link", { name: /view on osm/i });
+    const editLink = page.getByRole("link", { name: /edit on osm/i });
+
+    await expect(viewLink).toBeVisible();
+    await expect(editLink).toBeVisible();
+
+    await expect
+      .poll(() => viewLink.getAttribute("href"), { timeout: 5000 })
+      .toMatch(/openstreetmap\.org\/#map=14\/51\.505/);
+
+    await expect
+      .poll(() => editLink.getAttribute("href"), { timeout: 5000 })
+      .toMatch(/openstreetmap\.org\/edit#map=14\/51\.505/);
   });
 });
 

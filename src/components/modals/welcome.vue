@@ -19,7 +19,7 @@ const { resolvedUnits, setUnits } = useSettings();
     <template #default>
       <div class="modal-header">
         <h5 class="modal-title" id="about-modal-title">
-        {{ t('modal.welcome.title') }}
+          {{ t("modal.welcome.title") }}
         </h5>
         <button
           type="button"
@@ -29,12 +29,12 @@ const { resolvedUnits, setUnits } = useSettings();
         ></button>
       </div>
       <div class="modal-body">
-        <p>{{ t('modal.welcome.welcome') }}</p>
-        <p>{{ t('modal.welcome.useMenu') }}</p>
-        <p class="fw-semibold mb-2">{{ t('modal.welcome.preferences') }}</p>
+        <p class="lead">{{ t("modal.welcome.introOne") }}</p>
+        <p>{{ t("modal.welcome.introTwo") }}</p>
+        <p class="fw-semibold mb-2">{{ t("modal.welcome.preferences") }}</p>
         <div class="mb-2">
           <label for="about-language" class="form-label small mb-1">
-            {{ t('panel.settings.language') }}
+            {{ t("panel.settings.language") }}
           </label>
           <select
             id="about-language"
@@ -49,7 +49,7 @@ const { resolvedUnits, setUnits } = useSettings();
         </div>
         <div class="mb-3">
           <label for="about-units" class="form-label small mb-1">
-            {{ t('panel.settings.units') }}
+            {{ t("panel.settings.units") }}
           </label>
           <select
             id="about-units"
@@ -57,12 +57,12 @@ const { resolvedUnits, setUnits } = useSettings();
             :value="resolvedUnits"
             @change="(e) => setUnits(e.target.value)"
           >
-            <option value="metric">{{ t('panel.settings.metric') }}</option>
-            <option value="imperial">{{ t('panel.settings.imperial') }}</option>
+            <option value="metric">{{ t("panel.settings.metric") }}</option>
+            <option value="imperial">{{ t("panel.settings.imperial") }}</option>
           </select>
         </div>
         <p class="mb-0 text-body-secondary small">
-          {{ t('modal.welcome.poweredBy') }}
+          {{ t("modal.welcome.locateInfo") }}
         </p>
       </div>
       <div class="modal-footer">
@@ -72,7 +72,7 @@ const { resolvedUnits, setUnits } = useSettings();
           id="about-modal-close"
           @click="closeAboutModal"
         >
-          {{ t('modal.welcome.getStarted') }}
+          {{ t("modal.welcome.getStarted") }}
         </button>
       </div>
     </template>

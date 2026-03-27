@@ -168,15 +168,14 @@ export const useMap = (containerRef = null, options = {}) => {
 
                 // Expose idle state as a data attribute so screenshot tests can
                 // reliably wait for tiles to finish rendering before capturing.
-                const container = containerRef.value;
                 map.on("idle", () => {
-                    container.dataset.mapIdle = "true";
+                    if (containerRef.value) containerRef.value.dataset.mapIdle = "true";
                 });
                 map.on("movestart", () => {
-                    delete container.dataset.mapIdle;
+                    if (containerRef.value) delete containerRef.value.dataset.mapIdle;
                 });
                 map.on("zoomstart", () => {
-                    delete container.dataset.mapIdle;
+                    if (containerRef.value) delete containerRef.value.dataset.mapIdle;
                 });
 
                 // Apply the active language to map labels immediately after load.

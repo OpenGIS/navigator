@@ -167,3 +167,38 @@ $primary: #your-brand-color;
 ```
 
 > **Tip:** Copy `src/assets/sass/theme.scss` into your project as a starting point and edit the palette variables in §2. Everything else will cascade automatically.
+
+---
+
+## Example themes
+
+Ready-to-use theme files live in [`docs/theme/`](theme/). Each file is a complete, standalone SCSS theme — copy it into your project and import it as described above.
+
+### Green (`docs/theme/green.scss`)
+
+A dark-navbar, green-accent theme inspired by GPS and trail-mapping apps. The top bar is near-black (`#111111`), the primary accent is a vivid GPS-marker green (`#39d353`), and the panel uses a translucent white/dark background so the map remains perceptible through the UI in both light and dark modes.
+
+**Palette**
+
+| Variable      | Value     | Role                                          |
+| ------------- | --------- | --------------------------------------------- |
+| `$nav-green`  | `#39d353` | Primary accent — links, active states, focus  |
+| `$nav-black`  | `#111111` | Top bar background (near-black)               |
+| `$nav-white`  | `#ffffff` | Light-mode panel base                         |
+| `$nav-ink`    | `#1a1f1a` | Body text in light mode                       |
+
+**Quick start**
+
+1. Copy `docs/theme/green.scss` into your project (e.g. `src/green-theme.scss`).
+2. Do **not** import `@ogis/navigator/navigator.css`.
+3. Import the theme file in your entry point:
+
+```js
+// main.js
+import Navigator from "@ogis/navigator";
+import "./green-theme.scss";
+
+Navigator.init({ id: "map" });
+```
+
+4. To adjust colours, edit the four palette variables at the top of the file (§2). Everything else cascades automatically.
