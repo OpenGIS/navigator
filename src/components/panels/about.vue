@@ -18,9 +18,7 @@ const { t } = useLocale();
         rel="noopener"
         class="ogis-logo"
       >
-        <svg width="48" height="48" fill="#fff" aria-hidden="true">
-          <use href="@ogis/icons/dist/ogis-icons.svg#ogis-logo"></use>
-        </svg>
+        <Icon name="ogis-logo" width="48" height="48" fill="#fff" aria-hidden="true" />
       </a>
 
       <p class="lead">{{ t("panel.about.descriptionOne") }}</p>
