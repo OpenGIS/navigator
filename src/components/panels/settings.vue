@@ -1,6 +1,6 @@
 <script setup>
-import { useSettings } from "@/features/settings/useSettings";
-import { useLocale } from "@/core/useLocale";
+import { useSettings } from "@/composables/useSettings";
+import { useLocale } from "@/composables/useLocale";
 
 const { isDark, resolvedUnits, toggleTheme, setUnits } = useSettings();
 const { t, locale, locales, localeNames, setLocale } = useLocale();

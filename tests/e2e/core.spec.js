@@ -210,15 +210,115 @@ test.describe("First load / Returning visits", () => {
 // ─── First load / About button ────────────────────────────────────────────────
 
 test.describe("First load / About button", () => {
-  test("About button in menu reopens the modal on returning visit", async ({ page }) => {
+  test("About button in menu opens the About panel", async ({ page }) => {
     await withViewStorage(page);
     await page.goto("/");
     await page.waitForLoadState("networkidle");
 
     await expect(page.locator(".navigator-panel")).toBeVisible({ timeout: 5000 });
-    await expect(page.locator("#about-modal")).toHaveCount(0);
 
     await page.locator("#about-button").click();
-    await expect(page.locator("#about-modal")).toBeVisible();
+    await expect(page.locator(".navigator-about-panel")).toBeVisible();
+  });
+});
+
+// ─── About panel ──────────────────────────────────────────────────────────────
+
+test.describe("About panel", () => {
+  test("About panel shows the app description", async ({ page }) => {
+    await withViewStorage(page);
+    await page.goto("/");
+    await page.waitForLoadState("networkidle");
+
+    await page.locator("#about-button").click();
+    await expect(page.locator(".navigator-about-panel")).toContainText("Navigator");
+  });
+
+  test("About panel contains attribution for OpenStreetMap", async ({ page }) => {
+    await withViewStorage(page);
+    await page.goto("/");
+    await page.waitForLoadState("networkidle");
+
+    await page.locator("#about-button").click();
+    await expect(page.locator(".navigator-about-panel")).toContainText("OpenStreetMap");
+  });
+
+  test("About panel contains attribution for MapLibre GL JS", async ({ page }) => {
+    await withViewStorage(page);
+    await page.goto("/");
+    await page.waitForLoadState("networkidle");
+
+    await page.locator("#about-button").click();
+    await expect(page.locator(".navigator-about-panel")).toContainText("MapLibre GL JS");
+  });
+
+  test("About panel contains attribution for OpenFreeMap", async ({ page }) => {
+    await withViewStorage(page);
+    await page.goto("/");
+    await page.waitForLoadState("networkidle");
+
+    await page.locator("#about-button").click();
+    await expect(page.locator(".navigator-about-panel")).toContainText("OpenFreeMap");
+  });
+
+  test("About panel contains attribution for Vue JS and Bootstrap", async ({ page }) => {
+    await withViewStorage(page);
+    await page.goto("/");
+    await page.waitForLoadState("networkidle");
+
+    await page.locator("#about-button").click();
+    await expect(page.locator(".navigator-about-panel")).toContainText("Vue JS");
+    await expect(page.locator(".navigator-about-panel")).toContainText("Bootstrap");
+  });
+});
+
+// ─── Privacy panel ────────────────────────────────────────────────────────────
+
+test.describe("Privacy panel", () => {
+  test("Privacy button in menu opens the Privacy panel", async ({ page }) => {
+    await withViewStorage(page);
+    await page.goto("/");
+    await page.waitForLoadState("networkidle");
+
+    await expect(page.locator(".navigator-panel")).toBeVisible({ timeout: 5000 });
+
+    await page.locator("#privacy-button").click();
+    await expect(page.locator(".navigator-privacy-panel")).toBeVisible();
+  });
+
+  test("Privacy panel explains on-device storage", async ({ page }) => {
+    await withViewStorage(page);
+    await page.goto("/");
+    await page.waitForLoadState("networkidle");
+
+    await page.locator("#privacy-button").click();
+    await expect(page.locator(".navigator-privacy-panel")).toContainText("local storage");
+  });
+
+  test("Privacy panel mentions third-party tile services", async ({ page }) => {
+    await withViewStorage(page);
+    await page.goto("/");
+    await page.waitForLoadState("networkidle");
+
+    await page.locator("#privacy-button").click();
+    await expect(page.locator(".navigator-privacy-panel")).toContainText("OpenFreeMap");
+  });
+
+  test("Privacy panel covers location data", async ({ page }) => {
+    await withViewStorage(page);
+    await page.goto("/");
+    await page.waitForLoadState("networkidle");
+
+    await page.locator("#privacy-button").click();
+    await expect(page.locator(".navigator-privacy-panel")).toContainText("Locate");
+  });
+
+  test("Privacy panel states no tracking", async ({ page }) => {
+    await withViewStorage(page);
+    await page.goto("/");
+    await page.waitForLoadState("networkidle");
+
+    await page.locator("#privacy-button").click();
+    await expect(page.locator(".navigator-privacy-panel")).toContainText("no analytics");
   });
 });

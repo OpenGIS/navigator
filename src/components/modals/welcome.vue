@@ -1,7 +1,7 @@
 <script setup>
-import { useUI } from "@/core/useUI";
-import { useLocale } from "@/core/useLocale";
-import { useSettings } from "@/features/settings/useSettings";
+import { useUI } from "@/composables/useUI";
+import { useLocale } from "@/composables/useLocale";
+import { useSettings } from "@/composables/useSettings";
 
 const { showAboutModal, closeAboutModal } = useUI();
 const { t, locale, locales, localeNames, setLocale } = useLocale();

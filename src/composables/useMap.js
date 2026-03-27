@@ -3,8 +3,8 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import { inject, onMounted, onUnmounted, ref, watch } from "vue";
 import { useStorage } from "@/composables/useStorage";
 import { parseUrlHash, updateUrlHash } from "@/composables/useUrlHash";
-import { useSettings } from "@/features/settings/useSettings";
-import { useLocale } from "@/core/useLocale";
+import { useSettings } from "@/composables/useSettings";
+import { useLocale } from "@/composables/useLocale";
 
 // Per-instance cache: instanceId -> { state, mapInstance }
 const mapCache = new Map();
@@ -155,6 +155,13 @@ export const useMap = (containerRef = null, options = {}) => {
                 );
 
                 cached.mapInstance = map;
+
+                // Expose idle state as a data attribute so screenshot tests can
+                // reliably wait for tiles to finish rendering before capturing.
+                const container = containerRef.value;
+                map.on("idle", () => { container.dataset.mapIdle = "true"; });
+                map.on("movestart", () => { delete container.dataset.mapIdle; });
+                map.on("zoomstart", () => { delete container.dataset.mapIdle; });
 
                 // Apply the active language to map labels immediately after load.
                 applyMapLanguage(map, mapLanguageTag.value);

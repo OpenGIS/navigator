@@ -1,8 +1,8 @@
 <script setup>
 import { computed } from "vue";
-import { useLocate } from "@/features/locate/useLocate";
-import { useSettings } from "@/features/settings/useSettings";
-import { useLocale } from "@/core/useLocale";
+import { useLocate } from "@/composables/useLocate";
+import { useSettings } from "@/composables/useSettings";
+import { useLocale } from "@/composables/useLocale";
 
 const { mode, position, compassHeading } = useLocate();
 const { isMetric } = useSettings();

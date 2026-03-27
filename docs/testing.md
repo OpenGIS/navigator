@@ -26,10 +26,14 @@ Each doc file has a corresponding spec file. Find the one that covers what you a
 
 | Doc | Spec |
 |-----|------|
+| `docs/config.md` | `tests/e2e/config.spec.js` |
 | `docs/instances.md` | `tests/e2e/instances.spec.js` |
+| `docs/core.md` | `tests/e2e/core.spec.js` |
 | `docs/map.md` | `tests/e2e/map.spec.js` |
 | `docs/ui.md` | `tests/e2e/ui.spec.js` |
+| `docs/locale.md` | `tests/e2e/locale.spec.js` |
 | `docs/features/locate.md` | `tests/e2e/features/locate.spec.js` |
+| `docs/features/settings.md` | `tests/e2e/features/settings.spec.js` |
 
 Screenshot specs live in `tests/e2e/screenshots/` and mirror the same names.
 
@@ -69,7 +73,7 @@ npx playwright test --ui
 
 E2E tests mirror the documentation. Each doc file has a corresponding spec, and each heading in the doc maps to a `test.describe` block.
 
-When a new doc file is added (e.g. `docs/4.myfeature.md`), create a corresponding `tests/e2e/4.myfeature.spec.js` with a `test.describe` block for each heading.
+When a new doc file is added (e.g. `docs/myfeature.md`), create a corresponding `tests/e2e/myfeature.spec.js` with a `test.describe` block for each heading.
 
 ---
 
@@ -81,6 +85,10 @@ Screenshots are captured by Playwright and embedded in documentation. They live 
 |-----------------|--------|---------|
 | `tests/e2e/screenshots/readme.spec.js` | `assets/screenshots/app-preview.png` | `README.md` |
 | `tests/e2e/screenshots/core.spec.js` | `assets/screenshots/docs/core/` | `docs/core.md` |
+| `tests/e2e/screenshots/map.spec.js` | `assets/screenshots/docs/map/` | `docs/map.md` |
+| `tests/e2e/screenshots/ui.spec.js` | `assets/screenshots/docs/ui/` | `docs/ui.md` |
+| `tests/e2e/screenshots/locale.spec.js` | `assets/screenshots/docs/locale/` | `docs/locale.md` |
+| `tests/e2e/screenshots/features/locate.spec.js` | `assets/screenshots/docs/features/locate/` | `docs/features/locate.md` |
 
 To regenerate a single screenshot spec:
 
@@ -92,7 +100,7 @@ Screenshots are committed to the repository so docs render correctly on GitHub a
 
 ### Screenshot conventions
 
-- One screenshot spec per doc file, numbered to match (e.g. `screenshots/features.spec.js` for `docs/features.md`).
+- One screenshot spec per doc file (e.g. `screenshots/features.spec.js` for `docs/features.md`).
 - Screenshots capture the full viewport at **1280×720** (desktop) unless a specific breakpoint is being illustrated.
 - Test names describe the UI state being captured (e.g. `"useUI / First load — desktop initial load"`).
 - Not every section needs a screenshot — add one when the visual output meaningfully illustrates the behaviour.
@@ -107,13 +115,13 @@ The standard initial test view used across E2E tests and screenshots is:
 #map=18/50.653900/-128.009400
 ```
 
-This is Port Hardy, BC — a recognisable coastal location used in test fixtures, screenshot specs, and the README preview image.
+This is Holberg, BC (Scarlet Ibis Pub) — a recognisable coastal location used in test fixtures, screenshot specs, and the README preview image.
 
 ---
 
 ## Writing Tests
 
-- Create spec files in `tests/e2e/` with the `.spec.js` extension, numbered to match the corresponding doc.
+- Create spec files in `tests/e2e/` with the `.spec.js` extension, named to match the corresponding doc.
 - Name `test.describe` blocks after doc headings (e.g. `"useMap / View persistence"`).
 - Use `page.addInitScript` to seed or clear `localStorage` before navigation.
 - Storage keys follow the pattern `navigator_{namespace}_{instanceId}`. The demo uses `id: "app"`, so the view key is `navigator_view_app`.
@@ -137,14 +145,23 @@ test.describe("My feature / My heading", () => {
 ```
 tests/
   e2e/
+    config.spec.js           ← docs/config.md
     instances.spec.js        ← docs/instances.md
+    core.spec.js             ← docs/core.md
     map.spec.js              ← docs/map.md
     ui.spec.js               ← docs/ui.md
+    locale.spec.js           ← docs/locale.md
     features/
       locate.spec.js         ← docs/features/locate.md
+      settings.spec.js       ← docs/features/settings.md
     screenshots/
       readme.spec.js         ← assets/screenshots/app-preview.png
       core.spec.js           ← assets/screenshots/docs/core/
+      map.spec.js            ← assets/screenshots/docs/map/
+      ui.spec.js             ← assets/screenshots/docs/ui/
+      locale.spec.js         ← assets/screenshots/docs/locale/
+      features/
+        locate.spec.js       ← assets/screenshots/docs/features/locate/
 assets/
   screenshots/
     app-preview.png          ← README.md hero image

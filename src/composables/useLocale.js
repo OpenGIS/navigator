@@ -1,5 +1,5 @@
 import { computed, inject } from "vue";
-import { useSettings } from "@/features/settings/useSettings";
+import { useSettings } from "@/composables/useSettings";
 import en from "@/locales/en.json";
 import fr from "@/locales/fr.json";
 

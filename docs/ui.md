@@ -4,7 +4,7 @@
 
 ---
 
-## `useUI` — `src/core/useUI.js`
+## `useUI` — `src/composables/useUI.js`
 
 Manages all application UI state: responsive breakpoints, the navigation sidebar, and the side panel.
 
@@ -13,7 +13,7 @@ Manages all application UI state: responsive breakpoints, the navigation sidebar
 Call `useUI()` from any component's `setup` to access state and actions. State is shared across all components within the same Navigator instance.
 
 ```js
-import { useUI } from '@/core/useUI';
+import { useUI } from '@/composables/useUI';
 
 const { isDesktop, isPanelVisible, openPanel, togglePanel } = useUI();
 ```
@@ -41,7 +41,7 @@ The side panel displays a single active Vue component at a time. Features open t
 Opens the panel with the given component. Closes the mobile nav if open.
 
 ```js
-import MyPanel from '@/features/my-feature/panel.vue';
+import MyPanel from '@/components/panels/my-feature.vue';
 
 openPanel('my-feature', MyPanel);
 ```
@@ -77,6 +77,7 @@ Closes the panel without changing the active component.
 | `isPanelExpanded` | `boolean` | Whether the panel is in expanded mode |
 | `activePanelId` | `string \| null` | The id of the currently active panel |
 | `activePanelComponent` | `Component \| null` | The Vue component rendered in the panel |
+| `activeMenuSub` | `string` | The active sub-panel within the menu (`'location'`, `'settings'`, `'about'`, `'privacy'`) |
 
 #### Computed
 
@@ -95,6 +96,7 @@ Closes the panel without changing the active component.
 | `closePanel` | `()` | Close the panel |
 | `togglePanelExpanded` | `()` | Toggle panel expanded state |
 | `setPanelExpanded` | `(value)` | Set panel expanded state directly |
+| `setMenuSub` | `(id)` | Switch the active menu sub-panel (`'location'`, `'settings'`, `'about'`, `'privacy'`) |
 | `toggleNav` | `()` | Toggle navigation sidebar |
 | `closeNav` | `()` | Close navigation sidebar |
 | `setNavExpanded` | `(value)` | Set nav expanded state directly |

@@ -1,11 +1,11 @@
 <script setup>
-import About from "@/components/ui/about.vue";
+import About from "@/components/modals/welcome.vue";
 import MenuPanel from "@/components/ui/side/menu.vue";
-import { useUI } from "@/core/useUI";
-import { useLocale } from "@/core/useLocale";
-import { useLocate } from "@/features/locate/useLocate";
+import { useUI } from "@/composables/useUI";
+import { useLocale } from "@/composables/useLocale";
+import { useLocate } from "@/composables/useLocate";
 import IconButton from "@/components/ui/icon-button.vue";
-import LocateButton from "@/features/locate/button.vue";
+import LocateButton from "@/components/ui/top/locate.vue";
 
 const { togglePanel } = useUI();
 const { hasAlerts } = useLocate();

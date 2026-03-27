@@ -76,17 +76,25 @@ test("permission denied modal — error state", async ({ page }) => {
  * Capture a small region around the locate button.
  * The button sits in the top-right area of the nav bar.
  */
+/** Wait for the map to finish rendering all tiles (idle state). */
+const waitForMapIdle = (page) =>
+    page.locator(".navigator-map[data-map-idle]").waitFor({ timeout: 15000 });
+
 async function screenshotLocateButton(page, filename) {
     const btn = page.locator("#locate-button");
+    const nav = page.locator(".navigator-top nav");
     const box = await btn.boundingBox();
+    const navBox = await nav.boundingBox();
     const pad = 20;
+    const clipTop = Math.max(0, box.y - pad);
+    const clipBottom = Math.min(navBox.y + navBox.height, box.y + box.height + pad);
     await page.screenshot({
         path: path.join(OUT, filename),
         clip: {
             x: Math.max(0, box.x - pad),
-            y: Math.max(0, box.y - pad),
+            y: clipTop,
             width: box.width + pad * 2,
-            height: box.height + pad * 2,
+            height: clipBottom - clipTop,
         },
     });
 }
@@ -110,6 +118,7 @@ test("locate button — active", async ({ page }) => {
         .locator("#locate-button")
         .filter({ hasText: /Located/ })
         .waitFor({ timeout: 5000 });
+    await waitForMapIdle(page);
 
     await screenshotLocateButton(page, "button-active.png");
 });
@@ -130,6 +139,7 @@ test("locate button — following", async ({ page }) => {
         .locator("#locate-button")
         .filter({ hasText: /Following/ })
         .waitFor({ timeout: 5000 });
+    await waitForMapIdle(page);
 
     await screenshotLocateButton(page, "button-following.png");
 });
@@ -160,7 +170,7 @@ test("map marker — position", async ({ page }) => {
 
     await page.locator("#locate-button").click();
     await page.locator(".navigator-locate-position").waitFor({ state: "visible", timeout: 5000 });
-    await page.waitForTimeout(300);
+    await waitForMapIdle(page);
 
     const marker = page.locator(".navigator-locate-position");
     const box = await marker.boundingBox();
@@ -200,7 +210,7 @@ test("map marker — heading", async ({ page }) => {
         window.dispatchEvent(event);
     });
     await page.locator(".navigator-locate-heading").waitFor({ state: "visible", timeout: 5000 });
-    await page.waitForTimeout(300);
+    await waitForMapIdle(page);
 
     const heading = page.locator(".navigator-locate-heading");
     const box = await heading.boundingBox();
@@ -233,6 +243,7 @@ test("navbar badge — location error state", async ({ page }) => {
     // Close the error modal so the badge is unobstructed
     await page.locator("#locate-error-close").click();
     await page.locator(".navigator-alert-badge").waitFor();
+    await waitForMapIdle(page);
 
     await page.screenshot({
         path: path.join(OUT, "navbar-badge.png"),

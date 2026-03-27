@@ -66,6 +66,15 @@ Each call to `Navigator.init()` creates a fully isolated instance with its own m
 
 See [`docs/instances.md`](docs/instances.md) for full details.
 
+## PWA
+
+The Navigator demo is installable as a Progressive Web App (PWA) on supported browsers and devices. When visited in a compatible browser, users will be prompted to add it to their home screen for a full-screen, app-like experience.
+
+The demo includes:
+- A [Web App Manifest](public/manifest.json) with icons, name, and display settings
+- Optimised viewport meta tags to prevent page-level zoom (map zoom is handled by MapLibre)
+- Apple-specific meta tags for iOS home screen installation
+
 ## Development
 
 ### Document First

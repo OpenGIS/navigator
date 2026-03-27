@@ -32,7 +32,7 @@ The **Current view** section is hidden on a true first visit (no URL hash, no pe
 
 ---
 
-## `useMap` — `src/core/useMap.js`
+## `useMap` — `src/composables/useMap.js`
 
 Manages the MapLibre GL JS map lifecycle: creation, view persistence, and cleanup.
 
@@ -42,7 +42,7 @@ Call `useMap` with a Vue template ref from the component that owns the map conta
 
 ```js
 import { ref } from 'vue';
-import { useMap } from '@/core/useMap';
+import { useMap } from '@/composables/useMap';
 
 const mapContainer = ref(null);
 useMap(mapContainer, mapOptions);
@@ -59,7 +59,7 @@ Internally, `useMap` registers `onMounted` and `onUnmounted` hooks. On mount, a 
 Call `useMap()` without arguments from any component or feature composable to retrieve the current map instance.
 
 ```js
-import { useMap } from '@/core/useMap';
+import { useMap } from '@/composables/useMap';
 
 const { map } = useMap();
 if (map) {
@@ -90,12 +90,29 @@ Any [MapLibre `MapOptions`](https://maplibre.org/maplibre-gl-js/docs/API/type-al
 ### Returned API
 
 ```js
-const { map } = useMap();
+const { map, currentView } = useMap();
 ```
 
 | Property | Type | Description |
 |----------|------|-------------|
 | `map` | `maplibregl.Map \| null` | The active MapLibre map instance, or `null` before load |
+| `currentView` | `Ref<{lat, lng, zoom} \| null>` | Reactive current map view, or `null` on first visit before any movement |
+
+> **Callbacks and composables:** if you need to access the map inside an async callback or a composable that runs outside a Vue setup context (e.g. geolocation handlers), use `getMapInstance(instanceId)` from the same module instead of destructuring `map` at call time — see [`getMapInstance`](#getmapinstance) below.
+
+### `getMapInstance`
+
+```js
+import { getMapInstance } from '@/composables/useMap';
+
+const doSomethingWithMap = (instanceId) => {
+  const map = getMapInstance(instanceId);
+  if (!map) return;
+  // map.addSource(...), map.addLayer(...), etc.
+};
+```
+
+`getMapInstance(instanceId)` returns the live `maplibregl.Map` instance (or `null` if not yet loaded) without requiring a Vue inject context. Use it from geolocation callbacks, event handlers, or any code that runs after component setup. The `instanceId` comes from `inject('navigatorId', 'navigator')` in the composable that owns the callback.
 
 ### Scale bar
 

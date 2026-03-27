@@ -2,7 +2,7 @@ import { ref, computed, inject } from "vue";
 import maplibregl from "maplibre-gl";
 import { magvar } from "magvar";
 import { useStorage } from "@/composables/useStorage";
-import { getMapInstance } from "@/core/useMap";
+import { getMapInstance } from "@/composables/useMap";
 import { Position } from "@/classes/Position";
 
 // Per-instance cache: instanceId -> instance state

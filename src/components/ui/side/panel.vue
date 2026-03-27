@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from "vue";
-import { useUI } from "@/core/useUI";
+import { useUI } from "@/composables/useUI";
 
 const {
   activePanelId,

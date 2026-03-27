@@ -1,17 +1,20 @@
 <script setup>
 import { computed, ref } from "vue";
-import { useMap } from "@/core/useMap";
-import { useUI } from "@/core/useUI";
-import { useLocate } from "@/features/locate/useLocate";
-import { useLocale } from "@/core/useLocale";
+import { useMap } from "@/composables/useMap";
+import { useUI } from "@/composables/useUI";
+import { useLocate } from "@/composables/useLocate";
+import { useSettings } from "@/composables/useSettings";
+import { useLocale } from "@/composables/useLocale";
 import Icon from "@/components/ui/icon.vue";
 import IconButton from "@/components/ui/icon-button.vue";
-import PanelBar from "@/components/ui/side/panel-bar.vue";
-import SettingsPanel from "@/features/settings/panel.vue";
+import SettingsPanel from "@/components/panels/settings.vue";
+import AboutPanel from "@/components/panels/about.vue";
+import PrivacyPanel from "@/components/panels/privacy.vue";
 
 const { currentView } = useMap();
-const { togglePanel, openAboutModal } = useUI();
-const { mode: locateMode, headingLost, position, permissionGranted, retryOrientation, retryPosition } = useLocate();
+const { activeMenuSub, setMenuSub } = useUI();
+const { mode: locateMode, headingLost, position, compassHeading, permissionGranted, retryOrientation, retryPosition } = useLocate();
+const { isMetric } = useSettings();
 const { t } = useLocale();
 
 const sharePosition = ref(false);
@@ -41,146 +44,167 @@ const shareUrl = computed(() => {
   const hash = `#map=${zoom}/${lat.toFixed(6)}/${lng.toFixed(6)}`;
   return `${base}${hash}`;
 });
+
+const formattedPositionCoords = computed(() => {
+  if (!position.value) return null;
+  const { lat, lng } = position.value;
+  return `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+});
+
+const formattedAccuracy = computed(() => {
+  if (!position.value) return null;
+  if (isMetric.value) return `${Math.round(position.value.accuracy)} m`;
+  return `${Math.round(position.value.accuracy * 3.28084)} ft`;
+});
+
+const formattedSpeed = computed(() => {
+  if (!position.value || position.value.speed === null) return null;
+  if (isMetric.value) return `${(position.value.speed * 3.6).toFixed(1)} km/h`;
+  return `${(position.value.speed * 2.23694).toFixed(1)} mph`;
+});
+
+const formattedHeading = computed(() => {
+  if (compassHeading.value === null) return null;
+  return `${compassHeading.value}°`;
+});
+
+const tabs = [
+  { id: 'location', icon: 'globe', labelKey: 'menu.location' },
+  { id: 'settings', icon: 'gear', labelKey: 'menu.settings', btnId: 'settings-button' },
+  { id: 'about', icon: 'info-circle', labelKey: 'menu.about', btnId: 'about-button' },
+  { id: 'privacy', icon: 'lock', labelKey: 'menu.privacy', btnId: 'privacy-button' },
+];
 </script>
 
 <template>
   <div class="d-flex flex-column flex-grow-1">
-    <div class="sidebar-section sidebar-section-body p-3 pb-0">
-      <h5 class="mb-0">{{ t('menu.title') }}</h5>
-    </div>
-
-    <div v-if="currentView" class="sidebar-section sidebar-section-body p-3 border-top">
-      <h6 class="mb-2 text-muted small text-uppercase fw-semibold">{{ t('menu.currentView') }}</h6>
-      <p class="mb-1 small">
-        <span class="text-body-secondary">{{ t('menu.latLng') }}</span>
-        <span class="ms-2 font-monospace">{{ formattedCoords }}</span>
-      </p>
-      <p class="mb-2 small">
-        <span class="text-body-secondary">{{ t('menu.zoom') }}</span>
-        <span class="ms-2 font-monospace">{{ formattedZoom }}</span>
-      </p>
-      <div v-if="permissionGranted" class="form-check mb-2">
-        <input
-          class="form-check-input"
-          type="checkbox"
-          id="share-position-toggle"
-          v-model="sharePosition"
-          :disabled="!position"
-        />
-        <label class="form-check-label small" for="share-position-toggle">
-          {{ t('menu.shareMyPosition') }}
-          <span v-if="!position" class="text-body-tertiary"> {{ t('menu.positionNotActive') }}</span>
-        </label>
-      </div>
-      <a
-        :href="shareUrl"
-        target="_blank"
-        rel="noopener"
-        class="navigator-share-link btn btn-sm btn-outline-primary w-100 d-flex align-items-center justify-content-center gap-1"
-      >
-        <Icon width="16" height="16" fill="currentColor" name="globe" />
-        {{ sharePosition && position ? t('menu.shareMyPosition') : t('menu.shareThisView') }}
-      </a>
-    </div>
-
-    <div class="sidebar-section sidebar-section-body p-3 border-top mt-auto">
-      <p class="mb-2">{{ t('menu.description') }}</p>
-      <p class="mb-0">{{ t('menu.thankOpenSource') }}</p>
-    </div>
-
-    <div class="sidebar-section sidebar-section-body p-3 border-top">
-      <h6 class="mb-3 w-100 d-flex align-items-center">
-        {{ t('menu.attribution') }}
-
-        <Icon
-          class="ms-auto text-danger"
-          width="32"
-          height="32"
-          fill="currentColor"
-          name="heart"
-        />
-      </h6>
-
-      <div class="d-flex flex-column gap-3">
-        <!-- MapLibre -->
-        <div class="d-flex align-items-center">
-          <span class="badge bg-warning bg-opacity-10 text-warning rounded-pill me-2">Rendering</span>
-          <a href="https://maplibre.org/" target="_blank" class="text-body small ms-auto text-decoration-underline">
-            MapLibre GL JS
-          </a>
-        </div>
-
-        <!-- OpenFreeMap -->
-        <div class="d-flex align-items-center">
-          <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill me-2">Vector Tiles</span>
-          <a href="https://openfreemap.org" target="_blank" class="text-body small ms-auto text-decoration-underline">
-            OpenFreeMap
-          </a>
-        </div>
-
-        <!-- OpenMapTiles -->
-        <div class="d-flex align-items-center">
-          <span class="badge bg-info bg-opacity-10 text-info rounded-pill me-2">Tile Schema</span>
-          <a href="https://www.openmaptiles.org/" target="_blank" class="text-body small ms-auto text-decoration-underline">
-            &copy; OpenMapTiles
-          </a>
-        </div>
-
-        <!-- OpenStreetMap -->
-        <div class="d-flex align-items-center">
-          <span class="badge bg-danger bg-opacity-10 text-danger rounded-pill me-2">Data</span>
-          <a href="https://www.openstreetmap.org/copyright" target="_blank" class="text-body small ms-auto text-decoration-underline">
-            &copy; OpenStreetMap contributors
-          </a>
-        </div>
-      </div>
-    </div>
-
-    <div v-if="locateMode === 'error'"
-      class="sidebar-section sidebar-section-body p-3 border-top"
-      id="menu-position-lost-alert"
-    >
-      <div class="alert alert-danger d-flex align-items-center gap-2 py-2 px-3 mb-0 small" role="alert">
-        <span>{{ t('menu.locationLost') }}</span>
-        <button
-          type="button"
-          class="btn btn-sm btn-danger ms-auto py-0"
-          @click="retryPosition"
-        >{{ t('menu.reRequest') }}</button>
-      </div>
-    </div>
-
-    <div v-if="headingLost && (locateMode === 'active' || locateMode === 'following')"
-      class="sidebar-section sidebar-section-body p-3 border-top"
-      id="menu-heading-lost-alert"
-    >
-      <div class="alert alert-warning d-flex align-items-center gap-2 py-2 px-3 mb-0 small" role="alert">
-        <span>{{ t('menu.compassUnavailable') }}</span>
-        <button
-          type="button"
-          class="btn btn-sm btn-warning ms-auto py-0"
-          @click="retryOrientation"
-        >{{ t('menu.reRequest') }}</button>
-      </div>
-    </div>
-
-    <PanelBar>
+    <!-- Top navigation -->
+    <div class="menu-nav border-bottom bg-body">
       <IconButton
-        icon="gear"
-        :label="t('menu.settings')"
+        v-for="tab in tabs"
+        :key="tab.id"
+        :id="tab.btnId"
+        :icon="tab.icon"
+        :label="t(tab.labelKey)"
         :icon-width="32"
         :icon-height="32"
-        @click="togglePanel('settings', SettingsPanel)"
+        :active="activeMenuSub === tab.id"
+        @click="setMenuSub(tab.id)"
       />
-      <IconButton
-        id="about-button"
-        icon="info-circle"
-        :label="t('menu.about')"
-        :icon-width="32"
-        :icon-height="32"
-        @click="openAboutModal"
-      />
-    </PanelBar>
+    </div>
+
+    <!-- Sub-panel content -->
+    <div class="menu-content flex-grow-1 overflow-auto">
+
+      <!-- Location -->
+      <template v-if="activeMenuSub === 'location'">
+
+        <!-- Current map view + share -->
+        <div v-if="currentView" class="sidebar-section sidebar-section-body p-3 border-bottom">
+          <h6 class="mb-2 text-muted small text-uppercase fw-semibold">{{ t('menu.currentView') }}</h6>
+          <p class="mb-1 small">
+            <span class="text-body-secondary">{{ t('menu.latLng') }}</span>
+            <span class="ms-2 font-monospace">{{ formattedCoords }}</span>
+          </p>
+          <p class="mb-2 small">
+            <span class="text-body-secondary">{{ t('menu.zoom') }}</span>
+            <span class="ms-2 font-monospace">{{ formattedZoom }}</span>
+          </p>
+          <div v-if="permissionGranted" class="form-check mb-2">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              id="share-position-toggle"
+              v-model="sharePosition"
+              :disabled="!position"
+            />
+            <label class="form-check-label small" for="share-position-toggle">
+              {{ t('menu.shareMyPosition') }}
+              <span v-if="!position" class="text-body-tertiary"> {{ t('menu.positionNotActive') }}</span>
+            </label>
+          </div>
+          <a
+            :href="shareUrl"
+            target="_blank"
+            rel="noopener"
+            class="navigator-share-link btn btn-sm btn-outline-primary w-100 d-flex align-items-center justify-content-center gap-1"
+          >
+            <Icon width="16" height="16" fill="currentColor" name="globe" />
+            {{ sharePosition && position ? t('menu.shareMyPosition') : t('menu.shareThisView') }}
+          </a>
+        </div>
+
+        <!-- Locate prompt when not yet active -->
+        <div v-if="locateMode === null" class="sidebar-section sidebar-section-body p-3 border-bottom">
+          <p class="mb-0 text-body-secondary small">{{ t('locate.pressLocate') }}</p>
+        </div>
+
+        <!-- Location error -->
+        <div v-if="locateMode === 'error'" class="sidebar-section sidebar-section-body p-3 border-bottom" id="menu-position-lost-alert">
+          <div class="alert alert-danger d-flex align-items-center gap-2 py-2 px-3 mb-0 small" role="alert">
+            <span>{{ t('menu.locationLost') }}</span>
+            <button type="button" class="btn btn-sm btn-danger ms-auto py-0" @click="retryPosition">{{ t('menu.reRequest') }}</button>
+          </div>
+        </div>
+
+        <!-- Device position details -->
+        <div v-if="position" class="sidebar-section sidebar-section-body p-3 border-bottom">
+          <h6 class="mb-2 text-muted small text-uppercase fw-semibold">{{ t('locate.position') }}</h6>
+          <p class="mb-1 small">
+            <span class="text-body-secondary">{{ t('locate.latLng') }}</span>
+            <span class="ms-2 font-monospace">{{ formattedPositionCoords }}</span>
+          </p>
+          <p class="mb-1 small">
+            <span class="text-body-secondary">{{ t('locate.accuracy') }}</span>
+            <span class="ms-2 font-monospace">{{ formattedAccuracy }}</span>
+          </p>
+          <p v-if="formattedSpeed" class="mb-1 small">
+            <span class="text-body-secondary">{{ t('locate.speed') }}</span>
+            <span class="ms-2 font-monospace">{{ formattedSpeed }}</span>
+          </p>
+          <p v-if="formattedHeading" class="mb-1 small">
+            <span class="text-body-secondary">{{ t('locate.heading') }}</span>
+            <span class="ms-2 font-monospace">{{ formattedHeading }}</span>
+          </p>
+        </div>
+
+        <!-- Compass warning -->
+        <div
+          v-if="headingLost && (locateMode === 'active' || locateMode === 'following')"
+          class="sidebar-section sidebar-section-body p-3 border-bottom"
+          id="menu-heading-lost-alert"
+        >
+          <div class="alert alert-warning d-flex align-items-center gap-2 py-2 px-3 mb-0 small" role="alert">
+            <span>{{ t('menu.compassUnavailable') }}</span>
+            <button type="button" class="btn btn-sm btn-warning ms-auto py-0" @click="retryOrientation">{{ t('menu.reRequest') }}</button>
+          </div>
+        </div>
+      </template>
+
+      <!-- Settings -->
+      <SettingsPanel v-else-if="activeMenuSub === 'settings'" />
+
+      <!-- About -->
+      <AboutPanel v-else-if="activeMenuSub === 'about'" />
+
+      <!-- Privacy -->
+      <PrivacyPanel v-else-if="activeMenuSub === 'privacy'" />
+    </div>
   </div>
 </template>
 
+<style scoped>
+.menu-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  min-height: 5rem;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.menu-nav :deep(.icon-btn) {
+  flex: 1 0 calc(100% / 4);
+}
+</style>

@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from "vue";
-import { useLocate } from "@/features/locate/useLocate";
-import { useLocale } from "@/core/useLocale";
+import { useLocate } from "@/composables/useLocate";
+import { useLocale } from "@/composables/useLocale";
 import IconButton from "@/components/ui/icon-button.vue";
 
 const { mode, showConfirmModal, showErrorModal, cycle, confirmLocate } =
