@@ -76,27 +76,4 @@ if (isDesktop.value) {
 	</div>
 </template>
 
-<style scoped>
-.navigator-map {
-	z-index: 1;
-	position: absolute;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	transition: left 0.3s ease, width 0.3s ease;
-}
 
-.navigator-map.panel-open {
-	left: var(--navigator-panel-width, 340px);
-	width: calc(100% - var(--navigator-panel-width, 340px));
-}
-
-.navigator-top {
-	z-index: 1040;
-	position: absolute;
-	top: 0;
-	left: 0;
-	width: 100%;
-}
-</style>

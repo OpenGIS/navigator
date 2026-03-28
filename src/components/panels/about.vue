@@ -143,12 +143,4 @@ const { t } = useLocale();
   </div>
 </template>
 
-<style scoped>
-.ogis-logo {
-  padding: 3px;
-  margin-left: 10px;
-  float: right;
-  line-height: 1;
-  background: #002400;
-}
-</style>
+

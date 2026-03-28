@@ -46,12 +46,4 @@ const label = computed(() => {
   <LocateError />
 </template>
 
-<style>
-/* Map marker styles */
-.navigator-locate-position,
-.navigator-locate-heading {
-  color: var(--bs-primary);
-  line-height: 0;
-  pointer-events: none;
-}
-</style>
+

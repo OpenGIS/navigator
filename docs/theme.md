@@ -132,18 +132,20 @@ The share link textarea is styled as ambient display content rather than an edit
 Navigator is distributed with its compiled CSS (`dist/navigator.css`). To apply your own theme:
 
 1. **Do not import** `@ogis/navigator/navigator.css`.
-2. Create your own SCSS file following the same structure — Bootstrap functions → overrides → Bootstrap components → Navigator overrides.
-3. Import it in your application entry point instead.
+2. Create your own SCSS file following the same structure — Bootstrap functions → overrides → Bootstrap components → Navigator overrides (§6a–§6f) → Navigator layout styles (§6g).
+3. **Import MapLibre GL JS CSS** separately in your application entry point — it is not part of Bootstrap and must always be loaded regardless of which theme you use.
+4. Import your SCSS file in your application entry point instead of `navigator.css`.
 
 ```js
 // main.js
+import "maplibre-gl/dist/maplibre-gl.css"; // MapLibre GL JS — required for the map
 import Navigator from "@ogis/navigator";
 import "./my-theme.scss"; // your custom theme — no navigator.css import
 
 Navigator.init({ id: "map" });
 ```
 
-Your SCSS file should at minimum import Bootstrap and Navigator's component overrides:
+Your SCSS file should include Bootstrap, Navigator's visual overrides (§6a–§6f), **and** Navigator's layout styles (§6g). The layout styles in §6g are structural — they position the map, top bar, panel, and icon buttons correctly. Copy them verbatim; they do not depend on palette variables.
 
 ```scss
 // my-theme.scss
@@ -162,8 +164,11 @@ $primary: #your-brand-color;
 @import "bootstrap/scss/reboot";
 // … (see src/assets/sass/theme.scss §5 for the full list)
 
-// Navigator component styles
-// Repeat §6 from src/assets/sass/theme.scss, adjusted for your palette.
+// Navigator visual overrides (§6a–§6f)
+// Repeat §6a–§6f from src/assets/sass/theme.scss, adjusted for your palette.
+
+// Navigator layout styles (§6g) — copy verbatim, no palette changes needed
+// Repeat §6g from src/assets/sass/theme.scss unchanged.
 ```
 
 > **Tip:** Copy `src/assets/sass/theme.scss` into your project as a starting point and edit the palette variables in §2. Everything else will cascade automatically.
@@ -191,10 +196,11 @@ A dark-navbar, green-accent theme inspired by GPS and trail-mapping apps. The to
 
 1. Copy `docs/theme/green.scss` into your project (e.g. `src/green-theme.scss`).
 2. Do **not** import `@ogis/navigator/navigator.css`.
-3. Import the theme file in your entry point:
+3. Import MapLibre GL JS CSS and the theme file in your entry point:
 
 ```js
 // main.js
+import "maplibre-gl/dist/maplibre-gl.css"; // MapLibre GL JS — required for the map
 import Navigator from "@ogis/navigator";
 import "./green-theme.scss";
 

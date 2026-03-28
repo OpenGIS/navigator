@@ -32,13 +32,4 @@ defineExpose({ close });
   </Teleport>
 </template>
 
-<style>
-/* Ensure modals sit above the top nav bar */
-.navigator-modal-backdrop {
-  z-index: 1065;
-}
 
-.navigator-modal {
-  z-index: 1070;
-}
-</style>

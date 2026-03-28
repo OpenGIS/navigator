@@ -68,24 +68,4 @@ const activeComponent = computed(() => panelComponents[activePanel.value] ?? Vie
   ></div>
 </template>
 
-<style scoped>
-.offcanvas {
-  z-index: 1045;
-  top: 86px !important;
-  height: calc(100% - 73px) !important;
-}
 
-.panel-nav {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  min-height: 5rem;
-  position: sticky;
-  top: 0;
-  z-index: 1;
-}
-
-.panel-nav :deep(.icon-btn) {
-  flex: 1 0 calc(100% / 4);
-}
-</style>

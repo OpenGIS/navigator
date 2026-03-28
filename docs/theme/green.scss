@@ -6,6 +6,10 @@
 // Copy this file into your project, adjust the palette in §2,
 // and import it instead of @ogis/navigator/navigator.css.
 //
+// ⚠ MapLibre GL JS CSS is NOT included here. Import it
+//   separately in your application entry point BEFORE this file:
+//     import "maplibre-gl/dist/maplibre-gl.css"
+//
 // Palette
 // ─────────────────────────────────────────────────────────
 //   $nav-green   #39d353  — GPS marker green (primary accent)
@@ -27,6 +31,7 @@
 //       d  Panel content sections
 //       e  Icon buttons
 //       f  Share URL textarea
+//       g  Navigator layout and component styles (required)
 // ============================================================
 
 
@@ -211,4 +216,123 @@ $font-size-base: 0.9375rem; // 15 px
     border-color: rgba(var(--bs-primary-rgb), 0.4);
     box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.12);
   }
+}
+
+
+// §6g  Navigator layout and component styles
+// These structural styles are required for Navigator to render
+// correctly. They do not depend on the theme palette — copy
+// them verbatim into any custom theme.
+
+// Map container
+.navigator-map {
+  z-index: 1;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transition: left 0.3s ease, width 0.3s ease;
+}
+
+.navigator-map.panel-open {
+  left: var(--navigator-panel-width, 340px);
+  width: calc(100% - var(--navigator-panel-width, 340px));
+}
+
+// Top navigation bar container
+.navigator-top {
+  z-index: 1040;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+
+.navigator-top nav.navbar {
+  touch-action: pan-x pan-y;
+}
+
+.navigator-top .navbar-toggler:focus {
+  box-shadow: none;
+  border: 0;
+  outline: none;
+}
+
+// Side panel — positioned below the top bar
+.navigator-panel {
+  top: 86px !important;
+  height: calc(100% - 73px) !important;
+}
+
+// Panel navigation tab row
+.panel-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  min-height: 5rem;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.panel-nav .icon-btn {
+  flex: 1 0 calc(100% / 4);
+}
+
+// Icon buttons (panel nav + top bar)
+.icon-btn {
+  cursor: pointer;
+  line-height: 1;
+  position: relative;
+  padding: 4px 4px 18px;
+
+  &[aria-pressed="true"] {
+    color: var(--bs-primary);
+  }
+
+  &:focus-visible {
+    outline: 2px solid white;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
+.icon-btn__label {
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+// OGIS logo in the About panel
+.ogis-logo {
+  padding: 3px;
+  margin-left: 10px;
+  float: right;
+  line-height: 1;
+  background: #002400;
+}
+
+// GPS locate markers (rendered into the MapLibre map)
+.navigator-locate-position,
+.navigator-locate-heading {
+  color: var(--bs-primary);
+  line-height: 0;
+  pointer-events: none;
+}
+
+// Modal z-index — must sit above the top nav bar
+.navigator-modal-backdrop {
+  z-index: 1065;
+}
+
+.navigator-modal {
+  z-index: 1070;
 }

@@ -46,14 +46,4 @@ const { t } = useLocale();
   <About />
 </template>
 
-<style scoped>
-nav.navbar {
-  touch-action: pan-x pan-y;
-}
 
-.navbar-toggler:focus {
-  box-shadow: none;
-  border: 0;
-  outline: none;
-}
-</style>
