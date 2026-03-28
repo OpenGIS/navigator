@@ -179,12 +179,13 @@ $font-size-base: 0.9375rem; // 15 px
 
 
 // §6e  Icon buttons
-// White icons in the dark top bar; green on hover/active.
+// White icons in the dark top bar; green on active/hover.
 
 .icon-btn {
   color: var(--bs-secondary-color);
   transition: color 0.15s ease;
 
+  &[aria-pressed="true"],
   &:hover {
     color: var(--bs-primary);
   }
@@ -193,6 +194,7 @@ $font-size-base: 0.9375rem; // 15 px
 [data-bs-theme="dark"] .icon-btn {
   color: rgba(255, 255, 255, 0.55);
 
+  &[aria-pressed="true"],
   &:hover {
     color: var(--bs-primary);
   }
@@ -286,10 +288,6 @@ $font-size-base: 0.9375rem; // 15 px
   line-height: 1;
   position: relative;
   padding: 4px 4px 18px;
-
-  &[aria-pressed="true"] {
-    color: var(--bs-primary);
-  }
 
   &:focus-visible {
     outline: 2px solid white;

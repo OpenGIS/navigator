@@ -119,7 +119,9 @@ Rows within panels are separated by a featherlight border. Override the opacity 
 
 ### §6e — Icon buttons (`.icon-btn`)
 
-Inactive icons use `--bs-secondary-color`; active/hover state transitions to `--bs-primary`. The 0.15 s ease avoids jarring state snaps.
+Inactive icons use `--bs-secondary-color`; the **active panel** (`[aria-pressed="true"]`) and hover state both transition to `--bs-primary`. The 0.15 s ease avoids jarring state snaps.
+
+> **Important:** The `[aria-pressed="true"]` active rule **must** live in §6e (the visual overrides section). Do not rely on §6g for this — §6g is structural-only and may be overridden. Custom themes that omit `&[aria-pressed="true"]` from §6e will have no visible active panel indicator.
 
 ### §6f — Share URL textarea (`.navigator-share-textarea`)
 

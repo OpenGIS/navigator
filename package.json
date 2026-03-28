@@ -1,6 +1,6 @@
 {
   "name": "@ogis/navigator",
-  "version": "1.0.17",
+  "version": "1.0.18",
   "type": "module",
   "description": "A map for everyone, right in the browser.",
   "homepage": "https://www.ogis.org/navigator",
