@@ -27,7 +27,7 @@ Navigator.init({ id: 'my-map', locale: 'fr' })
 
 The About modal on first load renders entirely in the chosen language — labels, buttons, and preference selectors all update immediately:
 
-![About modal rendered in French](../assets/screenshots/docs/locale/about-french.png)
+![About modal rendered in French](../../assets/screenshots/docs/locale/about-french.png)
 
 ### `messages`
 
@@ -76,7 +76,7 @@ Storage key: `navigator_settings_{instanceId}`
 
 When French is selected, the entire Settings panel re-renders in French — including the language dropdown that shows the active preference:
 
-![Settings panel with French language selected](../assets/screenshots/docs/locale/settings-language-french.png)
+![Settings panel with French language selected](../../assets/screenshots/docs/locale/settings-language-french.png)
 
 ---
 
@@ -168,7 +168,7 @@ This means **every Navigator locale code is a valid OSM `name:xx` tag suffix**. 
 
 Map labels update automatically when the user changes their language. The active language is applied to all symbol layers that render OSM name fields on map load, and again immediately whenever the language changes.
 
-![Paris displayed with French map labels](../assets/screenshots/docs/locale/paris-french-labels.png)
+![Paris displayed with French map labels](../../assets/screenshots/docs/locale/paris-french-labels.png)
 
 ### `mapLanguageTag`
 

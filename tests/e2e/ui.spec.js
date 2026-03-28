@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 /**
- * Tests for docs/ui.md
+ * Tests for docs/guide/ui.md
  *
  * Covers useUI (responsive breakpoints, panel actions).
  * First load tests live in tests/e2e/core.spec.js.

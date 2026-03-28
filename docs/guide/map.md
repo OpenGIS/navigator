@@ -28,7 +28,7 @@ The navigation menu panel displays the current map coordinates and zoom level, a
 
 The **Current view** section is hidden on a true first visit (no URL hash, no persisted view). It appears as soon as a view is available — either because the page loaded with a `#map=…` hash, the user has a previously saved view, or the map has been panned or zoomed.
 
-![Menu panel with current view coordinates and share link](../assets/screenshots/docs/map/url-hash.png)
+![Menu panel with current view coordinates and share link](../../assets/screenshots/docs/map/url-hash.png)
 
 ---
 
@@ -128,4 +128,4 @@ name:{locale}  →  name (local)  →  name:en
 
 The expression is updated reactively whenever the language changes in Settings — no page reload required.
 
-See [`docs/locale.md` — OSM Multilingual Names](./locale.md#osm-multilingual-names) for full details.
+See [`docs/guide/locale.md` — OSM Multilingual Names](./locale.md#osm-multilingual-names) for full details.

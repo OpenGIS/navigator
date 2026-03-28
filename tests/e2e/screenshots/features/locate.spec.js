@@ -2,7 +2,7 @@ import { test } from "@playwright/test";
 import path from "path";
 
 /**
- * Screenshots for docs/features/locate.md
+ * Screenshots for docs/guide/features/locate.md
  *
  * Captures locate UI states: modals, button modes, map markers, and navbar badge.
  * Output: assets/screenshots/docs/features/locate/

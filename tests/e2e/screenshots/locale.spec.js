@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 import path from "path";
 
 /**
- * Screenshots for docs/locale.md
+ * Screenshots for docs/guide/locale.md
  *
  * Captures the About modal rendered in French and the Settings panel
  * with the French language preference selected.

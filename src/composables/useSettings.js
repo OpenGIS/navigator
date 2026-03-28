@@ -12,13 +12,13 @@ window
 	});
 
 /**
- * Infer the user's preferred unit system from their browser locale.
+ * Infer the user's preferred unit system from a browser locale string.
  * Only the US, Liberia (LR), and Myanmar (MM) default to imperial.
  * Returns 'imperial' for those locales, 'metric' for everything else.
  */
-function localeDefaultUnits() {
+export function localeDefaultUnits(localeStr) {
 	try {
-		const region = new Intl.Locale(navigator.language).maximize().region;
+		const region = new Intl.Locale(localeStr ?? navigator.language).maximize().region;
 		return ["US", "LR", "MM"].includes(region) ? "imperial" : "metric";
 	} catch {
 		return "metric";

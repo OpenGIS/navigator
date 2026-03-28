@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 /**
- * Tests for docs/map.md
+ * Tests for docs/guide/map.md
  *
  * Covers useMap (URL hash, map lifecycle, view persistence, mapOptions).
  */

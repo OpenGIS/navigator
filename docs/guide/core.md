@@ -16,7 +16,7 @@ The core module provides three composables that every part of the application is
 
 On the first visit, a **Welcome modal** is shown. It lets the user choose their preferred language and units before they begin exploring the map.
 
-![Desktop first load — Welcome modal with language and units selection](../assets/screenshots/docs/core/first-load.png)
+![Desktop first load — Welcome modal with language and units selection](../../assets/screenshots/docs/core/first-load.png)
 
 ### Language
 
@@ -70,7 +70,7 @@ The attribution table lists every open-source component and data source Navigato
 | **Tile Schema** | [OpenMapTiles](https://www.openmaptiles.org/) / [OSM Bright](https://github.com/openmaptiles/osm-bright-gl-style) |
 | **User Interface** | [Vue JS](https://vuejs.org/) / [Bootstrap](https://getbootstrap.com/) |
 
-![About panel — desktop](../assets/screenshots/docs/core/about-panel.png)
+![About panel — desktop](../../assets/screenshots/docs/core/about-panel.png)
 
 ---
 
@@ -97,4 +97,4 @@ If you use the **Locate** feature, your device's GPS coordinates are used only t
 
 Navigator contains no analytics, no advertising, no cookies, and no tracking scripts of any kind.
 
-![Privacy panel — desktop](../assets/screenshots/docs/core/privacy-panel.png)
+![Privacy panel — desktop](../../assets/screenshots/docs/core/privacy-panel.png)

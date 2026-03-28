@@ -57,7 +57,7 @@ Navigator.init({ id: 'my-map' });
 | `my-map` | `navigator_view_my-map` |
 | `secondary` | `navigator_view_secondary` |
 
-See [`docs/instances.md`](./instances.md) for full details on instance isolation and the storage key format.
+See [`docs/guide/instances.md`](./instances.md) for full details on instance isolation and the storage key format.
 
 ---
 
@@ -95,7 +95,7 @@ Language resolution order:
 | `en` | English |
 | `fr` | Français |
 
-See [`docs/locale.md`](./locale.md) for the full locale API, available languages, and how to contribute a translation.
+See [`docs/guide/locale.md`](./locale.md) for the full locale API, available languages, and how to contribute a translation.
 
 ---
 
@@ -123,7 +123,7 @@ Navigator.init({
 
 Custom messages are merged on top of the built-in translations — only the keys you supply are overridden. Any unspecified keys continue to use the built-in values.
 
-See [`docs/locale.md`](./locale.md) for the full list of translation keys.
+See [`docs/guide/locale.md`](./locale.md) for the full list of translation keys.
 
 ---
 
@@ -154,4 +154,4 @@ Navigator.init({
 
 > **View persistence:** if the user has previously visited, their last-known center and zoom are restored from `localStorage` and take precedence over `center`/`zoom` in `mapOptions`. The stored view is cleared when the user navigates to a new location using the URL hash.
 
-See [`docs/map.md`](./map.md) for the full map API including view persistence and programmatic control.
+See [`docs/guide/map.md`](./map.md) for the full map API including view persistence and programmatic control.

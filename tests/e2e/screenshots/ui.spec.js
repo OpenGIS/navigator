@@ -2,7 +2,7 @@ import { test } from "@playwright/test";
 import path from "path";
 
 /**
- * Screenshots for docs/ui.md
+ * Screenshots for docs/guide/ui.md
  *
  * Each screenshot captures a meaningful UI state described in the docs.
  * Output: assets/screenshots/docs/ui/

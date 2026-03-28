@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 /**
- * Tests for docs/features/locate.md
+ * Tests for docs/guide/features/locate.md
  *
  * Covers the Locate button states, permission flow modals, and map marker.
  */

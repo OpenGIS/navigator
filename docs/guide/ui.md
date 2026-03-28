@@ -30,7 +30,7 @@ const { isDesktop, isPanelVisible, openPanel, togglePanel } = useUI();
 
 On resize, `isNavVisible` is automatically managed: it is forced `true` on desktop and hidden on smaller screens if the nav was not explicitly expanded.
 
-![Mobile viewport — panel closed, top bar visible](../assets/screenshots/docs/ui/mobile.png)
+![Mobile viewport — panel closed, top bar visible](../../assets/screenshots/docs/ui/mobile.png)
 
 ### Panel
 
@@ -62,7 +62,7 @@ togglePanel('my-feature', MyPanel);
 
 Closes the panel without changing the active component.
 
-![Desktop panel open on returning visit](../assets/screenshots/docs/ui/panel.png)
+![Desktop panel open on returning visit](../../assets/screenshots/docs/ui/panel.png)
 
 ### Full API
 

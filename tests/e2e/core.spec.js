@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 /**
- * Tests for docs/core.md
+ * Tests for docs/guide/core.md
  *
  * Covers the First load behaviour: Welcome modal, language/units selection,
  * returning visits, and the About button.

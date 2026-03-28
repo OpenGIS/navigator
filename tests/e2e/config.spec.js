@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 /**
- * Tests for docs/config.md
+ * Tests for docs/guide/config.md
  *
  * Covers each Navigator.init() option: id, debug, locale, messages, mapOptions.
  * The demo app (index.html) uses id: "app" and exposes URL params for testing.

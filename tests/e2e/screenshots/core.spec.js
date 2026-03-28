@@ -2,7 +2,7 @@ import { test } from "@playwright/test";
 import path from "path";
 
 /**
- * Screenshots for docs/core.md
+ * Screenshots for docs/guide/core.md
  *
  * Captures the first-load Welcome modal, the About panel, and the Privacy panel.
  * Output: assets/screenshots/docs/core/

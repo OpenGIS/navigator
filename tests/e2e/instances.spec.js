@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 /**
- * Tests for docs/instances.md
+ * Tests for docs/guide/instances.md
  *
  * The demo app (index.html) uses Navigator.init({ id: "app" }), so all
  * instance-specific storage keys are suffixed with "app".

@@ -2,27 +2,25 @@
 /**
  * check-sync.js
  *
- * Verifies that docs, tests, and screenshots are in sync with the
+ * Verifies that guide docs, tests, and screenshots are in sync with the
  * Document First process. Exits with code 1 if any issues are found.
  *
+ * Only docs/guide/ participates in the sync contract.
+ * docs/dev/ contains technical/developer docs with no runtime tests.
+ *
  * Rules:
- *   1. Every docs/*.md must have a tests/e2e/*.spec.js (by matching stem name)
- *      (except docs marked as developer guides with no runtime behaviour)
- *   2. Every tests/e2e/screenshots/*.spec.js must have a docs/*.md (by matching stem name)
- *   3. Every screenshot image referenced in docs must exist on disk
+ *   1. Every docs/guide/*.md must have a tests/e2e/*.spec.js (by matching stem name)
+ *   2. Every tests/e2e/screenshots/*.spec.js must have a docs/guide/*.md (by matching stem name)
+ *   3. Every screenshot image referenced in guide docs must exist on disk
  */
 
 import { readdirSync, existsSync, readFileSync } from "fs";
 import { join, resolve } from "path";
 
 const ROOT = resolve(new URL(".", import.meta.url).pathname, "..");
-const DOCS_DIR = join(ROOT, "docs");
+const GUIDE_DIR = join(ROOT, "docs", "guide");
 const TESTS_DIR = join(ROOT, "tests", "e2e");
 const SCREENSHOTS_DIR = join(TESTS_DIR, "screenshots");
-const ASSETS_DIR = join(ROOT, "assets");
-
-// Docs that are developer guides with no runtime behaviour to test
-const GUIDE_ONLY_DOCS = ["features.md", "testing.md", "theme.md"];
 
 let issues = 0;
 
@@ -36,20 +34,18 @@ function pass(msg) {
 }
 
 /**
- * Collect { docFile, docDir, testsDir, screenshotsDir } pairs to check.
- * This includes the root docs/ directory and any named subdirectories
- * that follow the same convention (e.g. docs/features/ → tests/e2e/features/).
+ * Collect { docDir, testsDir, screenshotsDir } pairs to check.
+ * Scans docs/guide/ and any subdirectories (e.g. docs/guide/features/ → tests/e2e/features/).
  */
 function collectDocSections() {
   const sections = [
-    { docDir: DOCS_DIR, testsDir: TESTS_DIR, screenshotsDir: SCREENSHOTS_DIR, label: "" },
+    { docDir: GUIDE_DIR, testsDir: TESTS_DIR, screenshotsDir: SCREENSHOTS_DIR, label: "" },
   ];
 
-  // Scan for subdirectories in docs/ and mirror them to tests/e2e/
-  for (const entry of readdirSync(DOCS_DIR, { withFileTypes: true })) {
+  for (const entry of readdirSync(GUIDE_DIR, { withFileTypes: true })) {
     if (entry.isDirectory()) {
       sections.push({
-        docDir: join(DOCS_DIR, entry.name),
+        docDir: join(GUIDE_DIR, entry.name),
         testsDir: join(TESTS_DIR, entry.name),
         screenshotsDir: join(SCREENSHOTS_DIR, entry.name),
         label: `${entry.name}/`,
@@ -62,7 +58,7 @@ function collectDocSections() {
 
 // ─── Rule 1: every doc has a test spec ───────────────────────────────────────
 
-console.log("\nRule 1: every doc has a corresponding test spec");
+console.log("\nRule 1: every guide doc has a corresponding test spec");
 
 for (const { docDir, testsDir, label } of collectDocSections()) {
   if (!existsSync(docDir)) continue;
@@ -70,11 +66,6 @@ for (const { docDir, testsDir, label } of collectDocSections()) {
   const docFiles = readdirSync(docDir).filter((f) => f.endsWith(".md"));
 
   for (const doc of docFiles) {
-    if (GUIDE_ONLY_DOCS.includes(doc)) {
-      console.log(`  – ${label}${doc} (guide only, skipped)`);
-      continue;
-    }
-
     const stem = doc.replace(/\.md$/, "");
 
     if (!existsSync(testsDir)) {
@@ -93,7 +84,7 @@ for (const { docDir, testsDir, label } of collectDocSections()) {
 
 // ─── Rule 2: every screenshot spec has a doc ─────────────────────────────────
 
-console.log("\nRule 2: every screenshot spec has a corresponding doc");
+console.log("\nRule 2: every screenshot spec has a corresponding guide doc");
 
 for (const { docDir, screenshotsDir, label } of collectDocSections()) {
   if (!existsSync(screenshotsDir)) continue;
@@ -106,15 +97,10 @@ for (const { docDir, screenshotsDir, label } of collectDocSections()) {
     const stem = spec.replace(/\.spec\.js$/, "");
     const expectedDoc = `${stem}.md`;
 
-    if (!existsSync(docDir)) {
-      fail(`tests/e2e/screenshots/${label}${spec} has no matching docs/${label}${expectedDoc}`);
-      continue;
-    }
-
-    if (!existsSync(join(docDir, expectedDoc))) {
-      fail(`tests/e2e/screenshots/${label}${spec} has no matching docs/${label}${expectedDoc}`);
+    if (!existsSync(docDir) || !existsSync(join(docDir, expectedDoc))) {
+      fail(`tests/e2e/screenshots/${label}${spec} has no matching docs/guide/${label}${expectedDoc}`);
     } else {
-      pass(`tests/e2e/screenshots/${label}${spec} → docs/${label}${expectedDoc}`);
+      pass(`tests/e2e/screenshots/${label}${spec} → docs/guide/${label}${expectedDoc}`);
     }
   }
 }
@@ -123,7 +109,7 @@ for (const { docDir, screenshotsDir, label } of collectDocSections()) {
 
 console.log("\nRule 3: screenshot images referenced in docs exist on disk");
 
-const imageRefPattern = /!\[.*?\]\((\.\.(?:\/\.\.)?\/assets\/screenshots\/[^)]+)\)/g;
+const imageRefPattern = /!\[.*?\]\(((?:\.\.\/)+assets\/screenshots\/[^)]+)\)/g;
 
 for (const { docDir, label } of collectDocSections()) {
   if (!existsSync(docDir)) continue;

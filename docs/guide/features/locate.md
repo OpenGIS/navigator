@@ -19,7 +19,7 @@ The Locate button sits in the right slot of the top navigation bar. It has four 
 
 | Inactive | Active | Following | Error |
 |----------|--------|-----------|-------|
-| ![Inactive](../../assets/screenshots/docs/features/locate/button-inactive.png) | ![Active](../../assets/screenshots/docs/features/locate/button-active.png) | ![Following](../../assets/screenshots/docs/features/locate/button-following.png) | ![Error](../../assets/screenshots/docs/features/locate/button-error.png) |
+| ![Inactive](../../../assets/screenshots/docs/features/locate/button-inactive.png) | ![Active](../../../assets/screenshots/docs/features/locate/button-active.png) | ![Following](../../../assets/screenshots/docs/features/locate/button-following.png) | ![Error](../../../assets/screenshots/docs/features/locate/button-error.png) |
 
 ### Cycling through states
 
@@ -86,7 +86,7 @@ Shown the first time the user presses Locate (before the browser prompt).
 - **I Understand** (primary button) — proceeds to the browser prompt
 - **Cancel** (secondary / close) — dismisses the modal, no action taken
 
-![Confirmation modal](../../assets/screenshots/docs/features/locate/confirmation-modal.png)
+![Confirmation modal](../../../assets/screenshots/docs/features/locate/confirmation-modal.png)
 
 ---
 
@@ -108,7 +108,7 @@ Shown when the Geolocation API returns a `PERMISSION_DENIED` error. Also shown w
 
 > The `permissionGranted` storage flag is not affected by a denial — it only becomes `true` on a successful fix.
 
-![Permission denied modal](../../assets/screenshots/docs/features/locate/permission-denied-modal.png)
+![Permission denied modal](../../../assets/screenshots/docs/features/locate/permission-denied-modal.png)
 
 ---
 
@@ -120,13 +120,13 @@ Once the user's position is known, a live marker is rendered on the map.
 
 A crosshairs icon centred on the user's current `lat`/`lng` coordinate. The marker updates whenever a new position fix arrives.
 
-![Position marker](../../assets/screenshots/docs/features/locate/marker-position.png)
+![Position marker](../../../assets/screenshots/docs/features/locate/marker-position.png)
 
 ### Heading marker
 
 If the device provides a compass bearing via the [`DeviceOrientationEvent`](https://developer.mozilla.org/en-US/docs/Web/API/DeviceOrientationEvent) API, a separate heading indicator icon is rendered at the same position, rotated to match the bearing. The bearing is smoothed with a low-pass filter to prevent jitter from magnetometer noise.
 
-![Heading marker](../../assets/screenshots/docs/features/locate/marker-heading.png)
+![Heading marker](../../../assets/screenshots/docs/features/locate/marker-heading.png)
 
 Using `DeviceOrientationEvent` (rather than `GeolocationCoordinates.heading`) means the heading indicator is stable at rest — it reflects the compass direction the device is pointing, not the direction it is travelling.
 
@@ -142,7 +142,7 @@ If no orientation data is available (e.g. desktop without a sensor, or permissio
 
 When geolocation permission is denied, the error modal appears automatically. It explains how to re-enable location access in each browser and provides a **Try Again** button.
 
-![Error modal with retry button](../../assets/screenshots/docs/features/locate/navbar-badge.png)
+![Error modal with retry button](../../../assets/screenshots/docs/features/locate/navbar-badge.png)
 
 Clicking **Try Again** resets the locate mode to inactive and immediately re-requests geolocation, bypassing the confirmation step (since the user has already granted permission once). This exits the button's **Error** state.
 
