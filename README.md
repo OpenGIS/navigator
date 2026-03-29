@@ -10,7 +10,7 @@ This project is inspired by, and made possible thanks to the [OpenStreetMap](htt
 
 ## Features
 
-- No install, no account.
+- Highly detailed, free global map. No install, no account.
 - GPS locate with compass heading.
 - Once loaded, works offline (cached tiles and data).
 - Multilingual (auto-detects browser language).
@@ -20,14 +20,14 @@ This project is inspired by, and made possible thanks to the [OpenStreetMap](htt
 - User preference settings.
 - Works on any device.
 
+[![App Preview](assets/screenshots/app-preview.png)](https://www.ogis.org/navigator/)
+
 ## Aims
 
 - A handy, general purpose mapping tool that anyone can use.
 - Offer low barriers to, and promote Open data.
 - Tighten the feedback loop between Open data contributors and consumers.
 - Be Open.
-
-[![App Preview](assets/screenshots/app-preview.png)](https://www.ogis.org/navigator/)
 
 [&laquo;&laquo; Use Navigator &raquo;&raquo;](https://www.ogis.org/navigator/)
 
