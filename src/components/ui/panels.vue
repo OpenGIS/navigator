@@ -11,6 +11,7 @@ import PrivacyPanel from "@/components/panels/privacy.vue";
 
 const instanceId = inject("navigatorId", "navigator");
 const customButtons = inject("navigatorButtons", []);
+const customPanels = inject("navigatorPanels", []);
 
 const { isPanelVisible, activePanel, setActivePanel, closePanel, isDesktop } = useUI();
 const { t } = useLocale();
@@ -23,15 +24,21 @@ const builtInTabs = [
 ];
 
 // Custom buttons that have a panel definition become additional tabs
-const customTabs = computed(() =>
+const buttonTabs = computed(() =>
   customButtons
     .filter((b) => b.panel)
     .map((b) => ({ id: b.id, icon: b.icon, label: b.panel.title || b.label })),
 );
 
+// Standalone custom panels (no toolbar button required)
+const panelTabs = computed(() =>
+  customPanels.map((p) => ({ id: p.id, icon: p.icon, label: p.title })),
+);
+
 const tabs = computed(() => [
   ...builtInTabs,
-  ...customTabs.value,
+  ...buttonTabs.value,
+  ...panelTabs.value,
 ]);
 
 const panelComponents = {
@@ -53,11 +60,20 @@ watch(
   async () => {
     if (!isCustomPanel.value || !customPanelContainer.value) return;
     await nextTick();
+    const map = getMapInstance(instanceId);
+    const ctx = { map, instanceId };
+
+    // Check button-based panels first, then standalone panels
     const btn = customButtons.find((b) => b.id === activePanel.value);
     if (btn?.panel?.render) {
       customPanelContainer.value.innerHTML = "";
-      const map = getMapInstance(instanceId);
-      btn.panel.render(customPanelContainer.value, { map, instanceId });
+      btn.panel.render(customPanelContainer.value, ctx);
+      return;
+    }
+    const panel = customPanels.find((p) => p.id === activePanel.value);
+    if (panel?.render) {
+      customPanelContainer.value.innerHTML = "";
+      panel.render(customPanelContainer.value, ctx);
     }
   },
   { flush: "post" },

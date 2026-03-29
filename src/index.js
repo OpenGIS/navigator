@@ -18,7 +18,9 @@ export { getMapInstance } from "./composables/useMap.js";
 
 /**
  * @typedef {Object} PanelConfig
- * @property {string} title - Panel heading
+ * @property {string} id - Unique panel identifier
+ * @property {string} icon - Icon name from the sprite
+ * @property {string} title - Tab label
  * @property {Function} render - Called with (container, { map, instanceId }) to populate content
  */
 
@@ -35,6 +37,7 @@ export { getMapInstance } from "./composables/useMap.js";
  * @property {Object} [messages={}] - Per-language label overrides
  * @property {Object} [mapOptions={}] - MapLibre Map constructor options
  * @property {ButtonConfig[]} [buttons=[]] - Custom toolbar buttons
+ * @property {PanelConfig[]} [panels=[]] - Custom panel tabs (no toolbar button)
  * @property {NavigatorPlugin[]} [plugins=[]] - Per-instance plugins
  * @property {Function} [onMapReady] - Called when the map finishes loading
  * @property {Function} [onViewChange] - Called on map moveend with { center, zoom }
@@ -150,6 +153,7 @@ const Navigator = {
 		messages = {},
 		mapOptions = {},
 		buttons = [],
+		panels = [],
 		plugins = [],
 		onMapReady,
 		onViewChange,
@@ -178,6 +182,7 @@ const Navigator = {
 		app.provide("navigatorLocale", locale);
 		app.provide("navigatorMessages", messages);
 		app.provide("navigatorButtons", buttons);
+		app.provide("navigatorPanels", panels);
 
 		const instance = new NavigatorInstance(app, id, emitter, el);
 

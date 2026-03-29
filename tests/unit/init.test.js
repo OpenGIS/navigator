@@ -119,6 +119,17 @@ describe("Navigator.create()", () => {
 		Navigator.create({ id: "t8" });
 		expect(mockApp.provide).toHaveBeenCalledWith("navigatorButtons", []);
 	});
+
+	it("provides navigatorPanels from the panels option", () => {
+		const panels = [{ id: "info", icon: "info-circle", title: "Info", render: vi.fn() }];
+		Navigator.create({ id: "t9", panels });
+		expect(mockApp.provide).toHaveBeenCalledWith("navigatorPanels", panels);
+	});
+
+	it("provides empty panels array by default", () => {
+		Navigator.create({ id: "t10" });
+		expect(mockApp.provide).toHaveBeenCalledWith("navigatorPanels", []);
+	});
 });
 
 describe("NavigatorInstance.mount()", () => {
