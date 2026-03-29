@@ -2,9 +2,9 @@
 
 The core module provides three composables that every part of the application is built on. All are instance-aware — they scope their state to the active Navigator instance via `inject('navigatorId')`.
 
-- **[`useMap`](map.md)** — MapLibre GL JS lifecycle management: map creation, view persistence, and URL hash sync.
-- **[`useUI`](ui.md)** — Application UI state: responsive breakpoints, the navigation sidebar, and the side panel.
-- **[`useLocale`](locale.md)** — Multi-language support: browser-language detection, translation lookup, and locale persistence.
+- **[`useMap`](../dev/map.md)** — MapLibre GL JS lifecycle management: map creation, view persistence, and URL hash sync.
+- **[`useUI`](../dev/ui.md)** — Application UI state: responsive breakpoints, the navigation sidebar, and the side panel.
+- **[`useLocale`](../dev/locale.md)** — Multi-language support: browser-language detection, translation lookup, and locale persistence.
 
 ---
 

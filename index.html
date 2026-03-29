@@ -23,7 +23,7 @@
       const messagesRaw = params.get("messages");
       const messages = messagesRaw ? JSON.parse(decodeURIComponent(messagesRaw)) : undefined;
       const debug = params.get("debug") === "true";
-      Navigator.init({ id: "app", locale, messages, debug });
+      Navigator.create({ id: "app", locale, messages, debug }).mount();
     </script>
   </body>
 </html>

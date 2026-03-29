@@ -1,5 +1,6 @@
-import { ref, computed, inject } from "vue";
+import { ref, computed, inject, watch } from "vue";
 import { useStorage } from "@/composables/useStorage";
+import { getEmitter } from "@/index.js";
 
 const cache = new Map();
 
@@ -32,7 +33,7 @@ export const useSettings = () => {
 		const storage = useStorage("settings", {
 			theme: null, // null = follow system, 'light', or 'dark'
 			units: null, // null = follow locale default
-			language: null, // null = follow browser / Navigator.init() default
+			language: null, // null = follow browser / Navigator.create() default
 		});
 		cache.set(instanceId, { storage });
 	}
@@ -45,6 +46,12 @@ export const useSettings = () => {
 	);
 
 	const isDark = computed(() => resolvedTheme.value === "dark");
+
+	// Emit theme:change when the resolved theme changes (explicit toggle or system change)
+	watch(resolvedTheme, (theme) => {
+		const emitter = getEmitter(instanceId);
+		if (emitter) emitter.emit("theme:change", theme);
+	});
 
 	// Resolve units: explicit choice or fall back to locale default.
 	const resolvedUnits = computed(() => storage.units ?? localeDefaultUnits());

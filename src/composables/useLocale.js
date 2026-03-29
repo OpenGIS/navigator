@@ -39,7 +39,7 @@ export const useLocale = () => {
 		// 1. Explicit user choice stored in settings
 		if (language.value) return language.value;
 
-		// 2. Default locale from Navigator.init()
+		// 2. Default locale from Navigator.create()
 		if (defaultLocale && LOCALES[defaultLocale]) return defaultLocale;
 
 		// 3. Browser language — try exact match then base code
@@ -71,7 +71,7 @@ export const useLocale = () => {
 	 * The locale code formatted as an OSM `name:xx` tag suffix.
 	 * For most locales this equals `locale.value` directly.
 	 * Use this value when building MapLibre coalesce expressions for
-	 * multilingual map labels (see docs/guide/locale.md — OSM Multilingual Names).
+	 * multilingual map labels (see docs/dev/locale.md — OSM Multilingual Names).
 	 */
 	const mapLanguageTag = computed(
 		() => MAP_LANGUAGE_TAG_OVERRIDES[locale.value] ?? locale.value,

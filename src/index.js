@@ -2,35 +2,160 @@ import { createApp } from "vue";
 import App from "./App.vue";
 import "./assets/sass/theme.scss";
 import "bootstrap";
+import EventEmitter from "./classes/EventEmitter.js";
+
+export { getMapInstance } from "./composables/useMap.js";
+
+/**
+ * @typedef {Object} ButtonConfig
+ * @property {string} id - Unique button identifier
+ * @property {string} icon - Icon name from the sprite
+ * @property {string} label - Button label text
+ * @property {'start'|'middle'|'end'} [position='end'] - Toolbar position
+ * @property {Function} [onClick] - Click handler, receives { map, instanceId }
+ * @property {PanelConfig} [panel] - Optional panel to open on click
+ */
+
+/**
+ * @typedef {Object} PanelConfig
+ * @property {string} title - Panel heading
+ * @property {Function} render - Called with (container, { map, instanceId }) to populate content
+ */
+
+/**
+ * @typedef {Object} NavigatorPlugin
+ * @property {Function} install - Called with ({ app, instanceId, on, off, emit }, options)
+ */
 
 /**
  * @typedef {Object} NavigatorConfig
- * @property {string} [id='navigator'] - Unique instance identifier. A <div> with this id is
- *   mounted to if one does not already exist in the DOM. Also used to namespace localStorage
- *   keys so multiple instances on the same page do not collide.
+ * @property {string} [id='navigator'] - Unique instance identifier
  * @property {boolean} [debug=false] - Enable debug mode
- * @property {string} [locale] - Default language code (e.g. 'fr'). Used when the user has no
- *   stored preference. Falls back to the browser language, then English.
- * @property {Object} [messages={}] - Per-language label overrides. Keys are language codes;
- *   values are objects mapping translation keys to replacement strings.
- *   Example: { en: { 'about.title': 'My Map' }, fr: { 'about.title': 'Ma carte' } }
- * @property {Object} [mapOptions={}] - Options passed directly to the MapLibre Map constructor
+ * @property {string} [locale] - Default language code (e.g. 'fr')
+ * @property {Object} [messages={}] - Per-language label overrides
+ * @property {Object} [mapOptions={}] - MapLibre Map constructor options
+ * @property {ButtonConfig[]} [buttons=[]] - Custom toolbar buttons
+ * @property {NavigatorPlugin[]} [plugins=[]] - Per-instance plugins
+ * @property {Function} [onMapReady] - Called when the map finishes loading
+ * @property {Function} [onViewChange] - Called on map moveend with { center, zoom }
+ * @property {Function} [onThemeChange] - Called when the resolved theme changes
+ * @property {Function} [onPanelChange] - Called when the active panel tab changes
  */
+
+// Per-instance emitters, accessible from composables via getEmitter()
+const emitters = new Map();
+
+/** @param {string} instanceId */
+export const getEmitter = (instanceId) => emitters.get(instanceId) ?? null;
+
+// Global plugins registered via Navigator.use()
+const globalPlugins = [];
+
+/**
+ * A mounted Navigator instance.
+ * Wraps the Vue app and exposes the event emitter for external listeners.
+ */
+class NavigatorInstance {
+	/**
+	 * @param {import('vue').App} app
+	 * @param {string} id
+	 * @param {EventEmitter} emitter
+	 * @param {HTMLElement} el
+	 */
+	constructor(app, id, emitter, el) {
+		this.app = app;
+		this.id = id;
+		this._emitter = emitter;
+		this._el = el;
+		this._mounted = false;
+	}
+
+	/** Mount the Vue app to the DOM. */
+	mount() {
+		if (this._mounted) return this;
+		this.app.mount(this._el);
+		this._mounted = true;
+		return this;
+	}
+
+	/** Unmount and clean up. */
+	unmount() {
+		if (!this._mounted) return this;
+		this.app.unmount();
+		this._mounted = false;
+		emitters.delete(this.id);
+		return this;
+	}
+
+	/** @param {string} event @param {Function} fn */
+	on(event, fn) {
+		this._emitter.on(event, fn);
+		return this;
+	}
+
+	/** @param {string} event @param {Function} fn */
+	once(event, fn) {
+		this._emitter.once(event, fn);
+		return this;
+	}
+
+	/** @param {string} event @param {Function} [fn] */
+	off(event, fn) {
+		this._emitter.off(event, fn);
+		return this;
+	}
+
+	/** @param {string} event @param {...*} args */
+	emit(event, ...args) {
+		this._emitter.emit(event, ...args);
+		return this;
+	}
+}
 
 const Navigator = {
 	/**
-	 * Initialise and mount a Navigator instance.
+	 * Register a global plugin that will be installed on every instance.
+	 *
+	 * @param {NavigatorPlugin} plugin
+	 * @param {Object} [options]
+	 * @returns {typeof Navigator}
+	 */
+	use(plugin, options) {
+		if (plugin && typeof plugin.install === "function") {
+			globalPlugins.push({ plugin, options });
+		}
+		return this;
+	},
+
+	/**
+	 * Create a Navigator instance without mounting it.
+	 * Use the returned NavigatorInstance to configure the Vue app,
+	 * register event listeners, and then call .mount().
 	 *
 	 * @param {NavigatorConfig} config
-	 * @returns {import('vue').App} The mounted Vue application instance
+	 * @returns {NavigatorInstance}
 	 *
 	 * @example
 	 * import Navigator from '@ogis/navigator'
 	 * import '@ogis/navigator/navigator.css'
 	 *
-	 * Navigator.init({ id: 'my-map', locale: 'fr' })
+	 * const nav = Navigator.create({ id: 'my-map', locale: 'fr' })
+	 * nav.on('map:ready', ({ map }) => console.log('Map loaded'))
+	 * nav.mount()
 	 */
-	init({ id = "navigator", debug = false, locale = null, messages = {}, mapOptions = {} } = {}) {
+	create({
+		id = "navigator",
+		debug = false,
+		locale = null,
+		messages = {},
+		mapOptions = {},
+		buttons = [],
+		plugins = [],
+		onMapReady,
+		onViewChange,
+		onThemeChange,
+		onPanelChange,
+	} = {}) {
 		let el = document.getElementById(id);
 		if (!el) {
 			el = document.createElement("div");
@@ -38,12 +163,38 @@ const Navigator = {
 			document.body.appendChild(el);
 		}
 
+		// Create per-instance event emitter
+		const emitter = new EventEmitter();
+		emitters.set(id, emitter);
+
+		// Register lifecycle callbacks as event listeners
+		if (typeof onMapReady === "function") emitter.on("map:ready", onMapReady);
+		if (typeof onViewChange === "function") emitter.on("view:change", onViewChange);
+		if (typeof onThemeChange === "function") emitter.on("theme:change", onThemeChange);
+		if (typeof onPanelChange === "function") emitter.on("panel:change", onPanelChange);
+
 		const app = createApp(App, { debug, mapOptions });
 		app.provide("navigatorId", id);
 		app.provide("navigatorLocale", locale);
 		app.provide("navigatorMessages", messages);
-		app.mount(el);
-		return app;
+		app.provide("navigatorButtons", buttons);
+
+		const instance = new NavigatorInstance(app, id, emitter, el);
+
+		// Install global plugins
+		const ctx = { app, instanceId: id, on: (e, f) => emitter.on(e, f), off: (e, f) => emitter.off(e, f), emit: (e, ...a) => emitter.emit(e, ...a) };
+		for (const { plugin, options } of globalPlugins) {
+			plugin.install(ctx, options);
+		}
+
+		// Install per-instance plugins
+		for (const p of plugins) {
+			if (p && typeof p.install === "function") {
+				p.install(ctx);
+			}
+		}
+
+		return instance;
 	},
 };
 

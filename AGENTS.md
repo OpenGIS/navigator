@@ -12,7 +12,7 @@ Context for agentic coding tools. Read this before making any changes to the cod
 
 ## What is this project?
 
-Navigator is an open-source mapping library published to npm as [`@ogis/navigator`](https://www.npmjs.com/package/@ogis/navigator). It wraps [MapLibre GL JS](https://maplibre.org/) and [Vue 3](https://vuejs.org/) into an embeddable map widget with a persistent UI layer. Consumers call `Navigator.init()` from a `<script type="module">` tag.
+Navigator is an open-source mapping library published to npm as [`@ogis/navigator`](https://www.npmjs.com/package/@ogis/navigator). It wraps [MapLibre GL JS](https://maplibre.org/) and [Vue 3](https://vuejs.org/) into an embeddable map widget with a persistent UI layer. Consumers call `Navigator.create().mount()` from a `<script type="module">` tag.
 
 The demo app (`index.html`) is also a fully installable PWA. It includes a Web App Manifest (`public/manifest.json`), PWA icons (`public/icon-*.png`), and viewport meta tags that disable page-level zoom so MapLibre handles all zooming. The demo is built with `npm run build:demo` using `vite.demo.config.js` (base: `/navigator/`).
 
@@ -49,7 +49,7 @@ Document → Test → Implement → Screenshot
 
 1. **Write the docs first.** Add or update the relevant `docs/guide/` file before writing any code.
 2. **Write tests against the docs.** Each heading in a doc maps to a `test.describe` block in the corresponding spec.
-3. **Implement until tests pass.** Run `npm test -- tests/e2e/{relevant}.spec.js` to track progress during development. See [docs/dev/testing.md](docs/dev/testing.md) for how to find the right spec.
+3. **Implement until tests pass.** Run `npm test -- tests/e2e/{relevant}.spec.js` to track progress during development. See [docs/dev/9.testing.md](docs/dev/9.testing.md) for how to find the right spec.
 4. **Add screenshots where helpful.** Screenshot specs live in `tests/e2e/screenshots/` and output to `assets/screenshots/docs/`.
 
 Before marking any task done, run `npm test` (full suite) and `npm run check:sync`. Both must pass.
@@ -60,7 +60,7 @@ Before marking any task done, run `npm test` (full suite) and `npm run check:syn
 
 ```
 src/
-  index.js              # public API — exports Navigator.init()
+  index.js              # public API — exports Navigator.create()
   App.vue               # root Vue component
   composables/
     useStorage.js       # localStorage wrapper, instance-scoped
@@ -92,7 +92,7 @@ src/
 
 ### Instance isolation
 
-Every call to `Navigator.init({ id })` creates a fully isolated Vue app. The `id` is passed down via `app.provide('navigatorId', id)`. All composables call `inject('navigatorId', 'navigator')` to scope their state.
+Every call to `Navigator.create({ id })` creates a fully isolated Vue app. The `id` is passed down via `app.provide('navigatorId', id)`. All composables call `inject('navigatorId', 'navigator')` to scope their state.
 
 ### localStorage key format
 
@@ -145,7 +145,7 @@ center: [-128.0094, 50.6539]
 
 ### Features
 
-A feature's composable lives in `src/composables/`, its panel in `src/components/panels/`, and its top-bar button (if any) in `src/components/ui/top/`. See `docs/dev/features.md` for the full pattern.
+A feature's composable lives in `src/composables/`, its panel in `src/components/panels/`, and its top-bar button (if any) in `src/components/ui/top/`. See `docs/dev/7.features.md` for the full pattern.
 
 ---
 
@@ -170,12 +170,7 @@ Current mapping:
 
 | Doc | Tests | Screenshots |
 |-----|-------|-------------|
-| `docs/guide/config.md` | `tests/e2e/config.spec.js` | — |
-| `docs/guide/instances.md` | `tests/e2e/instances.spec.js` | — |
 | `docs/guide/core.md` | `tests/e2e/core.spec.js` | `tests/e2e/screenshots/core.spec.js` |
-| `docs/guide/map.md` | `tests/e2e/map.spec.js` | `tests/e2e/screenshots/map.spec.js` |
-| `docs/guide/ui.md` | `tests/e2e/ui.spec.js` | `tests/e2e/screenshots/ui.spec.js` |
-| `docs/guide/locale.md` | `tests/e2e/locale.spec.js` | `tests/e2e/screenshots/locale.spec.js` |
 | `docs/guide/features/locate.md` | `tests/e2e/features/locate.spec.js` | `tests/e2e/screenshots/features/locate.spec.js` |
 | `docs/guide/features/settings.md` | `tests/e2e/features/settings.spec.js` | — |
 
@@ -183,9 +178,15 @@ Developer docs (no tests):
 
 | Doc | Purpose |
 |-----|---------|
-| `docs/dev/features.md` | How to build a new feature |
-| `docs/dev/testing.md` | Testing conventions and screenshot strategy |
-| `docs/dev/theme.md` | Bootstrap theme customization |
+| `docs/dev/1.config.md` | `Navigator.create()` config API reference |
+| `docs/dev/2.instances.md` | Multi-instance setup, storage convention, architecture |
+| `docs/dev/3.map.md` | `useMap` full API: map lifecycle, view persistence, URL hash |
+| `docs/dev/4.ui.md` | `useUI` full API: responsive breakpoints, panel, navigation |
+| `docs/dev/5.locale.md` | Locale API, translations, OSM multilingual names |
+| `docs/dev/6.theme.md` | Bootstrap theme customization |
+| `docs/dev/7.features.md` | How to build a new feature |
+| `docs/dev/8.extending.md` | Extending Navigator: events, plugins, custom buttons/panels |
+| `docs/dev/9.testing.md` | Testing conventions and screenshot strategy |
 
 ---
 
@@ -193,7 +194,7 @@ Developer docs (no tests):
 
 1. Create `docs/guide/feature-name.md` (or `docs/guide/features/feature-name.md`)
 2. Create `tests/e2e/feature-name.spec.js` (or `tests/e2e/features/feature-name.spec.js`)
-3. Create `src/composables/use{FeatureName}.js`, `src/components/panels/{feature-name}.vue`, and `src/components/ui/top/{feature-name}.vue` (see `docs/dev/features.md`)
+3. Create `src/composables/use{FeatureName}.js`, `src/components/panels/{feature-name}.vue`, and `src/components/ui/top/{feature-name}.vue` (see `docs/dev/7.features.md`)
 4. If the feature has illustratable UI, create `tests/e2e/screenshots/feature-name.spec.js`
 5. Run `npm test -- tests/e2e/{relevant}.spec.js` during development, then `npm test && npm run check:sync` as a final check
 
@@ -208,10 +209,12 @@ A Playwright MCP server is configured in `.github/mcp.json`. Agents with MCP sup
 ## Further Reading
 
 - `README.md` — install and usage
-- `docs/guide/config.md` — `Navigator.init()` config API reference (all options)
-- `docs/guide/instances.md` — multi-instance setup, storage convention, architecture
-- `docs/guide/map.md` — `useMap` full API
-- `docs/guide/ui.md` — `useUI` full API
-- `docs/dev/features.md` — how to build a feature
-- `docs/dev/testing.md` — testing conventions, screenshot strategy, how to run specific specs
+- `docs/dev/1.config.md` — `Navigator.create()` config API reference (all options)
+- `docs/dev/2.instances.md` — multi-instance setup, storage convention, architecture
+- `docs/dev/3.map.md` — `useMap` full API
+- `docs/dev/4.ui.md` — `useUI` full API
+- `docs/dev/5.locale.md` — locale API, translations
+- `docs/dev/7.features.md` — how to build a feature
+- `docs/dev/8.extending.md` — events, plugins, custom buttons/panels
+- `docs/dev/9.testing.md` — testing conventions, screenshot strategy, how to run specific specs
 - `tasks/sync-review.md` — agent task for a full Document First sync review

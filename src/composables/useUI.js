@@ -1,4 +1,5 @@
 import { ref, computed, inject } from "vue";
+import { getEmitter } from "@/index.js";
 
 // Per-instance state: instanceId -> state object
 const instances = new Map();
@@ -116,6 +117,8 @@ export const useUI = () => {
 
     const setActivePanel = (id) => {
         s.activePanel.value = id;
+        const emitter = getEmitter(instanceId);
+        if (emitter) emitter.emit("panel:change", id);
     };
 
     const setFirstLoadComplete = () => {

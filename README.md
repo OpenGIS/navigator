@@ -33,6 +33,7 @@ This project is inspired by, and made possible thanks to the [OpenStreetMap](htt
 
 ## Planned Changes
 
+- Implement [debug option](docs/dev/1.config.md#debug).
 - Worldwide language support.
 - Search ([Nominatim](https://nominatim.org/) integration).
 - Better handling of denied location permissions.
@@ -76,15 +77,15 @@ npm install @ogis/navigator
 import Navigator from "@ogis/navigator";
 import "@ogis/navigator/navigator.css";
 
-Navigator.init({ id: "my-map" });
+Navigator.create({ id: "my-map" }).mount();
 ```
 
-`Navigator.init()` looks for a `<div id="my-map">` in the DOM. If one does not exist it is created and appended to `<body>`.
+`Navigator.create()` looks for a `<div id="my-map">` in the DOM. If one does not exist it is created and appended to `<body>`.
 
 ### Options
 
 ```js
-Navigator.init({
+const nav = Navigator.create({
   id: "my-map", // DOM element id to mount into (created if absent); defaults to 'navigator'
   locale: "fr", // default language; uses browser language if omitted
   messages: {
@@ -97,27 +98,33 @@ Navigator.init({
     center: [-128.0094, 50.6539],
     zoom: 12,
   },
+  onMapReady: ({ map }) => {
+    // called when the map finishes loading
+    console.log("Map is ready");
+  },
 });
+
+nav.mount();
 ```
 
-See [`docs/guide/config.md`](docs/guide/config.md) for the full configuration reference.
+See [`docs/dev/1.config.md`](docs/dev/1.config.md) for the full configuration reference.
 
 ### Multiple instances
 
-Each call to `Navigator.init()` creates a fully isolated instance with its own map, UI state, and localStorage namespace.
+Each call to `Navigator.create()` creates a fully isolated instance with its own map, UI state, and localStorage namespace.
 
 ```js
-Navigator.init({
+Navigator.create({
   id: "map-a",
   mapOptions: { center: [-128.0094, 50.6539], zoom: 10 },
-});
-Navigator.init({
+}).mount();
+Navigator.create({
   id: "map-b",
   mapOptions: { center: [-128.0094, 50.6539], zoom: 14 },
-});
+}).mount();
 ```
 
-See [`docs/guide/instances.md`](docs/guide/instances.md) for full details.
+See [`docs/dev/2.instances.md`](docs/dev/2.instances.md) for full details.
 
 ## PWA
 
@@ -143,11 +150,11 @@ Document → Test → Implement → Screenshot
 
 **2. Write the tests** — Translate each doc heading into a `test.describe` block in the corresponding spec file. If you can't write a test for something, the docs description is too vague — sharpen it first.
 
-**3. Implement until the tests pass** — The docs and tests define the target; the implementation just needs to reach it. Run `npm test -- tests/e2e/{relevant}.spec.js` to track progress. See [docs/dev/testing.md](docs/dev/testing.md) for how to find the right spec.
+**3. Implement until the tests pass** — The docs and tests define the target; the implementation just needs to reach it. Run `npm test -- tests/e2e/{relevant}.spec.js` to track progress. See [docs/dev/9.testing.md](docs/dev/9.testing.md) for how to find the right spec.
 
 **4. Add screenshots to the docs** — For sections where a picture helps, add a screenshot spec in `tests/e2e/screenshots/` and embed the output in the docs. Not every section needs one.
 
-See [docs/dev/testing.md](docs/dev/testing.md) for the full testing and screenshot strategy.
+See [docs/dev/9.testing.md](docs/dev/9.testing.md) for the full testing and screenshot strategy.
 
 ### Install
 
@@ -167,7 +174,7 @@ npm run dev
 npm test -- tests/e2e/{spec}.spec.js
 ```
 
-See [docs/dev/testing.md](docs/dev/testing.md) for the testing strategy and how to find the right spec file.
+See [docs/dev/9.testing.md](docs/dev/9.testing.md) for the testing strategy and how to find the right spec file.
 
 ### Build
 

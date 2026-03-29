@@ -62,14 +62,6 @@ Read this file, then:
 A report like:
 
 ```
-docs/guide/instances.md  ↔  tests/e2e/instances.spec.js
-  ✅ Creating an Instance        → describe block found
-  ✅ id — Instance Identifier    → describe block found
-  ✅ mapOptions                  → describe block found
-  ✅ Multiple Instances          → describe block found
-  ⚠️  Unmounting an Instance     → no describe block (no runtime test)
-  ✅ Internal Storage Convention → describe block found
-
 docs/guide/core.md  ↔  tests/e2e/core.spec.js
   ✅ useMap / Initialising the map  → describe block found
   ✅ useMap / View persistence      → describe block found

@@ -71,7 +71,7 @@ Storage key: `navigator_settings_{instanceId}`
 
 `units: null` means "follow the browser locale default". The locale is resolved via `Intl.Locale(navigator.language).maximize().region` — US, LR, and MM map to `'imperial'`; all other regions map to `'metric'`. Once the user toggles the switch an explicit `'metric'` or `'imperial'` string is stored.
 
-`language: null` means "follow the browser language or the `locale` default set via `Navigator.init()`". Once the user selects a language from the dropdown an explicit code (`'en'`, `'fr'`, …) is stored.
+`language: null` means "follow the browser language or the `locale` default set via `Navigator.create()`". Once the user selects a language from the dropdown an explicit code (`'en'`, `'fr'`, …) is stored.
 
 ---
 

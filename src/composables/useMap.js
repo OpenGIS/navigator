@@ -5,6 +5,7 @@ import { useStorage } from "@/composables/useStorage";
 import { parseUrlHash, updateUrlHash } from "@/composables/useUrlHash";
 import { useSettings } from "@/composables/useSettings";
 import { useLocale } from "@/composables/useLocale";
+import { getEmitter } from "@/index.js";
 
 // Per-instance cache: instanceId -> { state, mapInstance }
 const mapCache = new Map();
@@ -161,6 +162,9 @@ export const useMap = (containerRef = null, options = {}) => {
                             zoom: z,
                         };
                         updateUrlHash(z, c.lat, c.lng);
+
+                        const emitter = getEmitter(instanceId);
+                        if (emitter) emitter.emit("view:change", { center: { lat: c.lat, lng: c.lng }, zoom: z });
                     }, 1000),
                 );
 
@@ -188,6 +192,10 @@ export const useMap = (containerRef = null, options = {}) => {
                 });
                 map.addControl(scaleControl, "bottom-left");
                 cached.scaleControl = scaleControl;
+
+                // Emit map:ready for external listeners
+                const emitter = getEmitter(instanceId);
+                if (emitter) emitter.emit("map:ready", { map, instanceId });
             });
         });
 

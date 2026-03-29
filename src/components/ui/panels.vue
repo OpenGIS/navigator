@@ -1,22 +1,38 @@
 <script setup>
-import { computed } from "vue";
+import { computed, inject, ref, watch, nextTick } from "vue";
 import { useUI } from "@/composables/useUI";
 import { useLocale } from "@/composables/useLocale";
+import { getMapInstance } from "@/composables/useMap";
 import IconButton from "@/components/ui/icon-button.vue";
 import ViewPanel from "@/components/panels/view.vue";
 import SettingsPanel from "@/components/panels/settings.vue";
 import AboutPanel from "@/components/panels/about.vue";
 import PrivacyPanel from "@/components/panels/privacy.vue";
 
+const instanceId = inject("navigatorId", "navigator");
+const customButtons = inject("navigatorButtons", []);
+
 const { isPanelVisible, activePanel, setActivePanel, closePanel, isDesktop } = useUI();
 const { t } = useLocale();
 
-const tabs = [
+const builtInTabs = [
   { id: "view",     icon: "globe",        labelKey: "menu.mapView" },
   { id: "settings", icon: "gear",         labelKey: "menu.settings",   btnId: "settings-button" },
   { id: "about",    icon: "info-circle",  labelKey: "menu.about",      btnId: "about-button" },
   { id: "privacy",  icon: "lock",         labelKey: "menu.privacy",    btnId: "privacy-button" },
 ];
+
+// Custom buttons that have a panel definition become additional tabs
+const customTabs = computed(() =>
+  customButtons
+    .filter((b) => b.panel)
+    .map((b) => ({ id: b.id, icon: b.icon, label: b.panel.title || b.label })),
+);
+
+const tabs = computed(() => [
+  ...builtInTabs,
+  ...customTabs.value,
+]);
 
 const panelComponents = {
   view:     ViewPanel,
@@ -25,7 +41,27 @@ const panelComponents = {
   privacy:  PrivacyPanel,
 };
 
-const activeComponent = computed(() => panelComponents[activePanel.value] ?? ViewPanel);
+const isCustomPanel = computed(() => !(activePanel.value in panelComponents));
+const activeComponent = computed(() => panelComponents[activePanel.value] ?? null);
+
+// Ref for the custom panel render container
+const customPanelContainer = ref(null);
+
+// When the active panel switches to a custom one, call its render function
+watch(
+  [activePanel, customPanelContainer],
+  async () => {
+    if (!isCustomPanel.value || !customPanelContainer.value) return;
+    await nextTick();
+    const btn = customButtons.find((b) => b.id === activePanel.value);
+    if (btn?.panel?.render) {
+      customPanelContainer.value.innerHTML = "";
+      const map = getMapInstance(instanceId);
+      btn.panel.render(customPanelContainer.value, { map, instanceId });
+    }
+  },
+  { flush: "post" },
+);
 </script>
 
 <template>
@@ -40,22 +76,33 @@ const activeComponent = computed(() => panelComponents[activePanel.value] ?? Vie
     <div class="offcanvas-body p-0 d-flex flex-column">
       <!-- Panel Nav -->
       <div class="panel-nav border-bottom bg-body">
-        <IconButton
-          v-for="tab in tabs"
-          :key="tab.id"
-          :id="tab.btnId"
-          :icon="tab.icon"
-          :label="t(tab.labelKey)"
-          :icon-width="32"
-          :icon-height="32"
-          :active="activePanel === tab.id"
-          @click="setActivePanel(tab.id)"
-        />
+        <template v-for="tab in tabs" :key="tab.id">
+          <IconButton
+            v-if="tab.labelKey"
+            :id="tab.btnId"
+            :icon="tab.icon"
+            :label="t(tab.labelKey)"
+            :icon-width="32"
+            :icon-height="32"
+            :active="activePanel === tab.id"
+            @click="setActivePanel(tab.id)"
+          />
+          <IconButton
+            v-else
+            :icon="tab.icon"
+            :label="tab.label"
+            :icon-width="32"
+            :icon-height="32"
+            :active="activePanel === tab.id"
+            @click="setActivePanel(tab.id)"
+          />
+        </template>
       </div>
 
       <!-- Active Panel Content -->
       <div class="flex-grow-1 overflow-auto">
-        <component :is="activeComponent" />
+        <component v-if="activeComponent" :is="activeComponent" />
+        <div v-else ref="customPanelContainer" class="p-3" />
       </div>
     </div>
   </div>

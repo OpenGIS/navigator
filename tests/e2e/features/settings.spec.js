@@ -2,6 +2,12 @@ import { test, expect } from "@playwright/test";
 
 const SETTINGS_STORAGE_KEY = "navigator_settings_app";
 
+/** Seed settings storage before page load (avoids an extra reload). */
+const withSettings = (page, data) =>
+	page.addInitScript(({ key, data }) => {
+		localStorage.setItem(key, JSON.stringify(data));
+	}, { key: SETTINGS_STORAGE_KEY, data });
+
 // Seed view storage so the About modal does not appear on fresh contexts
 test.beforeEach(async ({ page }) => {
 	await page.addInitScript(() => {
@@ -76,11 +82,8 @@ test.describe("Appearance", () => {
 		page,
 	}) => {
 		// Force light mode to get a known start state
+		await withSettings(page, { theme: "light", units: "metric" });
 		await page.goto("/");
-		await page.evaluate((key) => {
-			localStorage.setItem(key, JSON.stringify({ theme: "light", units: "metric" }));
-		}, SETTINGS_STORAGE_KEY);
-		await page.reload();
 		await page.waitForSelector(".navigator-map canvas");
 
 		const root = themeRoot(page);
@@ -97,11 +100,8 @@ test.describe("Appearance", () => {
 		page,
 	}) => {
 		// Start in dark mode
+		await withSettings(page, { theme: "dark", units: "metric" });
 		await page.goto("/");
-		await page.evaluate((key) => {
-			localStorage.setItem(key, JSON.stringify({ theme: "dark", units: "metric" }));
-		}, SETTINGS_STORAGE_KEY);
-		await page.reload();
 		await page.waitForSelector(".navigator-map canvas");
 
 		const root = themeRoot(page);
@@ -184,11 +184,8 @@ test.describe("Units", () => {
 		page,
 	}) => {
 		// Force metric to get a known start state
+		await withSettings(page, { theme: null, units: "metric" });
 		await page.goto("/");
-		await page.evaluate((key) => {
-			localStorage.setItem(key, JSON.stringify({ theme: null, units: "metric" }));
-		}, SETTINGS_STORAGE_KEY);
-		await page.reload();
 		await page.waitForSelector(".navigator-map canvas");
 
 		await openMenuPanel(page);
@@ -201,14 +198,8 @@ test.describe("Units", () => {
 	test("scale bar switches to imperial when units set to imperial", async ({
 		page,
 	}) => {
+		await withSettings(page, { theme: null, units: "imperial" });
 		await page.goto("/");
-		await page.evaluate((key) => {
-			localStorage.setItem(
-				key,
-				JSON.stringify({ theme: null, units: "imperial" }),
-			);
-		}, SETTINGS_STORAGE_KEY);
-		await page.reload();
 		await page.waitForSelector(".maplibregl-ctrl-scale");
 
 		const scale = page.locator(".maplibregl-ctrl-scale");
@@ -218,11 +209,8 @@ test.describe("Units", () => {
 
 test.describe("Persistence", () => {
 	test("dark mode preference is saved to localStorage", async ({ page }) => {
+		await withSettings(page, { theme: "light", units: "metric" });
 		await page.goto("/");
-		await page.evaluate((key) => {
-			localStorage.setItem(key, JSON.stringify({ theme: "light", units: "metric" }));
-		}, SETTINGS_STORAGE_KEY);
-		await page.reload();
 		await page.waitForSelector(".navigator-map canvas");
 
 		await openMenuPanel(page);
@@ -237,11 +225,8 @@ test.describe("Persistence", () => {
 
 	test("units preference is saved to localStorage", async ({ page }) => {
 		// Seed metric so we have a known start state regardless of locale
+		await withSettings(page, { theme: null, units: "metric" });
 		await page.goto("/");
-		await page.evaluate((key) => {
-			localStorage.setItem(key, JSON.stringify({ theme: null, units: "metric" }));
-		}, SETTINGS_STORAGE_KEY);
-		await page.reload();
 		await page.waitForSelector(".navigator-map canvas");
 
 		await openMenuPanel(page);
@@ -256,11 +241,8 @@ test.describe("Persistence", () => {
 	});
 
 	test("persisted theme is applied on page reload", async ({ page }) => {
+		await withSettings(page, { theme: "dark", units: "metric" });
 		await page.goto("/");
-		await page.evaluate((key) => {
-			localStorage.setItem(key, JSON.stringify({ theme: "dark", units: "metric" }));
-		}, SETTINGS_STORAGE_KEY);
-		await page.reload();
 		await page.waitForSelector(".navigator-map canvas");
 
 		await expect(themeRoot(page)).toHaveAttribute("data-bs-theme", "dark");
@@ -269,14 +251,8 @@ test.describe("Persistence", () => {
 	test("persisted units are reflected in the settings select on reload", async ({
 		page,
 	}) => {
+		await withSettings(page, { theme: "light", units: "imperial" });
 		await page.goto("/");
-		await page.evaluate((key) => {
-			localStorage.setItem(
-				key,
-				JSON.stringify({ theme: "light", units: "imperial" }),
-			);
-		}, SETTINGS_STORAGE_KEY);
-		await page.reload();
 		await page.waitForSelector(".navigator-map canvas");
 
 		await openMenuPanel(page);
@@ -320,11 +296,8 @@ test.describe("Language", () => {
 
 	test("selecting a language updates the UI immediately", async ({ page }) => {
 		// Seed English so we have a known start state
+		await withSettings(page, { theme: null, units: null, language: "en" });
 		await page.goto("/");
-		await page.evaluate((key) => {
-			localStorage.setItem(key, JSON.stringify({ theme: null, units: null, language: "en" }));
-		}, SETTINGS_STORAGE_KEY);
-		await page.reload();
 		await page.waitForSelector(".navigator-map canvas");
 
 		await openMenuPanel(page);
@@ -337,11 +310,8 @@ test.describe("Language", () => {
 	});
 
 	test("language preference is saved to localStorage", async ({ page }) => {
+		await withSettings(page, { theme: null, units: null, language: "en" });
 		await page.goto("/");
-		await page.evaluate((key) => {
-			localStorage.setItem(key, JSON.stringify({ theme: null, units: null, language: "en" }));
-		}, SETTINGS_STORAGE_KEY);
-		await page.reload();
 		await page.waitForSelector(".navigator-map canvas");
 
 		await openMenuPanel(page);
@@ -357,11 +327,8 @@ test.describe("Language", () => {
 	});
 
 	test("persisted language is applied on page reload", async ({ page }) => {
+		await withSettings(page, { theme: null, units: null, language: "fr" });
 		await page.goto("/");
-		await page.evaluate((key) => {
-			localStorage.setItem(key, JSON.stringify({ theme: null, units: null, language: "fr" }));
-		}, SETTINGS_STORAGE_KEY);
-		await page.reload();
 		await page.waitForSelector(".navigator-map canvas");
 
 		const offcanvas = page.locator(".offcanvas.show");
