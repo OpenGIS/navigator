@@ -1,6 +1,6 @@
 # Navigator
 
-A map for everyone, right in the browser.
+A navigational aid for everyone, right in the browser.
 
 The app is free to use: no API keys, no registration, no app stores and no invasions of privacy. Just open Navigator and start exploring.
 
