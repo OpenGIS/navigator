@@ -1,5 +1,5 @@
 <script setup>
-import { computed, inject, ref, watch, nextTick } from "vue";
+import { computed, inject, ref, shallowRef, watch, nextTick } from "vue";
 import { useUI } from "@/composables/useUI";
 import { useLocale } from "@/composables/useLocale";
 import { getMapInstance } from "@/composables/useMap";
@@ -10,8 +10,8 @@ import AboutPanel from "@/components/panels/about.vue";
 import PrivacyPanel from "@/components/panels/privacy.vue";
 
 const instanceId = inject("navigatorId", "navigator");
-const customButtons = inject("navigatorButtons", []);
-const customPanels = inject("navigatorPanels", []);
+const buttonsRef = inject("navigatorButtons", shallowRef([]));
+const panelsRef = inject("navigatorPanels", shallowRef([]));
 
 const { isPanelVisible, activePanel, setActivePanel, closePanel, isDesktop } = useUI();
 const { t } = useLocale();
@@ -25,14 +25,14 @@ const builtInTabs = [
 
 // Custom buttons that have a panel definition become additional tabs
 const buttonTabs = computed(() =>
-  customButtons
+  buttonsRef.value
     .filter((b) => b.panel)
     .map((b) => ({ id: b.id, icon: b.icon, label: b.panel.title || b.label })),
 );
 
 // Standalone custom panels (no toolbar button required)
 const panelTabs = computed(() =>
-  customPanels.map((p) => ({ id: p.id, icon: p.icon, label: p.title })),
+  panelsRef.value.map((p) => ({ id: p.id, icon: p.icon, label: p.title })),
 );
 
 const tabs = computed(() => [
@@ -54,17 +54,17 @@ const activeComponent = computed(() => panelComponents[activePanel.value] ?? nul
 // Resolve a Vue component from custom button/panel configs
 const activeCustomComponent = computed(() => {
   if (!isCustomPanel.value) return null;
-  const btn = customButtons.find((b) => b.id === activePanel.value);
+  const btn = buttonsRef.value.find((b) => b.id === activePanel.value);
   if (btn?.panel?.component) return btn.panel.component;
-  const panel = customPanels.find((p) => p.id === activePanel.value);
+  const panel = panelsRef.value.find((p) => p.id === activePanel.value);
   if (panel?.component) return panel.component;
   return null;
 });
 
 const activeCustomProps = computed(() => {
-  const btn = customButtons.find((b) => b.id === activePanel.value);
+  const btn = buttonsRef.value.find((b) => b.id === activePanel.value);
   if (btn?.panel?.component) return btn.panel.props || {};
-  const panel = customPanels.find((p) => p.id === activePanel.value);
+  const panel = panelsRef.value.find((p) => p.id === activePanel.value);
   if (panel?.component) return panel.props || {};
   return {};
 });
@@ -83,13 +83,13 @@ watch(
     const ctx = { map, instanceId };
 
     // Check button-based panels first, then standalone panels
-    const btn = customButtons.find((b) => b.id === activePanel.value);
+    const btn = buttonsRef.value.find((b) => b.id === activePanel.value);
     if (btn?.panel?.render) {
       customPanelContainer.value.innerHTML = "";
       btn.panel.render(customPanelContainer.value, ctx);
       return;
     }
-    const panel = customPanels.find((p) => p.id === activePanel.value);
+    const panel = panelsRef.value.find((p) => p.id === activePanel.value);
     if (panel?.render) {
       customPanelContainer.value.innerHTML = "";
       panel.render(customPanelContainer.value, ctx);

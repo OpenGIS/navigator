@@ -1,6 +1,8 @@
 // recordings.js — Recordings plugin for Navigator
 import { reactive, ref, computed } from 'vue';
 import { getMapInstance, useStorage } from '@ogis/navigator';
+import RecordButton from './RecordButton.vue';
+import RecordingsPanel from './RecordingsPanel.vue';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -82,13 +84,13 @@ const COLOR_PAUSED = '#6c757d'; // $secondary — Bootstrap grey
 // ---------------------------------------------------------------------------
 
 export const RecordingsPlugin = {
-  install({ app, instanceId, on }) {
+  install({ instanceId, on, provide, addButton }) {
     // useStorage provides reactive, auto-persisted state scoped to this instance.
     // Stored as "navigator_recordings_{instanceId}" in localStorage.
     // Pass instanceId explicitly since plugin install() runs outside Vue setup.
     const stored = useStorage('recordings', { saved: [], active: null }, instanceId);
 
-    // Reactive state shared with Vue components via app.provide()
+    // Reactive state shared with Vue components via provide()
     const state = reactive({
       isRecording: false,
       isPaused: false,
@@ -289,7 +291,7 @@ export const RecordingsPlugin = {
 
     // --- Provide to Vue tree ------------------------------------------------
 
-    app.provide('recordings', {
+    provide('recordings', {
       state,
       elapsed,
       distance,
@@ -301,6 +303,19 @@ export const RecordingsPlugin = {
       deleteRecording,
       downloadGPX,
       showOnMap,
+    });
+
+    // --- Register UI --------------------------------------------------------
+
+    addButton({
+      id: 'record',
+      icon: 'route',
+      position: 'middle',
+      component: RecordButton,
+      panel: {
+        title: 'Recordings',
+        component: RecordingsPanel,
+      },
     });
 
     // Return cleanup function for plugin teardown

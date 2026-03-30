@@ -1,39 +1,75 @@
-1. useStorage should be exported for plugin authors
+1. Plugins can't register their own UI
 
-The recordings plugin has ~20 lines of boilerplate for storageKey(), loadStorage(), saveStorage() — reimplementing
-the navigator*{namespace}*{instanceId} convention that useStorage already handles internally. If useStorage were
-exported (like useUI and getMapInstance), the plugin shrinks significantly and the key convention stays
-consistent.
+This is the biggest one. The Recordings feature requires three separate wiring points in the consumer's create()
+call:
 
-2. Export a useMap() composable
+Navigator.create({
+buttons: [{ id: 'record', component: RecordButton, panel: { component: RecordingsPanel } }],
+plugins: [RecordingsPlugin],
+})
 
-Components currently need two steps: inject('navigatorId') → getMapInstance(id). A useMap() composable that
-resolves both internally would be more Vue-idiomatic and less error-prone. The internal composable already exists
-— it just needs an external-facing export.
+The plugin manages all state, persistence, and map layers — but it can't declare its own button or panel. A
+self-contained plugin API would let you distribute a feature as a single import:
 
-3. Document the @vitejs/plugin-vue prerequisite
+// Hypothetical: plugin registers everything itself
+plugins: [RecordingsPlugin]
 
-The feature example shows .vue SFC files but doesn't mention that consumers need @vitejs/plugin-vue in their Vite
-config. This was a build-breaking blocker with no clear error message. A note in the extending docs (or a Vite
-plugin preset) would prevent this.
+The install() context could expose something like addButton() / addPanel() so a plugin can register its own UI
+components without the consumer manually wiring buttons config.
 
-4. Document available SVG sprite icons
+---
 
-RecordButton.vue uses <use href="#record-btn-fill" /> — but there's no list of available icon names anywhere.
-Plugin authors are guessing. A simple icon reference (even just a list) in the docs would help.
+2. useUI docs contradict the actual API
 
-5. Add once to the plugin context
+The internal docs (4.ui.md) describe openPanel(id, component) and togglePanel(id, component) — taking an id and
+component as parameters. But the actual exported useUI has:
 
-NavigatorInstance exposes once(), but the plugin install context only gets on/off/emit. Plugins that need one-time
-setup (like map:ready) would benefit from once too.
+- openPanel() — no parameters, just opens the panel
+- setActivePanel(id) — separate function to set which tab is active
 
-6. Add a plugin cleanup lifecycle
+The extending docs (8.extending.md) correctly show setActivePanel + openPanel as separate calls. The 4.ui.md docs
+should be updated to match.
 
-There's no destroy/teardown hook for plugins. If the instance is unmounted, plugins can't clean up timers,
-geolocation watches, or map layers. A on('destroy', fn) event or a return-value convention (install returns a
-cleanup function) would prevent leaks.
+---
 
-7. Minimum version annotations in docs
+3. app.provide() boilerplate in plugins
 
-useUI was added in 1.0.20, but the feature docs referenced it while the package was at 1.0.19. Adding @since
-annotations to the API tables would save debugging time.
+Every plugin that shares state with Vue components must manually call app.provide('key', ...) and every component
+must inject('key'). The plugin context could offer a shorthand:
+
+// Current — manual provide
+install({ app }) {
+app.provide('recordings', { state, start, pause, ... });
+}
+
+// Possible — context.provide() shorthand
+install({ provide }) {
+provide('recordings', { state, start, pause, ... });
+}
+
+Minor, but it reinforces the pattern and makes plugins feel less like they're reaching into Vue internals.
+
+---
+
+4. Per-instance plugins don't receive options
+
+Navigator.use(plugin, options) passes options as the second argument to install(), but per-instance plugins in the
+plugins array don't:
+
+// Global — options work
+Navigator.use(RecordingsPlugin, { maxDuration: 3600 });
+
+// Per-instance — no options mechanism
+plugins: [RecordingsPlugin] // install() gets context only
+
+Supporting plugins: [{ plugin: RecordingsPlugin, options: { ... } }] (or a tuple syntax) would make per-instance
+plugins configurable without needing factory functions.
+
+---
+
+5. @vitejs/plugin-vue is a hidden prerequisite
+
+The docs recommend Vue SFCs as the "preferred" approach for buttons and panels, but @vitejs/plugin-vue isn't
+mentioned until the very bottom of the extending docs. A consumer following the example will get an opaque Vite
+transform error. Options: surface this earlier in the docs, or detect the missing plugin at build time with a
+helpful error message.

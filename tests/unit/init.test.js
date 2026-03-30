@@ -109,26 +109,34 @@ describe("Navigator.create()", () => {
 		);
 	});
 
-	it("provides navigatorButtons from the buttons option", () => {
+	it("provides navigatorButtons as a shallowRef from the buttons option", () => {
 		const buttons = [{ id: "b1", icon: "star", label: "Star" }];
 		Navigator.create({ id: "t7", buttons });
-		expect(mockApp.provide).toHaveBeenCalledWith("navigatorButtons", buttons);
+		const call = mockApp.provide.mock.calls.find((c) => c[0] === "navigatorButtons");
+		expect(call).toBeTruthy();
+		expect(call[1].value).toEqual(buttons);
 	});
 
-	it("provides empty buttons array by default", () => {
+	it("provides empty buttons shallowRef by default", () => {
 		Navigator.create({ id: "t8" });
-		expect(mockApp.provide).toHaveBeenCalledWith("navigatorButtons", []);
+		const call = mockApp.provide.mock.calls.find((c) => c[0] === "navigatorButtons");
+		expect(call).toBeTruthy();
+		expect(call[1].value).toEqual([]);
 	});
 
-	it("provides navigatorPanels from the panels option", () => {
+	it("provides navigatorPanels as a shallowRef from the panels option", () => {
 		const panels = [{ id: "info", icon: "info-circle", title: "Info", render: vi.fn() }];
 		Navigator.create({ id: "t9", panels });
-		expect(mockApp.provide).toHaveBeenCalledWith("navigatorPanels", panels);
+		const call = mockApp.provide.mock.calls.find((c) => c[0] === "navigatorPanels");
+		expect(call).toBeTruthy();
+		expect(call[1].value).toEqual(panels);
 	});
 
-	it("provides empty panels array by default", () => {
+	it("provides empty panels shallowRef by default", () => {
 		Navigator.create({ id: "t10" });
-		expect(mockApp.provide).toHaveBeenCalledWith("navigatorPanels", []);
+		const call = mockApp.provide.mock.calls.find((c) => c[0] === "navigatorPanels");
+		expect(call).toBeTruthy();
+		expect(call[1].value).toEqual([]);
 	});
 });
 
@@ -260,6 +268,7 @@ describe("Plugin system", () => {
 				app: mockApp,
 				instanceId: "plugin-instance",
 			}),
+			undefined,
 		);
 	});
 
@@ -270,6 +279,62 @@ describe("Plugin system", () => {
 		expect(typeof ctx.on).toBe("function");
 		expect(typeof ctx.off).toBe("function");
 		expect(typeof ctx.emit).toBe("function");
+	});
+
+	it("plugin context includes provide, addButton, addPanel", () => {
+		const install = vi.fn();
+		Navigator.create({ id: "plugin-ctx", plugins: [{ install }] });
+		const ctx = install.mock.calls[0][0];
+		expect(typeof ctx.provide).toBe("function");
+		expect(typeof ctx.addButton).toBe("function");
+		expect(typeof ctx.addPanel).toBe("function");
+	});
+
+	it("provide() delegates to app.provide()", () => {
+		const install = vi.fn(({ provide }) => {
+			provide("myKey", "myValue");
+		});
+		Navigator.create({ id: "plugin-provide", plugins: [{ install }] });
+		expect(mockApp.provide).toHaveBeenCalledWith("myKey", "myValue");
+	});
+
+	it("addButton() appends to the reactive buttons ref", () => {
+		const btn = { id: "added", icon: "star", label: "Added" };
+		const install = vi.fn(({ addButton }) => addButton(btn));
+		Navigator.create({ id: "plugin-addbtn", plugins: [{ install }] });
+		const call = mockApp.provide.mock.calls.find((c) => c[0] === "navigatorButtons");
+		expect(call[1].value).toContainEqual(btn);
+	});
+
+	it("addPanel() appends to the reactive panels ref", () => {
+		const panel = { id: "added", icon: "info-circle", title: "Added" };
+		const install = vi.fn(({ addPanel }) => addPanel(panel));
+		Navigator.create({ id: "plugin-addpnl", plugins: [{ install }] });
+		const call = mockApp.provide.mock.calls.find((c) => c[0] === "navigatorPanels");
+		expect(call[1].value).toContainEqual(panel);
+	});
+
+	it("per-instance plugins support tuple syntax [plugin, options]", () => {
+		const install = vi.fn();
+		const opts = { maxDuration: 3600 };
+		Navigator.create({ id: "plugin-tuple", plugins: [[{ install }, opts]] });
+		expect(install).toHaveBeenCalledWith(
+			expect.objectContaining({ instanceId: "plugin-tuple" }),
+			opts,
+		);
+	});
+
+	it("per-instance plugins support object syntax { plugin, options }", () => {
+		const install = vi.fn();
+		const opts = { maxDuration: 3600 };
+		Navigator.create({
+			id: "plugin-obj",
+			plugins: [{ plugin: { install }, options: opts }],
+		});
+		expect(install).toHaveBeenCalledWith(
+			expect.objectContaining({ instanceId: "plugin-obj" }),
+			opts,
+		);
 	});
 
 	it("Navigator.use() returns Navigator for chaining", () => {

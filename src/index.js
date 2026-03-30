@@ -1,4 +1,4 @@
-import { createApp, inject as vueInject } from "vue";
+import { createApp, inject as vueInject, shallowRef } from "vue";
 import App from "./App.vue";
 import "./assets/sass/theme.scss";
 import "bootstrap";
@@ -46,7 +46,15 @@ export const useMap = () => {
 
 /**
  * @typedef {Object} NavigatorPlugin
- * @property {Function} install - Called with ({ app, instanceId, on, once, off, emit }, options). May return a cleanup function.
+ * @property {Function} install - Called with ({ app, instanceId, on, once, off, emit, provide, addButton, addPanel }, options). May return a cleanup function.
+ */
+
+/**
+ * @typedef {(NavigatorPlugin|[NavigatorPlugin, Object]|{plugin: NavigatorPlugin, options?: Object})} PluginEntry
+ * A per-instance plugin. Accepted forms:
+ * - `MyPlugin` — plugin object, no options
+ * - `[MyPlugin, { opt: 1 }]` — tuple of [plugin, options]
+ * - `{ plugin: MyPlugin, options: { opt: 1 } }` — object with plugin and options
  */
 
 /**
@@ -58,7 +66,7 @@ export const useMap = () => {
  * @property {Object} [mapOptions={}] - MapLibre Map constructor options
  * @property {ButtonConfig[]} [buttons=[]] - Custom toolbar buttons
  * @property {PanelConfig[]} [panels=[]] - Custom panel tabs (no toolbar button)
- * @property {NavigatorPlugin[]} [plugins=[]] - Per-instance plugins
+ * @property {PluginEntry[]} [plugins=[]] - Per-instance plugins
  * @property {Function} [onMapReady] - Called when the map finishes loading
  * @property {Function} [onViewChange] - Called on map moveend with { center, zoom }
  * @property {Function} [onThemeChange] - Called when the resolved theme changes
@@ -208,12 +216,16 @@ const Navigator = {
 		app.provide("navigatorId", id);
 		app.provide("navigatorLocale", locale);
 		app.provide("navigatorMessages", messages);
-		app.provide("navigatorButtons", buttons);
-		app.provide("navigatorPanels", panels);
+
+		// Reactive buttons/panels so plugins can register UI via addButton/addPanel
+		const buttonsRef = shallowRef([...buttons]);
+		const panelsRef = shallowRef([...panels]);
+		app.provide("navigatorButtons", buttonsRef);
+		app.provide("navigatorPanels", panelsRef);
 
 		const instance = new NavigatorInstance(app, id, emitter, el);
 
-		// Install global plugins
+		// Build plugin context
 		const ctx = {
 			app,
 			instanceId: id,
@@ -221,16 +233,34 @@ const Navigator = {
 			once: (e, f) => emitter.once(e, f),
 			off: (e, f) => emitter.off(e, f),
 			emit: (e, ...a) => emitter.emit(e, ...a),
+			provide: (key, value) => app.provide(key, value),
+			addButton: (config) => {
+				buttonsRef.value = [...buttonsRef.value, config];
+			},
+			addPanel: (config) => {
+				panelsRef.value = [...panelsRef.value, config];
+			},
 		};
+
+		// Install global plugins
 		for (const { plugin, options } of globalPlugins) {
 			const cleanup = plugin.install(ctx, options);
 			if (typeof cleanup === "function") instance._cleanups.push(cleanup);
 		}
 
-		// Install per-instance plugins
-		for (const p of plugins) {
-			if (p && typeof p.install === "function") {
-				const cleanup = p.install(ctx);
+		// Install per-instance plugins (supports plain object, tuple, or { plugin, options })
+		for (const entry of plugins) {
+			let plugin, options;
+			if (Array.isArray(entry)) {
+				[plugin, options] = entry;
+			} else if (entry && entry.plugin && typeof entry.plugin.install === "function") {
+				plugin = entry.plugin;
+				options = entry.options;
+			} else if (entry && typeof entry.install === "function") {
+				plugin = entry;
+			}
+			if (plugin) {
+				const cleanup = plugin.install(ctx, options);
 				if (typeof cleanup === "function") instance._cleanups.push(cleanup);
 			}
 		}

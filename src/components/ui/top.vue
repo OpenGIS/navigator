@@ -1,5 +1,5 @@
 <script setup>
-import { inject, computed } from "vue";
+import { inject, computed, shallowRef } from "vue";
 import About from "@/components/modals/welcome.vue";
 import { useUI } from "@/composables/useUI";
 import { useLocale } from "@/composables/useLocale";
@@ -9,14 +9,14 @@ import { getMapInstance } from "@/composables/useMap";
 import { getEmitter } from "@/index.js";
 
 const instanceId = inject("navigatorId", "navigator");
-const customButtons = inject("navigatorButtons", []);
+const buttonsRef = inject("navigatorButtons", shallowRef([]));
 
 const { togglePanel, setActivePanel, openPanel } = useUI();
 const { t } = useLocale();
 
-const startButtons = computed(() => customButtons.filter((b) => b.position === "start"));
-const middleButtons = computed(() => customButtons.filter((b) => b.position === "middle"));
-const endButtons = computed(() => customButtons.filter((b) => !b.position || b.position === "end"));
+const startButtons = computed(() => buttonsRef.value.filter((b) => b.position === "start"));
+const middleButtons = computed(() => buttonsRef.value.filter((b) => b.position === "middle"));
+const endButtons = computed(() => buttonsRef.value.filter((b) => !b.position || b.position === "end"));
 
 const handleCustomClick = (btn) => {
   if (btn.panel) {
