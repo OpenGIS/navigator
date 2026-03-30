@@ -1,11 +1,26 @@
-import { createApp } from "vue";
+import { createApp, inject as vueInject } from "vue";
 import App from "./App.vue";
 import "./assets/sass/theme.scss";
 import "bootstrap";
 import EventEmitter from "./classes/EventEmitter.js";
+import { getMapInstance as _getMapInstance } from "./composables/useMap.js";
 
 export { getMapInstance } from "./composables/useMap.js";
 export { useUI } from "./composables/useUI.js";
+export { useStorage } from "./composables/useStorage.js";
+
+/**
+ * Vue-idiomatic composable for accessing the MapLibre map instance.
+ * Resolves the instance ID via inject('navigatorId') internally.
+ * Must be called inside a Vue component's setup context within
+ * Navigator's component tree (e.g. a custom button or panel component).
+ *
+ * @returns {{ map: import('maplibre-gl').Map | null }}
+ */
+export const useMap = () => {
+	const instanceId = vueInject("navigatorId", "navigator");
+	return { map: _getMapInstance(instanceId) };
+};
 
 /**
  * @typedef {Object} ButtonConfig
@@ -31,7 +46,7 @@ export { useUI } from "./composables/useUI.js";
 
 /**
  * @typedef {Object} NavigatorPlugin
- * @property {Function} install - Called with ({ app, instanceId, on, off, emit }, options)
+ * @property {Function} install - Called with ({ app, instanceId, on, once, off, emit }, options). May return a cleanup function.
  */
 
 /**
@@ -76,6 +91,8 @@ class NavigatorInstance {
 		this._emitter = emitter;
 		this._el = el;
 		this._mounted = false;
+		/** @type {Function[]} */
+		this._cleanups = [];
 	}
 
 	/** Mount the Vue app to the DOM. */
@@ -86,9 +103,14 @@ class NavigatorInstance {
 		return this;
 	}
 
-	/** Unmount and clean up. */
+	/** Unmount and clean up. Emits `destroy` before teardown. */
 	unmount() {
 		if (!this._mounted) return this;
+		this._emitter.emit("destroy");
+		for (const fn of this._cleanups) {
+			try { fn(); } catch { /* ignore cleanup errors */ }
+		}
+		this._cleanups.length = 0;
 		this.app.unmount();
 		this._mounted = false;
 		emitters.delete(this.id);
@@ -192,15 +214,24 @@ const Navigator = {
 		const instance = new NavigatorInstance(app, id, emitter, el);
 
 		// Install global plugins
-		const ctx = { app, instanceId: id, on: (e, f) => emitter.on(e, f), off: (e, f) => emitter.off(e, f), emit: (e, ...a) => emitter.emit(e, ...a) };
+		const ctx = {
+			app,
+			instanceId: id,
+			on: (e, f) => emitter.on(e, f),
+			once: (e, f) => emitter.once(e, f),
+			off: (e, f) => emitter.off(e, f),
+			emit: (e, ...a) => emitter.emit(e, ...a),
+		};
 		for (const { plugin, options } of globalPlugins) {
-			plugin.install(ctx, options);
+			const cleanup = plugin.install(ctx, options);
+			if (typeof cleanup === "function") instance._cleanups.push(cleanup);
 		}
 
 		// Install per-instance plugins
 		for (const p of plugins) {
 			if (p && typeof p.install === "function") {
-				p.install(ctx);
+				const cleanup = p.install(ctx);
+				if (typeof cleanup === "function") instance._cleanups.push(cleanup);
 			}
 		}
 

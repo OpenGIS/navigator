@@ -1,6 +1,6 @@
 // recordings.js — Recordings plugin for Navigator
 import { reactive, ref, computed } from 'vue';
-import { getMapInstance } from '@ogis/navigator';
+import { getMapInstance, useStorage } from '@ogis/navigator';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -69,31 +69,6 @@ function toGPX(recording) {
 }
 
 // ---------------------------------------------------------------------------
-// Storage — follows the navigator_{namespace}_{instanceId} key convention
-// ---------------------------------------------------------------------------
-
-function storageKey(instanceId) {
-  return `navigator_recordings_${instanceId}`;
-}
-
-function loadStorage(instanceId) {
-  try {
-    const raw = localStorage.getItem(storageKey(instanceId));
-    return raw ? JSON.parse(raw) : { saved: [], active: null };
-  } catch {
-    return { saved: [], active: null };
-  }
-}
-
-function saveStorage(instanceId, data) {
-  try {
-    localStorage.setItem(storageKey(instanceId), JSON.stringify(data));
-  } catch {
-    /* storage full — silently ignore */
-  }
-}
-
-// ---------------------------------------------------------------------------
 // Map layer constants
 // ---------------------------------------------------------------------------
 
@@ -108,7 +83,10 @@ const COLOR_PAUSED = '#6c757d'; // $secondary — Bootstrap grey
 
 export const RecordingsPlugin = {
   install({ app, instanceId, on }) {
-    const stored = loadStorage(instanceId);
+    // useStorage provides reactive, auto-persisted state scoped to this instance.
+    // Stored as "navigator_recordings_{instanceId}" in localStorage.
+    // Pass instanceId explicitly since plugin install() runs outside Vue setup.
+    const stored = useStorage('recordings', { saved: [], active: null }, instanceId);
 
     // Reactive state shared with Vue components via app.provide()
     const state = reactive({
@@ -132,7 +110,8 @@ export const RecordingsPlugin = {
         state.isRecording || state.isPaused
           ? { points: state.points, startTime: state.startTime }
           : null;
-      saveStorage(instanceId, { saved: state.saved, active });
+      stored.saved = state.saved;
+      stored.active = active;
     };
 
     // --- Map layer ----------------------------------------------------------
@@ -323,5 +302,11 @@ export const RecordingsPlugin = {
       downloadGPX,
       showOnMap,
     });
+
+    // Return cleanup function for plugin teardown
+    return () => {
+      stopGeo();
+      stopTimer();
+    };
   },
 };
