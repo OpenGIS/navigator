@@ -1,6 +1,5 @@
 // recordings.js — Recordings plugin for Navigator
 import { reactive, ref, computed } from 'vue';
-import { getMapInstance, useStorage } from '@ogis/navigator';
 import RecordButton from './RecordButton.vue';
 import RecordingsPanel from './RecordingsPanel.vue';
 
@@ -84,11 +83,10 @@ const COLOR_PAUSED = '#6c757d'; // $secondary — Bootstrap grey
 // ---------------------------------------------------------------------------
 
 export const RecordingsPlugin = {
-  install({ instanceId, on, provide, addButton }) {
-    // useStorage provides reactive, auto-persisted state scoped to this instance.
+  install({ useStorage, getMap, onMapReady, on, provide, addButton }) {
+    // useStorage is pre-scoped — no instanceId needed.
     // Stored as "navigator_recordings_{instanceId}" in localStorage.
-    // Pass instanceId explicitly since plugin install() runs outside Vue setup.
-    const stored = useStorage('recordings', { saved: [], active: null }, instanceId);
+    const stored = useStorage('recordings', { saved: [], active: null });
 
     // Reactive state shared with Vue components via provide()
     const state = reactive({
@@ -124,7 +122,7 @@ export const RecordingsPlugin = {
     });
 
     const updateLine = () => {
-      const map = getMapInstance(instanceId);
+      const map = getMap();
       if (!map || !map.getSource(SOURCE_ID)) return;
       const coords = state.points.map((p) => [p.lng, p.lat]);
       map.getSource(SOURCE_ID).setData({
@@ -246,7 +244,7 @@ export const RecordingsPlugin = {
     };
 
     const showOnMap = (recording) => {
-      const map = getMapInstance(instanceId);
+      const map = getMap();
       if (!map || !map.getSource(SOURCE_ID)) return;
       const coords = recording.points.map((p) => [p.lng, p.lat]);
       map.getSource(SOURCE_ID).setData({
@@ -267,11 +265,11 @@ export const RecordingsPlugin = {
       }
     };
 
-    // --- Map setup ----------------------------------------------------------
+    // --- Map setup (auto-cleanup) -------------------------------------------
 
-    on('map:ready', ({ map }) => {
-      map.addSource(SOURCE_ID, { type: 'geojson', data: emptyLine() });
-      map.addLayer({
+    onMapReady(({ map, addSource, addLayer }) => {
+      addSource(SOURCE_ID, { type: 'geojson', data: emptyLine() });
+      addLayer({
         id: LAYER_ID,
         type: 'line',
         source: SOURCE_ID,
@@ -318,7 +316,8 @@ export const RecordingsPlugin = {
       },
     });
 
-    // Return cleanup function for plugin teardown
+    // Return cleanup function for plugin teardown.
+    // Map sources/layers are auto-removed via onMapReady — no manual cleanup needed.
     return () => {
       stopGeo();
       stopTimer();

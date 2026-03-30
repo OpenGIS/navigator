@@ -4,10 +4,12 @@ import "./assets/sass/theme.scss";
 import "bootstrap";
 import EventEmitter from "./classes/EventEmitter.js";
 import { getMapInstance as _getMapInstance } from "./composables/useMap.js";
+import { useStorage as _useStorage } from "./composables/useStorage.js";
 
 export { getMapInstance } from "./composables/useMap.js";
 export { useUI } from "./composables/useUI.js";
 export { useStorage } from "./composables/useStorage.js";
+export { useLocate } from "./composables/useLocate.js";
 
 /**
  * Vue-idiomatic composable for accessing the MapLibre map instance.
@@ -46,7 +48,18 @@ export const useMap = () => {
 
 /**
  * @typedef {Object} NavigatorPlugin
- * @property {Function} install - Called with ({ app, instanceId, on, once, off, emit, provide, addButton, addPanel }, options). May return a cleanup function.
+ * @property {Function} install - Called with (context, options). May return a cleanup function.
+ *
+ * Plugin context properties:
+ * - `app` — Vue 3 App instance
+ * - `instanceId` — Navigator instance ID
+ * - `map` — `shallowRef(null)` that becomes the MapLibre instance on `map:ready`
+ * - `useStorage(namespace, defaults)` — pre-scoped reactive localStorage (no instanceId needed)
+ * - `getMap()` — returns the current MapLibre instance or null (pre-scoped)
+ * - `onMapReady(callback)` — called with `{ map, addSource, addLayer }` when MapLibre loads; sources/layers are auto-removed on unmount
+ * - `on(event, fn)` / `once(event, fn)` / `off(event, fn)` / `emit(event, ...args)` — event emitter
+ * - `provide(key, value)` — share data with Vue components
+ * - `addButton(config)` / `addPanel(config)` — register toolbar UI
  */
 
 /**
@@ -225,10 +238,49 @@ const Navigator = {
 
 		const instance = new NavigatorInstance(app, id, emitter, el);
 
+		// Reactive map ref — null until MapLibre loads
+		const mapRef = shallowRef(null);
+		emitter.once("map:ready", ({ map }) => { mapRef.value = map; });
+
+		// Auto-cleanup tracking for plugin-added map sources/layers
+		const trackedSources = [];
+		const trackedLayers = [];
+
+		emitter.on("destroy", () => {
+			mapRef.value = null;
+			const map = _getMapInstance(id);
+			if (map) {
+				for (const layerId of [...trackedLayers].reverse()) {
+					if (map.getLayer(layerId)) map.removeLayer(layerId);
+				}
+				for (const sourceId of [...trackedSources].reverse()) {
+					if (map.getSource(sourceId)) map.removeSource(sourceId);
+				}
+			}
+		});
+
 		// Build plugin context
 		const ctx = {
 			app,
 			instanceId: id,
+			map: mapRef,
+			useStorage: (namespace, defaultState) => _useStorage(namespace, defaultState, id),
+			getMap: () => _getMapInstance(id),
+			onMapReady: (callback) => {
+				emitter.once("map:ready", ({ map }) => {
+					callback({
+						map,
+						addSource: (sourceId, options) => {
+							map.addSource(sourceId, options);
+							trackedSources.push(sourceId);
+						},
+						addLayer: (layerConfig, before) => {
+							map.addLayer(layerConfig, before);
+							trackedLayers.push(layerConfig.id);
+						},
+					});
+				});
+			},
 			on: (e, f) => emitter.on(e, f),
 			once: (e, f) => emitter.once(e, f),
 			off: (e, f) => emitter.off(e, f),

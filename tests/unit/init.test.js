@@ -16,9 +16,15 @@ vi.mock("@/assets/sass/theme.scss", () => ({}));
 vi.mock("bootstrap", () => ({}));
 vi.mock("maplibre-gl", () => ({ default: {} }));
 vi.mock("@/composables/useMap.js", () => ({ getMapInstance: vi.fn() }));
+vi.mock("@/composables/useStorage.js", () => ({
+	useStorage: vi.fn((_ns, defaults) => ({ ...defaults })),
+}));
+vi.mock("@/composables/useLocate.js", () => ({ useLocate: vi.fn() }));
 
 import Navigator from "@/index.js";
 import { createApp } from "vue";
+import { getMapInstance } from "@/composables/useMap.js";
+import { useStorage as _useStorage } from "@/composables/useStorage.js";
 
 beforeEach(() => {
 	vi.clearAllMocks();
@@ -345,5 +351,83 @@ describe("Plugin system", () => {
 	it("ignores plugins without install method", () => {
 		expect(() => Navigator.use({})).not.toThrow();
 		expect(() => Navigator.use(null)).not.toThrow();
+	});
+
+	it("plugin context includes useStorage pre-scoped to instanceId", () => {
+		const install = vi.fn(({ useStorage }) => {
+			useStorage("myns", { key: "val" });
+		});
+		Navigator.create({ id: "plugin-storage", plugins: [{ install }] });
+		expect(_useStorage).toHaveBeenCalledWith("myns", { key: "val" }, "plugin-storage");
+	});
+
+	it("plugin context includes getMap pre-scoped to instanceId", () => {
+		const install = vi.fn(({ getMap }) => {
+			getMap();
+		});
+		Navigator.create({ id: "plugin-getmap", plugins: [{ install }] });
+		expect(getMapInstance).toHaveBeenCalledWith("plugin-getmap");
+	});
+
+	it("plugin context includes map as a shallowRef (initially null)", () => {
+		const install = vi.fn();
+		Navigator.create({ id: "plugin-mapref", plugins: [{ install }] });
+		const ctx = install.mock.calls[0][0];
+		expect(ctx.map).toBeDefined();
+		expect(ctx.map.value).toBeNull();
+	});
+
+	it("map shallowRef is populated when map:ready fires", () => {
+		const install = vi.fn();
+		const nav = Navigator.create({ id: "plugin-mapready", plugins: [{ install }] });
+		const ctx = install.mock.calls[0][0];
+		const fakeMap = { addSource: vi.fn() };
+		nav.emit("map:ready", { map: fakeMap });
+		expect(ctx.map.value).toBe(fakeMap);
+	});
+
+	it("plugin context includes onMapReady that calls back with map helpers", () => {
+		const callback = vi.fn();
+		const install = vi.fn(({ onMapReady }) => {
+			onMapReady(callback);
+		});
+		const nav = Navigator.create({ id: "plugin-onmapready", plugins: [{ install }] });
+		const fakeMap = { addSource: vi.fn(), addLayer: vi.fn() };
+		nav.emit("map:ready", { map: fakeMap });
+		expect(callback).toHaveBeenCalledTimes(1);
+		const arg = callback.mock.calls[0][0];
+		expect(arg.map).toBe(fakeMap);
+		expect(typeof arg.addSource).toBe("function");
+		expect(typeof arg.addLayer).toBe("function");
+	});
+
+	it("onMapReady addSource/addLayer delegate to map and track for cleanup", () => {
+		const fakeMap = {
+			addSource: vi.fn(),
+			addLayer: vi.fn(),
+			getSource: vi.fn(() => true),
+			getLayer: vi.fn(() => true),
+			removeSource: vi.fn(),
+			removeLayer: vi.fn(),
+		};
+		getMapInstance.mockReturnValue(fakeMap);
+
+		const install = vi.fn(({ onMapReady }) => {
+			onMapReady(({ addSource, addLayer }) => {
+				addSource("s1", { type: "geojson" });
+				addLayer({ id: "l1", type: "circle", source: "s1" });
+			});
+		});
+		const nav = Navigator.create({ id: "plugin-autoclean", plugins: [{ install }] });
+		nav.emit("map:ready", { map: fakeMap });
+
+		expect(fakeMap.addSource).toHaveBeenCalledWith("s1", { type: "geojson" });
+		expect(fakeMap.addLayer).toHaveBeenCalledWith({ id: "l1", type: "circle", source: "s1" }, undefined);
+
+		// Trigger destroy → auto-cleanup
+		nav.mount();
+		nav.unmount();
+		expect(fakeMap.removeLayer).toHaveBeenCalledWith("l1");
+		expect(fakeMap.removeSource).toHaveBeenCalledWith("s1");
 	});
 });
