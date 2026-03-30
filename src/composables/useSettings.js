@@ -26,19 +26,23 @@ export function localeDefaultUnits(localeStr) {
 	}
 }
 
-export const useSettings = () => {
-	const instanceId = inject("navigatorId", "navigator");
+/**
+ * @param {string} [instanceId] - Navigator instance ID. If omitted, resolved via inject('navigatorId').
+ *   Pass explicitly when calling from a plugin install() or other non-setup context.
+ */
+export const useSettings = (instanceId) => {
+	const id = instanceId ?? inject("navigatorId", "navigator");
 
-	if (!cache.has(instanceId)) {
+	if (!cache.has(id)) {
 		const storage = useStorage("settings", {
 			theme: null, // null = follow system, 'light', or 'dark'
 			units: null, // null = follow locale default
 			language: null, // null = follow browser / Navigator.create() default
-		});
-		cache.set(instanceId, { storage });
+		}, id);
+		cache.set(id, { storage });
 	}
 
-	const { storage } = cache.get(instanceId);
+	const { storage } = cache.get(id);
 
 	// Resolve the effective theme: explicit choice or fall back to system preference.
 	const resolvedTheme = computed(
@@ -49,7 +53,7 @@ export const useSettings = () => {
 
 	// Emit theme:change when the resolved theme changes (explicit toggle or system change)
 	watch(resolvedTheme, (theme) => {
-		const emitter = getEmitter(instanceId);
+		const emitter = getEmitter(id);
 		if (emitter) emitter.emit("theme:change", theme);
 	});
 

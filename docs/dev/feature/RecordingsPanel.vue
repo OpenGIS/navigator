@@ -1,7 +1,10 @@
 <!-- RecordingsPanel.vue — side-panel content for the Recordings feature -->
 <script setup>
 import { inject, computed } from 'vue';
+import { useSettings } from '@ogis/navigator';
 import { formatDuration, formatDistance } from './recordings.js';
+
+const { isMetric } = useSettings();
 
 const {
   state,
@@ -32,7 +35,7 @@ const isActive = computed(() => state.isRecording || state.isPaused);
 
       <div class="d-flex justify-content-between mb-3">
         <span>Distance</span>
-        <strong>{{ formatDistance(distance) }}</strong>
+        <strong>{{ formatDistance(distance, isMetric) }}</strong>
       </div>
 
       <div class="d-flex gap-2 mb-4">
@@ -63,7 +66,7 @@ const isActive = computed(() => state.isRecording || state.isPaused);
       </div>
       <div class="d-flex justify-content-between small">
         <span>{{ formatDuration(rec.duration) }}</span>
-        <span>{{ formatDistance(rec.distance) }}</span>
+        <span>{{ formatDistance(rec.distance, isMetric) }}</span>
       </div>
       <div class="d-flex gap-1 mt-1">
         <button

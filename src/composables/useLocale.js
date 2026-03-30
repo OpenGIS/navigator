@@ -23,17 +23,31 @@ const MAP_LANGUAGE_TAG_OVERRIDES = {};
 
 const cache = new Map();
 
-export const useLocale = () => {
-	const instanceId = inject("navigatorId", "navigator");
-
+/**
+ * Pre-seed the locale cache for use outside Vue setup context (e.g., plugin install).
+ * Called by Navigator.create() before plugins are installed.
+ */
+export function initLocaleCache(instanceId, locale, messages) {
 	if (!cache.has(instanceId)) {
+		cache.set(instanceId, { defaultLocale: locale, customMessages: messages ?? {} });
+	}
+}
+
+/**
+ * @param {string} [instanceId] - Navigator instance ID. If omitted, resolved via inject('navigatorId').
+ *   Pass explicitly when calling from a plugin install() or other non-setup context.
+ */
+export const useLocale = (instanceId) => {
+	const id = instanceId ?? inject("navigatorId", "navigator");
+
+	if (!cache.has(id)) {
 		const defaultLocale = inject("navigatorLocale", null);
 		const customMessages = inject("navigatorMessages", {});
-		cache.set(instanceId, { defaultLocale, customMessages });
+		cache.set(id, { defaultLocale, customMessages });
 	}
 
-	const { defaultLocale, customMessages } = cache.get(instanceId);
-	const { language, setLanguage } = useSettings();
+	const { defaultLocale, customMessages } = cache.get(id);
+	const { language, setLanguage } = useSettings(id);
 
 	const locale = computed(() => {
 		// 1. Explicit user choice stored in settings

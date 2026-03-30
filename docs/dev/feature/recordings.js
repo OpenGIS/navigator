@@ -40,11 +40,18 @@ export function formatDuration(ms) {
   return h > 0 ? `${h}:${pad(m)}:${pad(sec)}` : `${m}:${pad(sec)}`;
 }
 
-/** Format metres as "X.XX km" or "X m". */
-export function formatDistance(metres) {
-  return metres >= 1000
-    ? `${(metres / 1000).toFixed(2)} km`
-    : `${Math.round(metres)} m`;
+/** Format metres as a human-readable distance string, respecting unit preference. */
+export function formatDistance(metres, isMetric = true) {
+  if (isMetric) {
+    return metres >= 1000
+      ? `${(metres / 1000).toFixed(2)} km`
+      : `${Math.round(metres)} m`;
+  }
+  const feet = metres * 3.28084;
+  const miles = metres / 1609.344;
+  return miles >= 0.1
+    ? `${miles.toFixed(2)} mi`
+    : `${Math.round(feet)} ft`;
 }
 
 /** Convert a saved recording to a GPX XML string. */
@@ -83,10 +90,13 @@ const COLOR_PAUSED = '#6c757d'; // $secondary — Bootstrap grey
 // ---------------------------------------------------------------------------
 
 export const RecordingsPlugin = {
-  install({ useStorage, getMap, onMapReady, on, provide, addButton }) {
+  install({ useStorage, useSettings, getMap, onMapReady, on, provide, addButton }) {
     // useStorage is pre-scoped — no instanceId needed.
     // Stored as "navigator_recordings_{instanceId}" in localStorage.
     const stored = useStorage('recordings', { saved: [], active: null });
+
+    // useSettings is pre-scoped — access user preferences directly.
+    const { isMetric } = useSettings();
 
     // Reactive state shared with Vue components via provide()
     const state = reactive({
@@ -293,6 +303,7 @@ export const RecordingsPlugin = {
       state,
       elapsed,
       distance,
+      isMetric,
       start,
       pause,
       resume,

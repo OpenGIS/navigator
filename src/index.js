@@ -5,11 +5,15 @@ import "bootstrap";
 import EventEmitter from "./classes/EventEmitter.js";
 import { getMapInstance as _getMapInstance } from "./composables/useMap.js";
 import { useStorage as _useStorage } from "./composables/useStorage.js";
+import { useSettings as _useSettings } from "./composables/useSettings.js";
+import { useLocale as _useLocale, initLocaleCache } from "./composables/useLocale.js";
 
 export { getMapInstance } from "./composables/useMap.js";
 export { useUI } from "./composables/useUI.js";
 export { useStorage } from "./composables/useStorage.js";
 export { useLocate } from "./composables/useLocate.js";
+export { useSettings } from "./composables/useSettings.js";
+export { useLocale } from "./composables/useLocale.js";
 
 /**
  * Vue-idiomatic composable for accessing the MapLibre map instance.
@@ -55,6 +59,8 @@ export const useMap = () => {
  * - `instanceId` — Navigator instance ID
  * - `map` — `shallowRef(null)` that becomes the MapLibre instance on `map:ready`
  * - `useStorage(namespace, defaults)` — pre-scoped reactive localStorage (no instanceId needed)
+ * - `useSettings()` — pre-scoped user preferences: theme, units, language (no instanceId needed)
+ * - `useLocale()` — pre-scoped locale/translations: t(), locale, setLocale (no instanceId needed)
  * - `getMap()` — returns the current MapLibre instance or null (pre-scoped)
  * - `onMapReady(callback)` — called with `{ map, addSource, addLayer }` when MapLibre loads; sources/layers are auto-removed on unmount
  * - `on(event, fn)` / `once(event, fn)` / `off(event, fn)` / `emit(event, ...args)` — event emitter
@@ -238,6 +244,10 @@ const Navigator = {
 
 		const instance = new NavigatorInstance(app, id, emitter, el);
 
+		// Pre-seed locale cache so plugins can use useLocale/useSettings
+		// in install() without needing Vue's inject()
+		initLocaleCache(id, locale, messages);
+
 		// Reactive map ref — null until MapLibre loads
 		const mapRef = shallowRef(null);
 		emitter.once("map:ready", ({ map }) => { mapRef.value = map; });
@@ -265,6 +275,8 @@ const Navigator = {
 			instanceId: id,
 			map: mapRef,
 			useStorage: (namespace, defaultState) => _useStorage(namespace, defaultState, id),
+			useSettings: () => _useSettings(id),
+			useLocale: () => _useLocale(id),
 			getMap: () => _getMapInstance(id),
 			onMapReady: (callback) => {
 				emitter.once("map:ready", ({ map }) => {
