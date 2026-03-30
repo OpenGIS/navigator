@@ -1,75 +1,73 @@
-1. Plugins can't register their own UI
+1. Pre-scoped helpers in the plugin context
 
-This is the biggest one. The Recordings feature requires three separate wiring points in the consumer's create()
-call:
+This is the biggest friction point. Every call inside install() requires manually threading instanceId:
 
-Navigator.create({
-buttons: [{ id: 'record', component: RecordButton, panel: { component: RecordingsPanel } }],
-plugins: [RecordingsPlugin],
-})
-
-The plugin manages all state, persistence, and map layers — but it can't declare its own button or panel. A
-self-contained plugin API would let you distribute a feature as a single import:
-
-// Hypothetical: plugin registers everything itself
-plugins: [RecordingsPlugin]
-
-The install() context could expose something like addButton() / addPanel() so a plugin can register its own UI
-components without the consumer manually wiring buttons config.
-
----
-
-2. useUI docs contradict the actual API
-
-The internal docs (4.ui.md) describe openPanel(id, component) and togglePanel(id, component) — taking an id and
-component as parameters. But the actual exported useUI has:
-
-- openPanel() — no parameters, just opens the panel
-- setActivePanel(id) — separate function to set which tab is active
-
-The extending docs (8.extending.md) correctly show setActivePanel + openPanel as separate calls. The 4.ui.md docs
-should be updated to match.
-
----
-
-3. app.provide() boilerplate in plugins
-
-Every plugin that shares state with Vue components must manually call app.provide('key', ...) and every component
-must inject('key'). The plugin context could offer a shorthand:
-
-// Current — manual provide
-install({ app }) {
-app.provide('recordings', { state, start, pause, ... });
+// Current — repetitive and error-prone
+install({ instanceId, on }) {
+const stored = useStorage('recordings', { saved: [], active: null }, instanceId);
+const map = getMapInstance(instanceId);
+// ...every helper call repeats instanceId
 }
 
-// Possible — context.provide() shorthand
-install({ provide }) {
-provide('recordings', { state, start, pause, ... });
+The fix: provide pre-bound versions on the plugin context itself:
+
+// Proposed — instanceId is already scoped
+install({ useStorage, getMap, on }) {
+const stored = useStorage('recordings', { saved: [], active: null });
+const map = getMap();
 }
 
-Minor, but it reinforces the pattern and makes plugins feel less like they're reaching into Vue internals.
+This eliminates the need for plugin authors to import useStorage or getMapInstance separately and removes a class
+of bugs where the wrong ID is passed.
 
 ---
 
-4. Per-instance plugins don't receive options
+2. Reactive map ref on the plugin context
 
-Navigator.use(plugin, options) passes options as the second argument to install(), but per-instance plugins in the
-plugins array don't:
+Currently, getMapInstance() returns null until MapLibre loads, so every usage must either live inside an
+on('map:ready') callback or defensively null-check. The Recordings plugin has updateLine() which does if (!map ||
+!map.getSource(...)) return; on every call.
 
-// Global — options work
-Navigator.use(RecordingsPlugin, { maxDuration: 3600 });
+A reactive shallowRef on the context would let plugin code watch for the map naturally:
 
-// Per-instance — no options mechanism
-plugins: [RecordingsPlugin] // install() gets context only
+install({ map }) {
+// map is a shallowRef — null until ready, then the MapLibre instance
+watch(map, (m) => {
+if (m) {
+m.addSource(...);
+m.addLayer(...);
+}
+});
+}
 
-Supporting plugins: [{ plugin: RecordingsPlugin, options: { ... } }] (or a tuple syntax) would make per-instance
-plugins configurable without needing factory functions.
+This would also compose well with watchEffect for code that needs to re-run when the map becomes available.
 
 ---
 
-5. @vitejs/plugin-vue is a hidden prerequisite
+3. Auto-cleanup for map sources and layers
 
-The docs recommend Vue SFCs as the "preferred" approach for buttons and panels, but @vitejs/plugin-vue isn't
-mentioned until the very bottom of the extending docs. A consumer following the example will get an opaque Vite
-transform error. Options: surface this earlier in the docs, or detect the missing plugin at build time with a
-helpful error message.
+The Recordings plugin adds a source and layer in map:ready but never removes them in its cleanup function. The
+cleanup only clears the timer and geolocation watch. This is a leak on unmount().
+
+Navigator could provide addSource() / addLayer() helpers on the context that automatically remove the source/layer
+when the instance unmounts:
+
+install({ onMapReady }) {
+onMapReady(({ map, addSource, addLayer }) => {
+addSource('recordings-track', { type: 'geojson', data: emptyLine() });
+addLayer({ id: 'recordings-track-line', type: 'line', ... });
+// Automatically removed on unmount — no cleanup needed
+});
+}
+
+This would eliminate the most common source of plugin cleanup bugs.
+
+---
+
+4. Expose useLocate / geolocation for reuse
+
+The Recordings plugin reimplements navigator.geolocation.watchPosition from scratch, but Navigator already has an
+internal useLocate composable for GPS. If this were exported, plugin authors could reuse it:
+
+import { useLocate } from '@ogis/navigator';
+// Reuse existing geolocation infrastructure instead of raw browser API
