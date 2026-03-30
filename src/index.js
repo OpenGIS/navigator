@@ -5,13 +5,16 @@ import "bootstrap";
 import EventEmitter from "./classes/EventEmitter.js";
 
 export { getMapInstance } from "./composables/useMap.js";
+export { useUI } from "./composables/useUI.js";
 
 /**
  * @typedef {Object} ButtonConfig
  * @property {string} id - Unique button identifier
- * @property {string} icon - Icon name from the sprite
- * @property {string} label - Button label text
+ * @property {string} [icon] - Icon name from the sprite (required unless component is provided)
+ * @property {string} [label] - Button label text (required unless component is provided)
  * @property {'start'|'middle'|'end'} [position='end'] - Toolbar position
+ * @property {import('vue').Component} [component] - Vue component to render instead of the default icon button
+ * @property {Object} [props] - Props to pass to the Vue component
  * @property {Function} [onClick] - Click handler, receives { map, instanceId }
  * @property {PanelConfig} [panel] - Optional panel to open on click
  */
@@ -21,7 +24,9 @@ export { getMapInstance } from "./composables/useMap.js";
  * @property {string} id - Unique panel identifier
  * @property {string} icon - Icon name from the sprite
  * @property {string} title - Tab label
- * @property {Function} render - Called with (container, { map, instanceId }) to populate content
+ * @property {import('vue').Component} [component] - Vue component to render (preferred)
+ * @property {Object} [props] - Props to pass to the Vue component
+ * @property {Function} [render] - Called with (container, { map, instanceId }) to populate content (DOM-based alternative)
  */
 
 /**
