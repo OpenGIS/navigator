@@ -45,7 +45,9 @@ const handleCustomClick = (btn) => {
           @click="togglePanel()"
         />
         <template v-for="btn in startButtons" :key="btn.id">
+          <component v-if="btn.component" :is="btn.component" v-bind="btn.props || {}" />
           <IconButton
+            v-else
             :icon="btn.icon"
             :label="btn.label"
             :data-custom-button="btn.id"
@@ -59,7 +61,9 @@ const handleCustomClick = (btn) => {
       <ul class="middle nav">
         <li class="nav-item ms-1"></li>
         <li v-for="btn in middleButtons" :key="btn.id" class="nav-item mx-1">
+          <component v-if="btn.component" :is="btn.component" v-bind="btn.props || {}" />
           <IconButton
+            v-else
             :icon="btn.icon"
             :label="btn.label"
             :data-custom-button="btn.id"
@@ -72,7 +76,9 @@ const handleCustomClick = (btn) => {
       <!-- START End -->
       <ul class="end nav">
         <li v-for="btn in endButtons" :key="btn.id" class="nav-item mx-1">
+          <component v-if="btn.component" :is="btn.component" v-bind="btn.props || {}" />
           <IconButton
+            v-else
             :icon="btn.icon"
             :label="btn.label"
             :data-custom-button="btn.id"

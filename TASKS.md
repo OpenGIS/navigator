@@ -13,8 +13,20 @@ Improve the panel api documented in @docs/dev/1.config.md with to support for Vu
 
 # Menu
 
-# Panel Nvigation
+Update the app top navigation bar to be more flexible. Currently @src/components/ui/top.vue the navbar has a left/middle/right positioned icon buttons. I want to make this more programtic, so that developers can modify/add/remove/replace icon buttons in the navbar as vue components. This can also be used to completely change the navbar dynamically, for example a consuming app may want to add their own custom navbar. I would also like to make this more friendly for reording, to support both RLS and LTR languages (a future consideration) for example. So the concept of start/end instead of left/right. The top nav should be able to accept any number of buttons, with the first aligned to the start, and the last aligned to the end (use bootstrap best practises). 3+ buttons will be added to the middle, evenly spaced. Update the documentation @docs/dev/8.extending.md to reflect these changes, and provide an example of how you would add a centered icon button to the navbar using the new API. Add a github-style alert to the @docs/dev/5.locale.md about the future support for RTL languages, and how the new navbar API will support this when it arrives.
+
+# Testing
 
 # Extending
 
-Let's improve the developer docs, specifically the @docs/dev/7.features.md . I want you to rewrite the "Adding Features to Navigator" section to highight the integration methods documented in @docs/dev/8.extending.md . By way of example, create a new Recordings feature that integrates as a vue plugin. The full plugin code should be included in the documentation, like with the green theme sass example @docs/dev/6.theme.md so that developers could copy and paste the code to create their own feature. As you build this example,
+Let's improve the developer docs, specifically the @docs/dev/7.features.md . I want you to rewrite the "Adding Features to Navigator" section to highight the integration methods documented in @docs/dev/8.extending.md . By way of example, create a new Recordings feature that integrates as a vue plugin. The full plugin code should be included in the documentation, like with the green theme sass example @docs/dev/6.theme.md so that developers could copy and paste the code to create their own feature. The recordings plugin should be a complete, but minimal feature. It should have:
+
+- A centre-aligned Record Button in the top navbar that toggles recording on/off. The button starts/pauses recording, and changes label and color to indicate the recording state (e.g. red when recording, grey when paused). When pause is presses, this should open a simple Recordings panel.
+
+- The Recordings panel should display simple information about the current recording track, such as duration and distance. It should also have "Pause/Resume", "Discard", "Save" button that saves the recording data to localStorage (using @src/composables/useStorage.js) If there is an active recording, it should also be saved to local storage so that it can be resumed if the user accidentally refreshes the page.
+
+- When a recording is active, the map should display a blue (primary brand sass colour @docs/dev/6.theme.md) line showing the path of the recording. This line should update in real time as the recording progresses. When the recording is paused, the line should turn grey.
+
+- The recordings panel should show a list of past recordings saved in localStorage, with the option to show/delete/download(as GPX) them. Each recording should display its duration, distance, and a timestamp of when it was recorded.
+
+Remember to include the full plugin code in the documentation, and to update the "Adding Features to Navigator" section to highlight this new integration method.

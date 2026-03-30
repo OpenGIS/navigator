@@ -51,14 +51,33 @@ const panelComponents = {
 const isCustomPanel = computed(() => !(activePanel.value in panelComponents));
 const activeComponent = computed(() => panelComponents[activePanel.value] ?? null);
 
-// Ref for the custom panel render container
+// Resolve a Vue component from custom button/panel configs
+const activeCustomComponent = computed(() => {
+  if (!isCustomPanel.value) return null;
+  const btn = customButtons.find((b) => b.id === activePanel.value);
+  if (btn?.panel?.component) return btn.panel.component;
+  const panel = customPanels.find((p) => p.id === activePanel.value);
+  if (panel?.component) return panel.component;
+  return null;
+});
+
+const activeCustomProps = computed(() => {
+  const btn = customButtons.find((b) => b.id === activePanel.value);
+  if (btn?.panel?.component) return btn.panel.props || {};
+  const panel = customPanels.find((p) => p.id === activePanel.value);
+  if (panel?.component) return panel.props || {};
+  return {};
+});
+
+// Ref for the custom panel render container (DOM-based fallback)
 const customPanelContainer = ref(null);
 
-// When the active panel switches to a custom one, call its render function
+// When the active panel switches to a custom one with a render function, call it
 watch(
   [activePanel, customPanelContainer],
   async () => {
     if (!isCustomPanel.value || !customPanelContainer.value) return;
+    if (activeCustomComponent.value) return;
     await nextTick();
     const map = getMapInstance(instanceId);
     const ctx = { map, instanceId };
@@ -118,6 +137,7 @@ watch(
       <!-- Active Panel Content -->
       <div class="flex-grow-1 overflow-auto">
         <component v-if="activeComponent" :is="activeComponent" />
+        <component v-else-if="activeCustomComponent" :is="activeCustomComponent" v-bind="activeCustomProps" />
         <div v-else ref="customPanelContainer" class="p-3" />
       </div>
     </div>
