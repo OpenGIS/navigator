@@ -6,7 +6,7 @@
  * Document First process. Exits with code 1 if any issues are found.
  *
  * Only docs/guide/ participates in the sync contract.
- * docs/dev/ contains technical/developer docs with no runtime tests.
+ * docs/core/ and docs/extend/ contain technical/developer docs with no runtime tests.
  *
  * Rules:
  *   1. Every docs/guide/*.md must have a tests/e2e/*.spec.js (by matching stem name)

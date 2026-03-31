@@ -33,7 +33,7 @@ This project is inspired by, and made possible thanks to the [OpenStreetMap](htt
 
 ## Planned Changes
 
-- Implement [debug option](docs/dev/1.config.md#debug).
+- Implement [debug option](docs/core/1.config.md#debug).
 - Worldwide language support.
 - Search ([Nominatim](https://nominatim.org/) integration).
 - Better handling of denied location permissions.
@@ -107,7 +107,7 @@ const nav = Navigator.create({
 nav.mount();
 ```
 
-See [`docs/dev/1.config.md`](docs/dev/1.config.md) for the full configuration reference.
+See [`docs/core/1.config.md`](docs/core/1.config.md) for the full configuration reference.
 
 ### Multiple instances
 
@@ -124,7 +124,7 @@ Navigator.create({
 }).mount();
 ```
 
-See [`docs/dev/2.instances.md`](docs/dev/2.instances.md) for full details.
+See [`docs/core/2.instances.md`](docs/core/2.instances.md) for full details.
 
 ## PWA
 
@@ -150,11 +150,11 @@ Document → Test → Implement → Screenshot
 
 **2. Write the tests** — Translate each doc heading into a `test.describe` block in the corresponding spec file. If you can't write a test for something, the docs description is too vague — sharpen it first.
 
-**3. Implement until the tests pass** — The docs and tests define the target; the implementation just needs to reach it. Run `npm test -- tests/e2e/{relevant}.spec.js` to track progress. See [docs/dev/9.testing.md](docs/dev/9.testing.md) for how to find the right spec.
+**3. Implement until the tests pass** — The docs and tests define the target; the implementation just needs to reach it. Run `npm test -- tests/e2e/{relevant}.spec.js` to track progress. See [docs/core/7.testing.md](docs/core/7.testing.md) for how to find the right spec.
 
 **4. Add screenshots to the docs** — For sections where a picture helps, add a screenshot spec in `tests/e2e/screenshots/` and embed the output in the docs. Not every section needs one.
 
-See [docs/dev/9.testing.md](docs/dev/9.testing.md) for the full testing and screenshot strategy.
+See [docs/core/7.testing.md](docs/core/7.testing.md) for the full testing and screenshot strategy.
 
 ### Install
 
@@ -174,7 +174,7 @@ npm run dev
 npm test -- tests/e2e/{spec}.spec.js
 ```
 
-See [docs/dev/9.testing.md](docs/dev/9.testing.md) for the testing strategy and how to find the right spec file.
+See [docs/core/7.testing.md](docs/core/7.testing.md) for the testing strategy and how to find the right spec file.
 
 ### Build
 

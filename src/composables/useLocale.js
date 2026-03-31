@@ -85,7 +85,7 @@ export const useLocale = (instanceId) => {
 	 * The locale code formatted as an OSM `name:xx` tag suffix.
 	 * For most locales this equals `locale.value` directly.
 	 * Use this value when building MapLibre coalesce expressions for
-	 * multilingual map labels (see docs/dev/locale.md — OSM Multilingual Names).
+	 * multilingual map labels (see docs/core/5.locale.md — OSM Multilingual Names).
 	 */
 	const mapLanguageTag = computed(
 		() => MAP_LANGUAGE_TAG_OVERRIDES[locale.value] ?? locale.value,

@@ -12,7 +12,7 @@ process.
 
 For each file matching `docs/guide/*.md` (and `docs/guide/features/*.md`):
 - There must be a corresponding `tests/e2e/*.spec.js` (or `tests/e2e/features/*.spec.js`)
-- Developer docs in `docs/dev/` do not need test specs
+- Developer docs in `docs/core/` and `docs/extend/` do not need test specs
 
 ### 2. Test describe blocks match doc headings
 

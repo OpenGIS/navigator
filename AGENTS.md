@@ -49,7 +49,7 @@ Document → Test → Implement → Screenshot
 
 1. **Write the docs first.** Add or update the relevant `docs/guide/` file before writing any code.
 2. **Write tests against the docs.** Each heading in a doc maps to a `test.describe` block in the corresponding spec.
-3. **Implement until tests pass.** Run `npm test -- tests/e2e/{relevant}.spec.js` to track progress during development. See [docs/dev/9.testing.md](docs/dev/9.testing.md) for how to find the right spec.
+3. **Implement until tests pass.** Run `npm test -- tests/e2e/{relevant}.spec.js` to track progress during development. See [docs/core/7.testing.md](docs/core/7.testing.md) for how to find the right spec.
 4. **Add screenshots where helpful.** Screenshot specs live in `tests/e2e/screenshots/` and output to `assets/screenshots/docs/`.
 
 Before marking any task done, run `npm test` (full suite) and `npm run check:sync`. Both must pass.
@@ -145,7 +145,7 @@ center: [-128.0094, 50.6539]
 
 ### Features
 
-A feature's composable lives in `src/composables/`, its panel in `src/components/panels/`, and its top-bar button (if any) in `src/components/ui/top/`. See `docs/dev/7.features.md` for the full pattern.
+A feature's composable lives in `src/composables/`, its panel in `src/components/panels/`, and its top-bar button (if any) in `src/components/ui/top/`. See `docs/extend/5.features.md` for the full pattern.
 
 ---
 
@@ -154,7 +154,8 @@ A feature's composable lives in `src/composables/`, its panel in `src/components
 Documentation is split into two directories:
 
 - **`docs/guide/`** — User-facing docs (how to use the library). These participate in the sync contract.
-- **`docs/dev/`** — Developer/technical docs (architecture, conventions, theming). No runtime tests.
+- **`docs/core/`** — Core developer docs (architecture, composables, config). No runtime tests.
+- **`docs/extend/`** — Extension docs (events, plugins, buttons, panels, theming). No runtime tests.
 
 The sync contract applies only to `docs/guide/`:
 
@@ -174,19 +175,28 @@ Current mapping:
 | `docs/guide/features/locate.md` | `tests/e2e/features/locate.spec.js` | `tests/e2e/screenshots/features/locate.spec.js` |
 | `docs/guide/features/settings.md` | `tests/e2e/features/settings.spec.js` | — |
 
-Developer docs (no tests):
+Core docs (no tests):
 
 | Doc | Purpose |
 |-----|---------|
-| `docs/dev/1.config.md` | `Navigator.create()` config API reference |
-| `docs/dev/2.instances.md` | Multi-instance setup, storage convention, architecture |
-| `docs/dev/3.map.md` | `useMap` full API: map lifecycle, view persistence, URL hash |
-| `docs/dev/4.ui.md` | `useUI` full API: responsive breakpoints, panel, navigation |
-| `docs/dev/5.locale.md` | Locale API, translations, OSM multilingual names |
-| `docs/dev/6.theme.md` | Bootstrap theme customization |
-| `docs/dev/7.features.md` | How to build a new feature |
-| `docs/dev/8.extending.md` | Extending Navigator: events, plugins, custom buttons/panels |
-| `docs/dev/9.testing.md` | Testing conventions and screenshot strategy |
+| `docs/core/1.config.md` | `Navigator.create()` config API reference |
+| `docs/core/2.instances.md` | Multi-instance setup, storage convention, architecture |
+| `docs/core/3.map.md` | `useMap` full API: map lifecycle, view persistence, URL hash |
+| `docs/core/4.ui.md` | `useUI` full API: responsive breakpoints, panel, navigation |
+| `docs/core/5.locale.md` | Locale API, translations, OSM multilingual names |
+| `docs/core/6.theme.md` | Bootstrap SCSS theme architecture |
+| `docs/core/7.testing.md` | Testing conventions and screenshot strategy |
+
+Extension docs (no tests):
+
+| Doc | Purpose |
+|-----|---------|
+| `docs/extend/1.events.md` | Event emitter, lifecycle callbacks |
+| `docs/extend/2.buttons-panels.md` | Config-driven custom buttons and panels |
+| `docs/extend/3.plugins.md` | Plugin system: writing, context, cleanup |
+| `docs/extend/4.apis.md` | Accessing map, panel, settings, locale, storage |
+| `docs/extend/5.features.md` | Building a complete feature as a plugin |
+| `docs/extend/6.theme.md` | Custom themes for library consumers |
 
 ---
 
@@ -194,7 +204,7 @@ Developer docs (no tests):
 
 1. Create `docs/guide/feature-name.md` (or `docs/guide/features/feature-name.md`)
 2. Create `tests/e2e/feature-name.spec.js` (or `tests/e2e/features/feature-name.spec.js`)
-3. Create `src/composables/use{FeatureName}.js`, `src/components/panels/{feature-name}.vue`, and `src/components/ui/top/{feature-name}.vue` (see `docs/dev/7.features.md`)
+3. Create `src/composables/use{FeatureName}.js`, `src/components/panels/{feature-name}.vue`, and `src/components/ui/top/{feature-name}.vue` (see `docs/extend/5.features.md`)
 4. If the feature has illustratable UI, create `tests/e2e/screenshots/feature-name.spec.js`
 5. Run `npm test -- tests/e2e/{relevant}.spec.js` during development, then `npm test && npm run check:sync` as a final check
 
@@ -209,12 +219,13 @@ A Playwright MCP server is configured in `.github/mcp.json`. Agents with MCP sup
 ## Further Reading
 
 - `README.md` — install and usage
-- `docs/dev/1.config.md` — `Navigator.create()` config API reference (all options)
-- `docs/dev/2.instances.md` — multi-instance setup, storage convention, architecture
-- `docs/dev/3.map.md` — `useMap` full API
-- `docs/dev/4.ui.md` — `useUI` full API
-- `docs/dev/5.locale.md` — locale API, translations
-- `docs/dev/7.features.md` — how to build a feature
-- `docs/dev/8.extending.md` — events, plugins, custom buttons/panels
-- `docs/dev/9.testing.md` — testing conventions, screenshot strategy, how to run specific specs
+- `docs/core/1.config.md` — `Navigator.create()` config API reference (all options)
+- `docs/core/2.instances.md` — multi-instance setup, storage convention, architecture
+- `docs/core/3.map.md` — `useMap` full API
+- `docs/core/4.ui.md` — `useUI` full API
+- `docs/core/5.locale.md` — locale API, translations
+- `docs/core/6.theme.md` — Bootstrap SCSS theme architecture
+- `docs/core/7.testing.md` — testing conventions, screenshot strategy, how to run specific specs
+- `docs/extend/README.md` — extending Navigator: events, plugins, buttons, panels, theming
+- `docs/extend/5.features.md` — how to build a feature
 - `tasks/sync-review.md` — agent task for a full Document First sync review

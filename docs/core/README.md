@@ -1,8 +1,10 @@
-# Developer Documentation
+# Core Documentation
 
-Welcome to the Navigator developer docs. This guide covers the architecture, APIs, and extension points of the Navigator mapping library.
+Welcome to the Navigator core developer docs. This guide covers the internal architecture, APIs, and composables that power the Navigator mapping library.
 
 Navigator wraps [MapLibre GL JS](https://maplibre.org/) and [Vue 3](https://vuejs.org/) into an embeddable map widget. Consumers create instances with `Navigator.create()` and mount them to the DOM.
+
+> **Looking to extend Navigator?** See the [Extending Navigator](../extend/README.md) docs for events, custom buttons & panels, plugins, and theming.
 
 ---
 
@@ -25,36 +27,17 @@ nav.mount();
 
 ## Documentation Guide
 
-The docs are ordered to walk you through the codebase from core concepts to advanced extension:
-
-### Getting Started
+The docs are ordered to walk you through the codebase from core concepts to testing:
 
 | # | Document | Description |
 |---|----------|-------------|
 | 1 | [Configuration](./1.config.md) | All `Navigator.create()` options: id, locale, messages, mapOptions, buttons, callbacks, and plugins |
 | 2 | [Instances](./2.instances.md) | Instance isolation, multi-instance setup, storage conventions, and architecture |
-
-### Core Systems
-
-| # | Document | Description |
-|---|----------|-------------|
 | 3 | [Map](./3.map.md) | `useMap` composable: MapLibre lifecycle, view persistence, URL hash sync, and multilingual labels |
 | 4 | [UI](./4.ui.md) | `useUI` composable: responsive breakpoints, side panel, and navigation state |
 | 5 | [Locale](./5.locale.md) | `useLocale` composable: language resolution, translations, and OSM multilingual names |
 | 6 | [Theme](./6.theme.md) | Bootstrap SCSS theme: palette customisation, dark mode, and component overrides |
-
-### Extending Navigator
-
-| # | Document | Description |
-|---|----------|-------------|
-| 7 | [Building Features](./7.features.md) | How to add a new feature: composable, panel, button, and wiring patterns |
-| 8 | [Extending](./8.extending.md) | Consumer-facing extension API: events, lifecycle callbacks, custom buttons, panels, and plugins |
-
-### Development
-
-| # | Document | Description |
-|---|----------|-------------|
-| 9 | [Testing](./9.testing.md) | Unit tests, E2E tests, screenshot specs, and the sync contract |
+| 7 | [Testing](./7.testing.md) | Unit tests, E2E tests, screenshot specs, and the sync contract |
 
 ---
 
@@ -86,7 +69,7 @@ Navigator.create(config)
 
 - **Composable-first.** Business logic lives in composables (`src/composables/`), not components. State is cached in module-level `Map` objects keyed by instance ID.
 
-- **Document First.** All development follows a Document → Test → Implement → Screenshot workflow. See the [Testing](./9.testing.md) guide for details.
+- **Document First.** All development follows a Document → Test → Implement → Screenshot workflow. See the [Testing](./7.testing.md) guide for details.
 
 ---
 
@@ -122,6 +105,7 @@ src/
 - [README.md](../../README.md) — install and usage
 - [AGENTS.md](../../AGENTS.md) — agent context for AI coding tools
 - [docs/guide/](../guide/) — user-facing feature documentation
+- [Extending Navigator](../extend/README.md) — events, plugins, buttons, panels, and theming
 
 ---
 
