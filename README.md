@@ -138,24 +138,6 @@ The demo includes:
 
 ## Development
 
-### Document First
-
-Navigator follows a **Document First** development process. Before writing any code, write the documentation for what you're building. Tests and implementation follow from that.
-
-```
-Document → Test → Implement → Screenshot
-```
-
-**1. Write the documentation** — Start by writing (or updating) the relevant `docs/guide/` file. Describe what the feature does, how to use it, and what developers can expect. If you can't explain it, it probably isn't ready to build.
-
-**2. Write the tests** — Translate each doc heading into a `test.describe` block in the corresponding spec file. If you can't write a test for something, the docs description is too vague — sharpen it first.
-
-**3. Implement until the tests pass** — The docs and tests define the target; the implementation just needs to reach it. Run `npm test -- tests/e2e/{relevant}.spec.js` to track progress. See [docs/core/7.testing.md](docs/core/7.testing.md) for how to find the right spec.
-
-**4. Add screenshots to the docs** — For sections where a picture helps, add a screenshot spec in `tests/e2e/screenshots/` and embed the output in the docs. Not every section needs one.
-
-See [docs/core/7.testing.md](docs/core/7.testing.md) for the full testing and screenshot strategy.
-
 ### Install
 
 ```bash
@@ -174,7 +156,7 @@ npm run dev
 npm test -- tests/e2e/{spec}.spec.js
 ```
 
-See [docs/core/7.testing.md](docs/core/7.testing.md) for the testing strategy and how to find the right spec file.
+See [docs/core/7.testing.md](docs/core/7.testing.md) for the testing strategy.
 
 ### Build
 

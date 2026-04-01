@@ -20,4 +20,3 @@ jobs:
       - run: npm test
         env:
           CI: "1"
-      - run: npm run check:sync

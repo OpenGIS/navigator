@@ -69,8 +69,6 @@ Navigator.create(config)
 
 - **Composable-first.** Business logic lives in composables (`src/composables/`), not components. State is cached in module-level `Map` objects keyed by instance ID.
 
-- **Document First.** All development follows a Document → Test → Implement → Screenshot workflow. See the [Testing](./7.testing.md) guide for details.
-
 ---
 
 ## Source Structure
@@ -104,7 +102,6 @@ src/
 
 - [README.md](../../README.md) — install and usage
 - [AGENTS.md](../../AGENTS.md) — agent context for AI coding tools
-- [docs/guide/](../guide/) — user-facing feature documentation
 - [Extending Navigator](../extend/README.md) — events, plugins, buttons, panels, and theming
 
 ---
