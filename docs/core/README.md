@@ -4,7 +4,8 @@ Welcome to the Navigator core developer docs. This guide covers the internal arc
 
 Navigator wraps [MapLibre GL JS](https://maplibre.org/) and [Vue 3](https://vuejs.org/) into an embeddable map widget. Consumers create instances with `Navigator.create()` and mount them to the DOM.
 
-> **Looking to extend Navigator?** See the [Extending Navigator](../extend/README.md) docs for events, custom buttons & panels, plugins, and theming.
+> [!NOTE]
+> **Building on top of Navigator?** See the [Extending Navigator](../extend/README.md) docs for events, custom buttons & panels, plugins, and theming.
 
 ---
 
@@ -35,9 +36,10 @@ The docs are ordered to walk you through the codebase from core concepts to test
 | 2 | [Instances](./2.instances.md) | Instance isolation, multi-instance setup, storage conventions, and architecture |
 | 3 | [Map](./3.map.md) | `useMap` composable: MapLibre lifecycle, view persistence, URL hash sync, and multilingual labels |
 | 4 | [UI](./4.ui.md) | `useUI` composable: responsive breakpoints, side panel, and navigation state |
-| 5 | [Locale](./5.locale.md) | `useLocale` composable: language resolution, translations, and OSM multilingual names |
-| 6 | [Theme](./6.theme.md) | Bootstrap SCSS theme: palette customisation, dark mode, and component overrides |
-| 7 | [Testing](./7.testing.md) | Unit tests, E2E tests, screenshot specs, and the sync contract |
+| 5 | [GeoJSON](./5.geojson.md) | `useGeoJSON` composable: rendering points, lines, and polygons with data-driven styles |
+| 6 | [Locale](./6.locale.md) | `useLocale` composable: language resolution, translations, and OSM multilingual names |
+| 7 | [Theme](./7.theme.md) | Bootstrap SCSS theme: palette customisation, dark mode, and component overrides |
+| 8 | [Testing](./8.testing.md) | Unit tests, E2E tests, screenshot specs, and the sync contract |
 
 ---
 
@@ -52,7 +54,8 @@ Navigator.create(config)
   │     ├── useUI             ← responsive breakpoints, panel, nav state
   │     ├── useSettings       ← theme, units, language preferences
   │     ├── useLocale         ← i18n resolution and translations
-  │     └── useStorage        ← localStorage wrapper, instance-scoped
+  │     ├── useStorage        ← localStorage wrapper, instance-scoped
+  │     └── useGeoJSON        ← GeoJSON rendering: points, lines, polygons
   │
   ├── EventEmitter            ← per-instance, framework-agnostic events
   │     ├── map:ready
@@ -88,6 +91,7 @@ src/
     useLocale.js              # i18n: language resolution, translations
     useSettings.js            # user preferences: theme, units, language
     useLocate.js              # GPS locate feature
+    useGeoJSON.js             # GeoJSON rendering: points, lines, polygons
   components/
     panels/                   # side panel content for each feature
     ui/

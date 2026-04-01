@@ -26,6 +26,8 @@ function smoothAngle(current, next, factor) {
  *
  * Manages GPS tracking state, map markers, and the permission flow.
  * State is cached per Navigator instance and shared across all callers.
+ *
+ * @returns {{ mode: import('vue').ComputedRef<'active'|'following'|'error'|null>, position: import('vue').ComputedRef<Position|null>, compassHeading: import('vue').ComputedRef<number|null>, headingLost: import('vue').ComputedRef<boolean>, permissionGranted: import('vue').ComputedRef<boolean>, showConfirmModal: import('vue').Ref<boolean>, showErrorModal: import('vue').Ref<boolean>, cycle: Function, confirmLocate: Function, stop: Function, retryOrientation: Function, retryPosition: Function }}
  */
 export const useLocate = () => {
     const instanceId = inject("navigatorId", "navigator");

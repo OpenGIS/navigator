@@ -2,7 +2,8 @@
 
 Navigator is designed to be extended. The event emitter, lifecycle callbacks, config-driven buttons, and plugin system give consumers multiple levels of customisation — from simple one-liners to full third-party plugins.
 
-> **Looking for core internals?** See the [Core Documentation](../core/README.md) for architecture, composables, and the config API reference.
+> [!NOTE]
+> **Contributing to Navigator's source?** See the [Core Documentation](../core/README.md) for architecture, composables, and the internal API reference.
 
 ---
 

@@ -14,6 +14,7 @@ export { useStorage } from "./composables/useStorage.js";
 export { useLocate } from "./composables/useLocate.js";
 export { useSettings } from "./composables/useSettings.js";
 export { useLocale } from "./composables/useLocale.js";
+export { useGeoJSON } from "./composables/useGeoJSON.js";
 
 /**
  * Vue-idiomatic composable for accessing the MapLibre map instance.

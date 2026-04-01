@@ -29,6 +29,7 @@ export function localeDefaultUnits(localeStr) {
 /**
  * @param {string} [instanceId] - Navigator instance ID. If omitted, resolved via inject('navigatorId').
  *   Pass explicitly when calling from a plugin install() or other non-setup context.
+ * @returns {{ resolvedTheme: import('vue').ComputedRef<string>, isDark: import('vue').ComputedRef<boolean>, isMetric: import('vue').ComputedRef<boolean>, resolvedUnits: import('vue').ComputedRef<string>, language: import('vue').ComputedRef<string|null>, toggleTheme: Function, setUnits: Function, setLanguage: Function }}
  */
 export const useSettings = (instanceId) => {
 	const id = instanceId ?? inject("navigatorId", "navigator");
@@ -61,16 +62,19 @@ export const useSettings = (instanceId) => {
 	const resolvedUnits = computed(() => storage.units ?? localeDefaultUnits());
 	const isMetric = computed(() => resolvedUnits.value === "metric");
 
+	/** Toggle between light and dark theme, persisting the choice. */
 	const toggleTheme = () => {
 		storage.theme = isDark.value ? "light" : "dark";
 	};
 
+	/** @param {'metric'|'imperial'} units */
 	const setUnits = (units) => {
 		storage.units = units;
 	};
 
 	const language = computed(() => storage.language);
 
+	/** @param {string|null} lang - BCP 47 language tag, or null to follow browser locale. */
 	const setLanguage = (lang) => {
 		storage.language = lang;
 	};

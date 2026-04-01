@@ -24,6 +24,13 @@ function createState(instanceId) {
     };
 }
 
+/**
+ * Composable for UI state management.
+ *
+ * Manages responsive breakpoints, side panel visibility, navigation bar state,
+ * and first-load detection. State is cached per Navigator instance and shared
+ * across all callers within the same instance.
+ */
 export const useUI = () => {
     const instanceId = inject("navigatorId", "navigator");
 
