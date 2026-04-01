@@ -45,11 +45,11 @@ This project is inspired by, and made possible thanks to the [OpenStreetMap](htt
 
 I believe the benefits of a web app far outweigh the drawbacks, but it's important to be transparent about the limitations:
 
-- Location permissions are required for GPS/Compass features. Some users have a deny-all approach to web browser permissions and changing permissions varies widely between browsers and devices. _This is a genuine pain point, with not much you can do other than warn and inform the user_
+- Location permissions are required for GPS/Compass features. Some users have a deny-all approach to web browser permissions and changing permissions varies widely between browsers and devices. _This is a genuine pain point, with not much you can do other than warn and inform the user_.
 
-- The app does not work in the background or when the device is locked. _This is a common limitation of web apps, but I want to explore ways to improve this with better caching and PWA features_
+- The app does not work in the background or when the device is locked. _This is a common limitation of web apps, but I want to explore ways to improve this with better caching and PWA features_.
 
-- Depending on a single tile provider ([OpenFreeMap](https://openfreemap.org/)) creates a single point of failure. _Their implementation is Open-Source and [self-hosting](https://github.com/hyperknot/openfreemap/blob/main/docs/self_hosting.md) is something I want to persue_
+- Depending on a single tile provider ([OpenFreeMap](https://openfreemap.org/)) creates a single point of failure. _Their implementation is Open-Source and [self-hosting](https://github.com/hyperknot/openfreemap/blob/main/docs/self_hosting.md) is something I want to persue_.
 
 - While the app works well with no internet service, it does require an initial connection to load the app assets and map tiles. _This can be hard to communicate to users and set expectations._
 
