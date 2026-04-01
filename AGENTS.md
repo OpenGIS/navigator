@@ -27,7 +27,6 @@ npm run test:unit    # run vitest unit tests (<1 s)
 npm run test:e2e -- tests/e2e/{spec}.spec.js   # run only the relevant E2E spec
 npm run test:e2e     # run all E2E tests
 npm test             # run all tests: unit + E2E (final check before confirming a task done)
-npm run check:sync   # verify docs/tests/screenshots are in sync
 ```
 
 ### Running tests — timing guidance
@@ -36,23 +35,6 @@ npm run check:sync   # verify docs/tests/screenshots are in sync
 - The full suite (`npm test`) takes **2–3 minutes**.
 
 When running tests with a shell tool, use `mode="sync"` with `initial_wait` set to at least **60** for a single spec and **240** for the full suite. You will be automatically notified when the command completes — **do not poll repeatedly with short waits**. Wait for the completion notification, then read the output once.
-
----
-
-## Document First
-
-All development in this project follows a **Document First** process:
-
-```
-Document → Test → Implement → Screenshot
-```
-
-1. **Write the docs first.** Add or update the relevant `docs/guide/` file before writing any code.
-2. **Write tests against the docs.** Each heading in a doc maps to a `test.describe` block in the corresponding spec.
-3. **Implement until tests pass.** Run `npm test -- tests/e2e/{relevant}.spec.js` to track progress during development. See [docs/core/7.testing.md](docs/core/7.testing.md) for how to find the right spec.
-4. **Add screenshots where helpful.** Screenshot specs live in `tests/e2e/screenshots/` and output to `assets/screenshots/docs/`.
-
-Before marking any task done, run `npm test` (full suite) and `npm run check:sync`. Both must pass.
 
 ---
 
@@ -149,33 +131,14 @@ A feature's composable lives in `src/composables/`, its panel in `src/components
 
 ---
 
-## Docs / Tests / Screenshots — Sync Contract
+## Docs
 
 Documentation is split into two directories:
 
-- **`docs/guide/`** — User-facing docs (how to use the library). These participate in the sync contract.
-- **`docs/core/`** — Core developer docs (architecture, composables, config). No runtime tests.
-- **`docs/extend/`** — Extension docs (events, plugins, buttons, panels, theming). No runtime tests.
+- **`docs/core/`** — Core developer docs (architecture, composables, config).
+- **`docs/extend/`** — Extension docs (events, plugins, buttons, panels, theming).
 
-The sync contract applies only to `docs/guide/`:
-
-| Layer | Location | Rule |
-|-------|----------|------|
-| Documentation | `docs/guide/*.md` | Source of truth for behaviour |
-| E2E tests | `tests/e2e/*.spec.js` | One file per guide doc; `test.describe` names match doc headings |
-| Screenshots | `tests/e2e/screenshots/*.spec.js` | One file per doc that needs illustrations; output to `assets/screenshots/docs/` |
-
-Run `npm run check:sync` to verify mechanically. For a semantic review (do test names actually match headings?), see `tasks/sync-review.md`.
-
-Current mapping:
-
-| Doc | Tests | Screenshots |
-|-----|-------|-------------|
-| `docs/guide/core.md` | `tests/e2e/core.spec.js` | `tests/e2e/screenshots/core.spec.js` |
-| `docs/guide/features/locate.md` | `tests/e2e/features/locate.spec.js` | `tests/e2e/screenshots/features/locate.spec.js` |
-| `docs/guide/features/settings.md` | `tests/e2e/features/settings.spec.js` | — |
-
-Core docs (no tests):
+Core docs:
 
 | Doc | Purpose |
 |-----|---------|
@@ -187,7 +150,7 @@ Core docs (no tests):
 | `docs/core/6.theme.md` | Bootstrap SCSS theme architecture |
 | `docs/core/7.testing.md` | Testing conventions and screenshot strategy |
 
-Extension docs (no tests):
+Extension docs:
 
 | Doc | Purpose |
 |-----|---------|
@@ -202,11 +165,9 @@ Extension docs (no tests):
 
 ## Adding a New Feature
 
-1. Create `docs/guide/feature-name.md` (or `docs/guide/features/feature-name.md`)
+1. Create `src/composables/use{FeatureName}.js`, `src/components/panels/{feature-name}.vue`, and `src/components/ui/top/{feature-name}.vue` (see `docs/extend/5.features.md`)
 2. Create `tests/e2e/feature-name.spec.js` (or `tests/e2e/features/feature-name.spec.js`)
-3. Create `src/composables/use{FeatureName}.js`, `src/components/panels/{feature-name}.vue`, and `src/components/ui/top/{feature-name}.vue` (see `docs/extend/5.features.md`)
-4. If the feature has illustratable UI, create `tests/e2e/screenshots/feature-name.spec.js`
-5. Run `npm test -- tests/e2e/{relevant}.spec.js` during development, then `npm test && npm run check:sync` as a final check
+3. Run `npm test -- tests/e2e/{relevant}.spec.js` during development, then `npm test` as a final check
 
 ---
 
@@ -228,4 +189,3 @@ A Playwright MCP server is configured in `.github/mcp.json`. Agents with MCP sup
 - `docs/core/7.testing.md` — testing conventions, screenshot strategy, how to run specific specs
 - `docs/extend/README.md` — extending Navigator: events, plugins, buttons, panels, theming
 - `docs/extend/5.features.md` — how to build a feature
-- `tasks/sync-review.md` — agent task for a full Document First sync review

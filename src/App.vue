@@ -57,9 +57,9 @@ if (isDesktop.value) {
 		:data-bs-theme="resolvedTheme"
 	>
 		<div style="display: none" v-html="iconSprite"></div>
-		<!-- 		<div class="navigator-top">
+		<div class="navigator-top">
 			<Top />
-		</div> -->
+		</div>
 
 		<div class="navigator-content">
 			<Panels />
@@ -75,3 +75,5 @@ if (isDesktop.value) {
 		/>
 	</div>
 </template>
+
+

@@ -6,6 +6,7 @@ import { parseUrlHash, updateUrlHash } from "@/composables/useUrlHash";
 import { useSettings } from "@/composables/useSettings";
 import { useLocale } from "@/composables/useLocale";
 import { getEmitter } from "@/index.js";
+import { mapDefaults, scaleMaxWidth } from "@/defaults/maplibre";
 
 // Per-instance cache: instanceId -> { state, mapInstance }
 const mapCache = new Map();
@@ -103,8 +104,7 @@ export const useMap = (containerRef = null, options = {}) => {
         onMounted(() => {
             const map = new maplibregl.Map({
                 container: containerRef.value,
-                style: "https://tiles.openfreemap.org/styles/bright",
-                attributionControl: true,
+                ...mapDefaults,
                 ...options,
             });
 
@@ -187,7 +187,7 @@ export const useMap = (containerRef = null, options = {}) => {
 
                 // Scale bar — unit follows the units preference in settings.
                 const scaleControl = new maplibregl.ScaleControl({
-                    maxWidth: 120,
+                    maxWidth: scaleMaxWidth,
                     unit: isMetric.value ? "metric" : "imperial",
                 });
                 map.addControl(scaleControl, "bottom-left");

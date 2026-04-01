@@ -33,7 +33,6 @@
     "test": "vitest run && playwright test",
     "test:unit": "vitest run",
     "test:e2e": "playwright test",
-    "check:sync": "node scripts/check-sync.js",
     "prepublishOnly": "npm run build",
     "preview": "vite preview"
   },
