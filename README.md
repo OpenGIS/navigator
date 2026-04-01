@@ -153,7 +153,9 @@ npm run dev
 ### Test
 
 ```bash
-npm test -- tests/e2e/{spec}.spec.js
+npm test                                          # unit tests (vitest)
+npm run test:e2e -- tests/e2e/{spec}.spec.js      # single E2E spec
+npm run test:e2e                                  # full E2E suite
 ```
 
 See [docs/core/7.testing.md](docs/core/7.testing.md) for the testing strategy.

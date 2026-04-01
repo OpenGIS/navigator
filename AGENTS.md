@@ -26,15 +26,16 @@ npm run build        # build the library for distribution
 npm run test:unit    # run vitest unit tests (<1 s)
 npm run test:e2e -- tests/e2e/{spec}.spec.js   # run only the relevant E2E spec
 npm run test:e2e     # run all E2E tests
-npm test             # run all tests: unit + E2E (final check before confirming a task done)
+npm test             # run unit tests only (final check before confirming a task done)
 ```
 
 ### Running tests — timing guidance
 
-- A single spec takes **15–45 seconds**.
-- The full suite (`npm test`) takes **2–3 minutes**.
+`npm test` runs unit tests only and completes in under a second.
 
-When running tests with a shell tool, use `mode="sync"` with `initial_wait` set to at least **60** for a single spec and **240** for the full suite. You will be automatically notified when the command completes — **do not poll repeatedly with short waits**. Wait for the completion notification, then read the output once.
+E2E tests are available separately via `npm run test:e2e` but are slow (a single spec takes **15–45 seconds**, the full suite **2–3 minutes**) and are not required as part of the standard task completion check. Run E2E tests manually when validating browser integration or complex user flows.
+
+When running E2E tests with a shell tool, use `mode="sync"` with `initial_wait` set to at least **60** for a single spec and **240** for the full suite. You will be automatically notified when the command completes — **do not poll repeatedly with short waits**. Wait for the completion notification, then read the output once.
 
 ---
 
@@ -52,6 +53,7 @@ src/
     useLocale.js        # i18n: language resolution, translations
     useSettings.js      # user preferences: theme, units, language
     useLocate.js        # GPS locate feature
+    useGeoJSON.js       # GeoJSON rendering: points, lines, polygons
   components/
     panels/
       about.vue         # About panel
@@ -92,11 +94,13 @@ Logic lives in composables, not components. Per-instance state is cached in a mo
 const cache = new Map();
 
 export const useMyFeature = () => {
-  const instanceId = inject('navigatorId', 'navigator');
+  const instanceId = inject("navigatorId", "navigator");
 
   if (!cache.has(instanceId)) {
     cache.set(instanceId, {
-      state: useStorage('my-feature', { /* defaults */ }),
+      state: useStorage("my-feature", {
+        /* defaults */
+      }),
     });
   }
 
@@ -107,6 +111,7 @@ export const useMyFeature = () => {
 ### CSS selectors
 
 Core elements use classes, not ids, to avoid collisions in multi-instance setups:
+
 - `.navigator-map` — MapLibre container
 - `.navigator-top` — top navigation bar
 - `.navigator-panel` — Bootstrap offcanvas side panel
@@ -122,7 +127,7 @@ lat: 50.6539, lng: -128.0094   // Scarlet Ibis Pub, Holberg, British Columbia, C
 In MapLibre `center` arrays (which are `[lng, lat]`):
 
 ```js
-center: [-128.0094, 50.6539]
+center: [-128.0094, 50.6539];
 ```
 
 ### Features
@@ -140,26 +145,27 @@ Documentation is split into two directories:
 
 Core docs:
 
-| Doc | Purpose |
-|-----|---------|
-| `docs/core/1.config.md` | `Navigator.create()` config API reference |
-| `docs/core/2.instances.md` | Multi-instance setup, storage convention, architecture |
-| `docs/core/3.map.md` | `useMap` full API: map lifecycle, view persistence, URL hash |
-| `docs/core/4.ui.md` | `useUI` full API: responsive breakpoints, panel, navigation |
-| `docs/core/5.locale.md` | Locale API, translations, OSM multilingual names |
-| `docs/core/6.theme.md` | Bootstrap SCSS theme architecture |
-| `docs/core/7.testing.md` | Testing conventions and screenshot strategy |
+| Doc                        | Purpose                                                      |
+| -------------------------- | ------------------------------------------------------------ |
+| `docs/core/1.config.md`    | `Navigator.create()` config API reference                    |
+| `docs/core/2.instances.md` | Multi-instance setup, storage convention, architecture       |
+| `docs/core/3.map.md`       | `useMap` full API: map lifecycle, view persistence, URL hash |
+| `docs/core/4.ui.md`        | `useUI` full API: responsive breakpoints, panel, navigation  |
+| `docs/core/5.geojson.md`   | `useGeoJSON` API: rendering GeoJSON features with styles     |
+| `docs/core/6.locale.md`    | Locale API, translations, OSM multilingual names             |
+| `docs/core/7.theme.md`     | Bootstrap SCSS theme architecture                            |
+| `docs/core/8.testing.md`   | Testing conventions and screenshot strategy                  |
 
 Extension docs:
 
-| Doc | Purpose |
-|-----|---------|
-| `docs/extend/1.events.md` | Event emitter, lifecycle callbacks |
-| `docs/extend/2.buttons-panels.md` | Config-driven custom buttons and panels |
-| `docs/extend/3.plugins.md` | Plugin system: writing, context, cleanup |
-| `docs/extend/4.apis.md` | Accessing map, panel, settings, locale, storage |
-| `docs/extend/5.features.md` | Building a complete feature as a plugin |
-| `docs/extend/6.theme.md` | Custom themes for library consumers |
+| Doc                               | Purpose                                         |
+| --------------------------------- | ----------------------------------------------- |
+| `docs/extend/1.events.md`         | Event emitter, lifecycle callbacks              |
+| `docs/extend/2.buttons-panels.md` | Config-driven custom buttons and panels         |
+| `docs/extend/3.plugins.md`        | Plugin system: writing, context, cleanup        |
+| `docs/extend/4.apis.md`           | Accessing map, panel, settings, locale, storage |
+| `docs/extend/5.features.md`       | Building a complete feature as a plugin         |
+| `docs/extend/6.theme.md`          | Custom themes for library consumers             |
 
 ---
 
@@ -167,7 +173,7 @@ Extension docs:
 
 1. Create `src/composables/use{FeatureName}.js`, `src/components/panels/{feature-name}.vue`, and `src/components/ui/top/{feature-name}.vue` (see `docs/extend/5.features.md`)
 2. Create `tests/e2e/feature-name.spec.js` (or `tests/e2e/features/feature-name.spec.js`)
-3. Run `npm test -- tests/e2e/{relevant}.spec.js` during development, then `npm test` as a final check
+3. Run `npm run test:e2e -- tests/e2e/{relevant}.spec.js` during development if E2E coverage is needed; run `npm test` as a final unit-test check
 
 ---
 
@@ -184,8 +190,9 @@ A Playwright MCP server is configured in `.github/mcp.json`. Agents with MCP sup
 - `docs/core/2.instances.md` — multi-instance setup, storage convention, architecture
 - `docs/core/3.map.md` — `useMap` full API
 - `docs/core/4.ui.md` — `useUI` full API
-- `docs/core/5.locale.md` — locale API, translations
-- `docs/core/6.theme.md` — Bootstrap SCSS theme architecture
-- `docs/core/7.testing.md` — testing conventions, screenshot strategy, how to run specific specs
+- `docs/core/5.geojson.md` — `useGeoJSON` API: rendering GeoJSON features with styles
+- `docs/core/6.locale.md` — locale API, translations
+- `docs/core/7.theme.md` — Bootstrap SCSS theme architecture
+- `docs/core/8.testing.md` — testing conventions, screenshot strategy, how to run specific specs
 - `docs/extend/README.md` — extending Navigator: events, plugins, buttons, panels, theming
 - `docs/extend/5.features.md` — how to build a feature

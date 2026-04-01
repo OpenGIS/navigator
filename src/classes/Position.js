@@ -1,3 +1,4 @@
+/** Represents a GPS position reading from the Geolocation API. */
 export class Position {
     /**
      * @param {object} params

@@ -1,5 +1,6 @@
 // recordings.js — Recordings plugin for Navigator
 import { reactive, ref, computed } from 'vue';
+import { useGeoJSON } from '@ogis/navigator';
 import RecordButton from './RecordButton.vue';
 import RecordingsPanel from './RecordingsPanel.vue';
 
@@ -80,17 +81,16 @@ function toGPX(recording) {
 // Map layer constants
 // ---------------------------------------------------------------------------
 
-const SOURCE_ID = 'recordings-track';
-const LAYER_ID = 'recordings-track-line';
 const COLOR_ACTIVE = '#4a8dc8'; // $primary — Navigator brand blue
 const COLOR_PAUSED = '#6c757d'; // $secondary — Bootstrap grey
+const TRACK_ID = 'recordings-active-track';
 
 // ---------------------------------------------------------------------------
 // Plugin
 // ---------------------------------------------------------------------------
 
 export const RecordingsPlugin = {
-  install({ useStorage, useSettings, getMap, onMapReady, on, provide, addButton }) {
+  install({ useStorage, useSettings, getMap, instanceId, provide, addButton }) {
     // useStorage is pre-scoped — no instanceId needed.
     // Stored as "navigator_recordings_{instanceId}" in localStorage.
     const stored = useStorage('recordings', { saved: [], active: null });
@@ -113,6 +113,28 @@ export const RecordingsPlugin = {
     let watchId = null;
     let timerId = null;
 
+    // --- GeoJSON layer (via useGeoJSON API) ---------------------------------
+
+    const geoJSON = useGeoJSON(instanceId);
+
+    const updateLine = () => {
+      const coords = state.points.map((p) => [p.lng, p.lat]);
+      if (coords.length < 2) {
+        geoJSON.removeFeature(TRACK_ID);
+        return;
+      }
+      geoJSON.setFeature({
+        type: 'Feature',
+        id: TRACK_ID,
+        geometry: { type: 'LineString', coordinates: coords },
+        properties: {
+          'navigator.color': state.isPaused ? COLOR_PAUSED : COLOR_ACTIVE,
+          'navigator.width': 3,
+          'navigator.opacity': 0.85,
+        },
+      });
+    };
+
     // --- Persistence --------------------------------------------------------
 
     const persist = () => {
@@ -122,28 +144,6 @@ export const RecordingsPlugin = {
           : null;
       stored.saved = state.saved;
       stored.active = active;
-    };
-
-    // --- Map layer ----------------------------------------------------------
-
-    const emptyLine = () => ({
-      type: 'Feature',
-      geometry: { type: 'LineString', coordinates: [] },
-    });
-
-    const updateLine = () => {
-      const map = getMap();
-      if (!map || !map.getSource(SOURCE_ID)) return;
-      const coords = state.points.map((p) => [p.lng, p.lat]);
-      map.getSource(SOURCE_ID).setData({
-        type: 'Feature',
-        geometry: { type: 'LineString', coordinates: coords },
-      });
-      map.setPaintProperty(
-        LAYER_ID,
-        'line-color',
-        state.isPaused ? COLOR_PAUSED : COLOR_ACTIVE,
-      );
     };
 
     // --- Geolocation --------------------------------------------------------
@@ -221,7 +221,7 @@ export const RecordingsPlugin = {
       stopGeo();
       stopTimer();
       persist();
-      updateLine();
+      geoJSON.removeFeature(TRACK_ID);
     };
 
     const save = () => {
@@ -254,15 +254,19 @@ export const RecordingsPlugin = {
     };
 
     const showOnMap = (recording) => {
-      const map = getMap();
-      if (!map || !map.getSource(SOURCE_ID)) return;
       const coords = recording.points.map((p) => [p.lng, p.lat]);
-      map.getSource(SOURCE_ID).setData({
+      geoJSON.setFeature({
         type: 'Feature',
+        id: TRACK_ID,
         geometry: { type: 'LineString', coordinates: coords },
+        properties: {
+          'navigator.color': COLOR_ACTIVE,
+          'navigator.width': 3,
+          'navigator.opacity': 0.85,
+        },
       });
-      map.setPaintProperty(LAYER_ID, 'line-color', COLOR_ACTIVE);
-      if (coords.length > 1) {
+      const map = getMap();
+      if (map && coords.length > 1) {
         const lngs = coords.map((c) => c[0]);
         const lats = coords.map((c) => c[1]);
         map.fitBounds(
@@ -275,27 +279,13 @@ export const RecordingsPlugin = {
       }
     };
 
-    // --- Map setup (auto-cleanup) -------------------------------------------
+    // --- Crash recovery -------------------------------------------------------
+    // useGeoJSON queues features set before map:ready and applies them on load.
 
-    onMapReady(({ map, addSource, addLayer }) => {
-      addSource(SOURCE_ID, { type: 'geojson', data: emptyLine() });
-      addLayer({
-        id: LAYER_ID,
-        type: 'line',
-        source: SOURCE_ID,
-        paint: {
-          'line-color': COLOR_ACTIVE,
-          'line-width': 3,
-          'line-opacity': 0.85,
-        },
-      });
-
-      // Resume a recording that survived a page refresh
-      if (stored.active?.points?.length) {
-        state.isPaused = true;
-        updateLine();
-      }
-    });
+    if (stored.active?.points?.length >= 2) {
+      state.isPaused = true;
+      updateLine();
+    }
 
     // --- Provide to Vue tree ------------------------------------------------
 
@@ -328,7 +318,7 @@ export const RecordingsPlugin = {
     });
 
     // Return cleanup function for plugin teardown.
-    // Map sources/layers are auto-removed via onMapReady — no manual cleanup needed.
+    // Map sources/layers are auto-removed by useGeoJSON on destroy.
     return () => {
       stopGeo();
       stopTimer();
