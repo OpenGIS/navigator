@@ -16,6 +16,8 @@ export default defineConfig({
 
   resolve: {
     alias: {
+      "@ogis/navigator/navigator.css": fileURLToPath(new URL("./src/assets/sass/theme.scss", import.meta.url)),
+      "@ogis/navigator": fileURLToPath(new URL("./src/index.js", import.meta.url)),
       "@": fileURLToPath(new URL("./src", import.meta.url)),
     },
   },

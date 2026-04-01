@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>Navigator — Green Theme Example</title>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module">
+      import "maplibre-gl/dist/maplibre-gl.css";
+      import Navigator from "@ogis/navigator";
+      import "./green.scss";
+
+      Navigator.create({ id: "app" }).mount();
+    </script>
+  </body>
+</html>
