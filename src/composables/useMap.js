@@ -1,5 +1,10 @@
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
+import cspWorkerUrl from "maplibre-gl/dist/maplibre-gl-csp-worker.js?url";
+
+// Use the pre-built CSP worker so Vite's production minification does not
+// mangle variable names referenced inside the serialised worker blob.
+maplibregl.setWorkerUrl(cspWorkerUrl);
 import { inject, onMounted, onUnmounted, ref, watch } from "vue";
 import { useStorage } from "@/composables/useStorage";
 import { parseUrlHash, updateUrlHash } from "@/composables/useUrlHash";
